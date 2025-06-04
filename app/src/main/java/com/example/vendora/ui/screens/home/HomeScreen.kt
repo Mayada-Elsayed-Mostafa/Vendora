@@ -1,6 +1,8 @@
 package com.example.vendora.ui.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -8,18 +10,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,12 +41,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.R
+import com.example.vendora.ui.ui_model.GiftCardAd
+import com.example.vendora.ui.ui_model.couponList
 
 @Composable
 fun HomeScreen() {
@@ -58,6 +66,10 @@ fun HomeScreen() {
                     .fillMaxWidth()
                     .height(56.dp)
             )
+        }
+
+        item {
+            GiftCardAd(couponList)
         }
     }
 }
@@ -113,7 +125,6 @@ fun HomeHeader() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(modifier: Modifier = Modifier) {
     var userQuery by remember { mutableStateOf("") }
@@ -158,9 +169,89 @@ fun SearchBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun GiftCardAd(modifier: Modifier = Modifier) {
-    Card {
+fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
+    // here we can replace the number with amount of gift card coming from api.
+    val pagerState = rememberPagerState(pageCount = {giftCardsList.size})
+    val context = LocalContext.current
 
+    Box {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            Card(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .height(IntrinsicSize.Min)
+                    .clip(shape = RoundedCornerShape(16.dp))
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(
+                            "${giftCardsList[page].couponAmount} %",
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        )
+
+                        Text(
+                            giftCardsList[page].couponTitle,
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            giftCardsList[page].couponDesc,
+                            maxLines = 2,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(giftCardsList[page].couponImage)
+                            .build(),
+                        contentDescription = giftCardsList[page].couponTitle,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(200.dp)
+                            .width(170.dp)
+                    )
+                }
+            }
+        }
+
+        Row(
+            Modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(pagerState.pageCount) { iteration ->
+                val color = if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .size(8.dp)
+                )
+            }
+        }
     }
 }
 
@@ -170,14 +261,20 @@ fun GiftCardAd(modifier: Modifier = Modifier) {
 //    HomeHeader()
 //}
 
-@Preview
-@Composable
-private fun SearchBarPreview() {
-    SearchBar()
-}
+//@Preview
+//@Composable
+//private fun SearchBarPreview() {
+//    SearchBar()
+//}
 
 //@Preview
 //@Composable
 //private fun GiftCardAdPreview() {
-//    GiftCardAd()
+//    GiftCardAd(couponList)
+//}
+
+//@Preview(showSystemUi = true)
+//@Composable
+//private fun HomeScreenPreview() {
+//    HomeScreen()
 //}
