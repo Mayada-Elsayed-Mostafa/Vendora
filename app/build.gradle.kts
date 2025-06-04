@@ -9,6 +9,8 @@ android {
     namespace = "com.example.vendora"
     compileSdk = 35
 
+    val accessToken = project.findProperty("adminApiAccessToken") as String? ?: ""
+
     defaultConfig {
         applicationId = "com.example.vendora"
         minSdk = 24
@@ -17,6 +19,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "adminApiAccessToken", "\"$accessToken\"")
     }
 
     buildTypes {
@@ -36,6 +39,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -47,6 +51,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
