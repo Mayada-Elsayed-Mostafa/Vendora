@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,9 +17,6 @@ import com.example.vendora.core.navigation.BottomNavBar
 import com.example.vendora.core.navigation.Category
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
-import com.example.vendora.core.navigation.ScreenRoute
-import com.example.vendora.core.navigation.routes
-import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 
 @Composable
@@ -38,8 +34,8 @@ fun VendorApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<Home> {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    HomeScreen(navController)
+                Column(modifier = Modifier.padding(top = 12.dp, start = 16.dp, end = 16.dp)) {
+                    HomeScreen()
                 }
             }
 
@@ -53,10 +49,6 @@ fun VendorApp() {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Icon(imageVector = Icons.Filled.AccountBox, contentDescription = null)
                 }
-            }
-
-            composable <ScreenRoute.CartScreen> {
-                CartScreen()
             }
         }
     }

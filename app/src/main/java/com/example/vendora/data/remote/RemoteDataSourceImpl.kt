@@ -17,7 +17,7 @@ class RemoteDataSourceImpl: RemoteDataSource {
         retrofit.create(ShopifyService::class.java)
     }
 
-    override suspend fun getBrands(): BrandsResponse {
-        return retrofitService.getBrands()
+    override suspend fun getBrands(token: String): BrandsResponse {
+        return retrofitService.getBrands(token)
     }
 }
