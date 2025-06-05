@@ -44,22 +44,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.R
+import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.ui.ui_model.GiftCardAd
 import com.example.vendora.ui.ui_model.couponList
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxWidth()
     ) {
         item {
-            HomeHeader()
+            HomeHeader(navController)
             Spacer(Modifier.height(16.dp))
             SearchBar(
                 modifier = Modifier
@@ -75,7 +77,7 @@ fun HomeScreen() {
 }
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(navController: NavController) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -116,7 +118,7 @@ fun HomeHeader() {
             )
         }
 
-        IconButton(onClick = { /* do something */ }) {
+        IconButton(onClick = { navController.navigate(ScreenRoute.CartScreen) }) {
             Icon(
                 imageVector = Icons.Filled.ShoppingCart,
                 contentDescription = "Favorite"

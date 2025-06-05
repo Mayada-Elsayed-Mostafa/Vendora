@@ -18,7 +18,9 @@ import com.example.vendora.core.navigation.BottomNavBar
 import com.example.vendora.core.navigation.Category
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
+import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.routes
+import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 
 @Composable
@@ -37,7 +39,7 @@ fun VendorApp() {
         ) {
             composable<Home> {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    HomeScreen()
+                    HomeScreen(navController)
                 }
             }
 
@@ -51,6 +53,10 @@ fun VendorApp() {
                 Column(modifier = Modifier.padding(24.dp)) {
                     Icon(imageVector = Icons.Filled.AccountBox, contentDescription = null)
                 }
+            }
+
+            composable <ScreenRoute.CartScreen> {
+                CartScreen()
             }
         }
     }
