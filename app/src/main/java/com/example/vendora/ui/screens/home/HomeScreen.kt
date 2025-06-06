@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,29 +53,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.R
-import com.example.vendora.data.remote.RemoteDataSourceImpl
-import com.example.vendora.data.repo_implementation.ProductsRepositoryImpl
 import com.example.vendora.domain.model.brands.SmartCollection
-import com.example.vendora.domain.usecase.brands.GetBrandsUseCase
 import com.example.vendora.ui.ui_model.GiftCardAd
 import com.example.vendora.ui.ui_model.couponList
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
-fun HomeScreen() {
-
-    val repo = ProductsRepositoryImpl(RemoteDataSourceImpl())
-    val useCase = GetBrandsUseCase(repo)
-    val factory = HomeViewModelFactory(useCase)
-    val viewModel: HomeViewModel = viewModel(factory = factory)
-
-    val brands = viewModel.brands.collectAsState()
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    navigateToCart: () -> Unit,
+    navigateToFavorites: () -> Unit,
+    navigateToBrandDetails: (brandId: Long) -> Unit
+) {
+    val brands = viewModel.brands.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.fetchBrands()
@@ -81,11 +82,12 @@ fun HomeScreen() {
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
+        state = rememberLazyGridState(),
         modifier = Modifier.fillMaxSize(),
     ) {
         item(span = { GridItemSpan(maxCurrentLineSpan) }) {
             Column {
-                HomeHeader()
+                HomeHeader(navigateToCart = navigateToCart)
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -117,14 +119,23 @@ fun HomeScreen() {
 
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                     GiftCardAd(couponList)
+
                 }
 
-                items(list) { brand ->
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    Text("Our Partners", style = MaterialTheme.typography.titleLarge)
+                }
+
+                items(
+                    items = list,
+                    key = { brand -> brand.id }
+                ) { brand ->
                     BrandCard(
                         brand,
                         Modifier
                             .padding(4.dp)
                             .fillMaxWidth()
+                            .clickable { navigateToBrandDetails(brand.id) }
                     )
                 }
             }
@@ -133,7 +144,7 @@ fun HomeScreen() {
 }
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(navigateToCart: () -> Unit) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -174,7 +185,7 @@ fun HomeHeader() {
             )
         }
 
-        IconButton(onClick = { /* do something */ }) {
+        IconButton(onClick = { navigateToCart() }) {
             Icon(
                 imageVector = Icons.Filled.ShoppingCart,
                 contentDescription = "Favorite"
@@ -235,6 +246,8 @@ fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
     Box {
         HorizontalPager(
             state = pagerState,
+            pageSpacing = 16.dp,
+            beyondViewportPageCount = 1,
             modifier = Modifier.fillMaxWidth()
         ) { page ->
             Card(
@@ -317,36 +330,44 @@ fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
 @Composable
 fun BrandCard(brand: SmartCollection, modifier: Modifier) {
     val context = LocalContext.current
-    Box(
-        contentAlignment = Alignment.BottomCenter,
+    Card(
+        shape = RoundedCornerShape(
+            topStart = 8.dp,
+            topEnd = 8.dp
+        ),
+
+        colors = CardDefaults
+            .cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = modifier
             .shadow(elevation = 4.dp)
-            .height(120.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color.White)
+            .height(140.dp)
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(brand.image.src)
-                .build(),
-            contentDescription = brand.title,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .fillMaxSize()
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black.copy(alpha = 0.6f))
-                .padding(8.dp)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Text(
-                text = brand.title,
-                color = Color.White,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.align(Alignment.Center)
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(brand.image.src)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build(),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = brand.title,
+                modifier = Modifier
+                    .weight(0.7f)
+                    .background(Color.White)
             )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = modifier.weight(0.3f)
+            ) {
+                Text(
+                    brand.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
         }
     }
 }

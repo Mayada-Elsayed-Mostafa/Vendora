@@ -7,8 +7,9 @@ import com.example.vendora.domain.repo_interfaces.ProductsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import com.example.vendora.utils.wrapper.Result
+import javax.inject.Inject
 
-class ProductsRepositoryImpl(private val remoteSource: RemoteDataSource): ProductsRepository {
+class ProductsRepositoryImpl @Inject constructor(private val remoteSource: RemoteDataSource): ProductsRepository {
 
     override fun getBrands(): Flow<Result<BrandsResponse>> = flow {
         emit(Result.Loading)

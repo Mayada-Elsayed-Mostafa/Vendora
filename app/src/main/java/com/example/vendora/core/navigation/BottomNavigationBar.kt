@@ -17,6 +17,14 @@ fun BottomNavBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    val navRoutes = routes.map {
+        it.toString()
+    }
+
+    if (!navRoutes.contains(currentDestination?.route)){
+        return
+    }
+
     NavigationBar {
         routes.forEach { route ->
             val isSelected = currentDestination?.route == route.toString()
