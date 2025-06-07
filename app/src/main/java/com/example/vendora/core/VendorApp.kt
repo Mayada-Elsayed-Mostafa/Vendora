@@ -30,7 +30,9 @@ fun VendorApp() {
 
     Scaffold(
         snackbarHost = {},
-        topBar = {},
+        topBar = {
+
+        },
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
         println(innerPadding)

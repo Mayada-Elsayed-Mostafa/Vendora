@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.brandDetails
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,14 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,10 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
-import com.example.vendora.domain.model.product.Image
-import com.example.vendora.domain.model.product.Option
 import com.example.vendora.domain.model.product.Product
-import com.example.vendora.domain.model.product.Variant
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
@@ -80,7 +79,7 @@ fun BrandDetailsScreen(
         )
 
         when (products.value.products) {
-            is Result.Failure -> OnError()
+            is Result.Failure -> OnError(getProducts = { viewModel.getProductsByBrandId(id) })
             Result.Loading -> OnLoading()
             is Result.Success -> {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -164,13 +163,29 @@ fun OnSuccess(products: List<Product>) {
 }
 
 @Composable
-fun OnError(modifier: Modifier = Modifier) {
-
+fun OnError(getProducts: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Image(painter = painterResource(R.drawable.connection), contentDescription = null)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Something went wrong")
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { getProducts() }) { Text("Try again") }
+    }
 }
 
 @Composable
 fun OnLoading(modifier: Modifier = Modifier) {
-
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CircularProgressIndicator()
+    }
 }
 
 @Composable

@@ -32,16 +32,15 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +63,8 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.R
 import com.example.vendora.domain.model.brands.SmartCollection
+import com.example.vendora.ui.screens.brandDetails.OnError
+import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.ui_model.GiftCardAd
 import com.example.vendora.ui.ui_model.couponList
 import com.example.vendora.utils.wrapper.Result
@@ -82,55 +83,37 @@ fun HomeScreen(
         viewModel.fetchBrands()
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        state = rememberLazyGridState(),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .padding(top = 8.dp, start = 12.dp, end = 12.dp)
-    ) {
-        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-            Column {
-                HomeHeader(navigateToCart = navigateToCart)
-                Spacer(Modifier.height(16.dp))
-            }
-        }
-
-        when (brands.value) {
-            is Result.Failure -> item(span = { GridItemSpan(maxLineSpan) }) {
-                Text((brands.value as Result.Failure).exception.toString())
-            }
-
-            Result.Loading -> item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            is Result.Success -> {
-                val list = (brands.value as Result.Success).data.smart_collections
+    when (brands.value) {
+        is Result.Failure -> OnError { viewModel.fetchBrands() }
+        is Result.Loading -> OnLoading()
+        is Result.Success -> {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                state = rememberLazyGridState(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(top = 8.dp, start = 12.dp, end = 12.dp)
+            ) {
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                    SearchBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
+                    HomeHeader(navigateToCart = navigateToCart)
+                }
+
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    ProductsSearchBar(
+                        onInputQuery = { query -> println(query) }
                     )
                 }
 
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                     GiftCardAd(couponList)
-
                 }
 
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                     Text("Our Partners", style = MaterialTheme.typography.titleLarge)
                 }
 
+                val list = (brands.value as Result.Success).data.smart_collections
                 items(
                     items = list,
                     key = { brand -> brand.id }
@@ -154,7 +137,7 @@ fun HomeHeader(navigateToCart: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Max)
+            .height(IntrinsicSize.Min)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
@@ -199,48 +182,39 @@ fun HomeHeader(navigateToCart: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(modifier: Modifier = Modifier) {
-    var userQuery by remember { mutableStateOf("") }
-    val searchBarBackgroundColor = MaterialTheme.colorScheme.surface
-    val contentColor = Color(0xFFC0C0C0)
+fun ProductsSearchBar(
+    onInputQuery: (String) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val expanded by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = userQuery,
-        onValueChange = {
-            userQuery = it
-        },
-        modifier = modifier,
-        placeholder = {
-            Text(
-                text = "Search for products",
-                style = MaterialTheme.typography.titleSmall,
-                color = contentColor.copy(alpha = 0.7f) // Slightly transparent placeholder
-            )
-        },
+    SearchBar(
+        modifier = Modifier.padding(top = 0.dp),
+        colors = SearchBarDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
         leadingIcon = {
             Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search icon",
-                tint = MaterialTheme.colorScheme.onBackground
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
             )
         },
-        singleLine = true,
-        textStyle = MaterialTheme.typography.titleSmall,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = searchBarBackgroundColor,
-            unfocusedContainerColor = searchBarBackgroundColor,
-            disabledContainerColor = searchBarBackgroundColor,
-            cursorColor = MaterialTheme.colorScheme.onBackground,
-            focusedBorderColor = Color.Transparent, // No border when focused
-            unfocusedBorderColor = Color.Transparent, // No border when unfocused
-            errorBorderColor = Color.Transparent,
-            focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedTextColor = contentColor,
-        ),
-        shape = RoundedCornerShape(8.dp),
-    )
+        placeholder = { Text("search for product") },
+        shadowElevation = 4.dp,
+        query = searchQuery,
+        onQueryChange = {
+            searchQuery = it
+            onInputQuery(it)
+        },
+        active = expanded,
+        onActiveChange = {},
+        onSearch = {},
+        shape = MaterialTheme.shapes.medium,
+    ) {}
 }
+
 
 @Composable
 fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
@@ -376,44 +350,3 @@ fun BrandCard(brand: SmartCollection, modifier: Modifier) {
         }
     }
 }
-
-//@Preview
-//@Composable
-//private fun BrandCardPreview() {
-//    val brand = SmartCollection(
-//        handle = "adidas",
-//        id = 450846785767,
-//        image = Image(
-//            alt = "ADIDAS",
-//            height = 200,
-//            src = "https://cdn.shopify.com/s/files/1/0747/4964/0935/collections/smart_collections_2.jpg?v=1748957094",
-//            width = 200
-//        ),
-//        title = "ADIDAS"
-//    )
-//    BrandCard(brand, Modifier.width(90.dp))
-//}
-
-//@Preview
-//@Composable
-//private fun HomeHeaderPreview() {
-//    HomeHeader()
-//}
-
-//@Preview
-//@Composable
-//private fun SearchBarPreview() {
-//    SearchBar()
-//}
-
-//@Preview
-//@Composable
-//private fun GiftCardAdPreview() {
-//    GiftCardAd(couponList)
-//}
-
-//@Preview(showSystemUi = true)
-//@Composable
-//private fun HomeScreenPreview() {
-//    HomeScreen()
-//}
