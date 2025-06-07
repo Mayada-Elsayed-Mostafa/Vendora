@@ -1,6 +1,6 @@
 package com.example.vendora.domain.model.brands
 
-data class Image(
+data class BrandImage(
     val alt: String,
     val height: Int,
     val src: String,

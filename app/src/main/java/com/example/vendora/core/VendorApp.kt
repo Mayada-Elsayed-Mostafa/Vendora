@@ -36,18 +36,17 @@ fun VendorApp() {
         println(innerPadding)
         NavHost(
             navController = navController,
-            startDestination = BrandDetails(),
+            startDestination = Home,
         ) {
             composable<Home> {
-                Column(modifier = Modifier.padding(top = 12.dp, start = 16.dp, end = 16.dp)) {
-                    HomeScreen(
-                        navigateToCart = {navController.navigate(ScreenRoute.CartScreen)},
-                        navigateToFavorites = {},
-                        navigateToBrandDetails = { brandId ->
-                            navController.navigate(BrandDetails(id = brandId))
-                        }
-                    )
-                }
+                HomeScreen(
+                    navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToFavorites = {},
+                    navigateToBrandDetails = { brandId ->
+                        navController.navigate(BrandDetails(id = brandId))
+                    },
+                    paddingValues = innerPadding
+                )
             }
 
             composable<Category> {
@@ -68,7 +67,10 @@ fun VendorApp() {
 
             composable<BrandDetails>{ navBackStackEntry ->
                 val brandDetails: BrandDetails = navBackStackEntry.toRoute()
-                BrandDetailsScreen(brandDetails.id)
+                BrandDetailsScreen(
+                    id = brandDetails.id,
+                    navigateUp = { navController.navigateUp() }
+                )
             }
         }
     }

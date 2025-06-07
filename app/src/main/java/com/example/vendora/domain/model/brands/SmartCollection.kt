@@ -4,6 +4,6 @@ package com.example.vendora.domain.model.brands
 data class SmartCollection(
     val handle: String,
     val id: Long,
-    val image: Image,
+    val image: BrandImage,
     val title: String,
 )

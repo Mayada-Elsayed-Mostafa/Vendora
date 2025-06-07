@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -72,7 +73,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navigateToCart: () -> Unit,
     navigateToFavorites: () -> Unit,
-    navigateToBrandDetails: (brandId: Long) -> Unit
+    navigateToBrandDetails: (brandId: Long) -> Unit,
+    paddingValues: PaddingValues = PaddingValues()
 ) {
     val brands = viewModel.brands.collectAsStateWithLifecycle()
 
@@ -83,7 +85,10 @@ fun HomeScreen(
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         state = rememberLazyGridState(),
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(top = 8.dp, start = 12.dp, end = 12.dp)
     ) {
         item(span = { GridItemSpan(maxCurrentLineSpan) }) {
             Column {
@@ -101,7 +106,7 @@ fun HomeScreen(
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator()
                 }
