@@ -31,3 +31,6 @@ object Category
 // Me Tab
 @Serializable
 object Me
+
+@Serializable
+data class BrandDetails(val id: Long = 450846785767)
