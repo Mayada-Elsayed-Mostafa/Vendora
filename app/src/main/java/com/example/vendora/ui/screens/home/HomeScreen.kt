@@ -1,17 +1,29 @@
 package com.example.vendora.ui.screens.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,14 +31,16 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,41 +48,96 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.R
+import com.example.vendora.domain.model.brands.SmartCollection
+import com.example.vendora.ui.screens.brandDetails.OnError
+import com.example.vendora.ui.screens.brandDetails.OnLoading
+import com.example.vendora.ui.ui_model.GiftCardAd
+import com.example.vendora.ui.ui_model.couponList
+import com.example.vendora.utils.wrapper.Result
 
 @Composable
-fun HomeScreen() {
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        item {
-            HomeHeader()
-            Spacer(Modifier.height(16.dp))
-            SearchBar(
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    navigateToCart: () -> Unit,
+    navigateToFavorites: () -> Unit,
+    navigateToBrandDetails: (brandId: Long) -> Unit,
+    paddingValues: PaddingValues = PaddingValues()
+) {
+    val brands = viewModel.brands.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchBrands()
+    }
+
+    when (brands.value) {
+        is Result.Failure -> OnError { viewModel.fetchBrands() }
+        is Result.Loading -> OnLoading()
+        is Result.Success -> {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                state = rememberLazyGridState(),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            )
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(top = 8.dp, start = 12.dp, end = 12.dp)
+            ) {
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    HomeHeader(navigateToCart = navigateToCart)
+                }
+
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    ProductsSearchBar(
+                        onInputQuery = { query -> println(query) }
+                    )
+                }
+
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    GiftCardAd(couponList)
+                }
+
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    Text("Our Partners", style = MaterialTheme.typography.titleLarge)
+                }
+
+                val list = (brands.value as Result.Success).data.smart_collections
+                items(
+                    items = list,
+                    key = { brand -> brand.id }
+                ) { brand ->
+                    BrandCard(
+                        brand,
+                        Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                            .clickable { navigateToBrandDetails(brand.id) }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun HomeHeader() {
+fun HomeHeader(navigateToCart: () -> Unit) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Max)
+            .height(IntrinsicSize.Min)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
@@ -104,7 +173,7 @@ fun HomeHeader() {
             )
         }
 
-        IconButton(onClick = { /* do something */ }) {
+        IconButton(onClick = { navigateToCart() }) {
             Icon(
                 imageVector = Icons.Filled.ShoppingCart,
                 contentDescription = "Favorite"
@@ -115,69 +184,169 @@ fun HomeHeader() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(modifier: Modifier = Modifier) {
-    var userQuery by remember { mutableStateOf("") }
-    val searchBarBackgroundColor = MaterialTheme.colorScheme.surface
-    val contentColor = Color(0xFFC0C0C0)
+fun ProductsSearchBar(
+    onInputQuery: (String) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val expanded by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = userQuery,
-        onValueChange = {
-            userQuery = it
-        },
-        modifier = modifier,
-        placeholder = {
-            Text(
-                text = "Search for products",
-                style = MaterialTheme.typography.titleSmall,
-                color = contentColor.copy(alpha = 0.7f) // Slightly transparent placeholder
-            )
-        },
+    SearchBar(
+        modifier = Modifier.padding(top = 0.dp),
+        colors = SearchBarDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
         leadingIcon = {
             Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search icon",
-                tint = MaterialTheme.colorScheme.onBackground
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
             )
         },
-        singleLine = true,
-        textStyle = MaterialTheme.typography.titleSmall,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = searchBarBackgroundColor,
-            unfocusedContainerColor = searchBarBackgroundColor,
-            disabledContainerColor = searchBarBackgroundColor,
-            cursorColor = MaterialTheme.colorScheme.onBackground,
-            focusedBorderColor = Color.Transparent, // No border when focused
-            unfocusedBorderColor = Color.Transparent, // No border when unfocused
-            errorBorderColor = Color.Transparent,
-            focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedTextColor = contentColor,
-        ),
-        shape = RoundedCornerShape(8.dp),
-    )
+        placeholder = { Text("search for product") },
+        shadowElevation = 4.dp,
+        query = searchQuery,
+        onQueryChange = {
+            searchQuery = it
+            onInputQuery(it)
+        },
+        active = expanded,
+        onActiveChange = {},
+        onSearch = {},
+        shape = MaterialTheme.shapes.medium,
+    ) {}
 }
 
-@Composable
-fun GiftCardAd(modifier: Modifier = Modifier) {
-    Card {
 
+@Composable
+fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
+    // here we can replace the number with amount of gift card coming from api.
+    val pagerState = rememberPagerState(pageCount = { giftCardsList.size })
+    val context = LocalContext.current
+
+    Box {
+        HorizontalPager(
+            state = pagerState,
+            pageSpacing = 16.dp,
+            beyondViewportPageCount = 1,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            Card(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .height(IntrinsicSize.Min)
+                    .clip(shape = RoundedCornerShape(16.dp))
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(
+                            "${giftCardsList[page].couponAmount} %",
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        )
+
+                        Text(
+                            giftCardsList[page].couponTitle,
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            giftCardsList[page].couponDesc,
+                            maxLines = 2,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(giftCardsList[page].couponImage)
+                            .build(),
+                        contentDescription = giftCardsList[page].couponTitle,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(200.dp)
+                            .width(170.dp)
+                    )
+                }
+            }
+        }
+
+        Row(
+            Modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(pagerState.pageCount) { iteration ->
+                val color =
+                    if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .size(8.dp)
+                )
+            }
+        }
     }
 }
 
-//@Preview
-//@Composable
-//private fun HomeHeaderPreview() {
-//    HomeHeader()
-//}
-
-@Preview
 @Composable
-private fun SearchBarPreview() {
-    SearchBar()
-}
+fun BrandCard(brand: SmartCollection, modifier: Modifier) {
+    val context = LocalContext.current
+    Card(
+        shape = RoundedCornerShape(
+            topStart = 8.dp,
+            topEnd = 8.dp
+        ),
 
-//@Preview
-//@Composable
-//private fun GiftCardAdPreview() {
-//    GiftCardAd()
-//}
+        colors = CardDefaults
+            .cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = modifier
+            .shadow(elevation = 4.dp)
+            .height(140.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(brand.image.src)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build(),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = brand.title,
+                modifier = Modifier
+                    .weight(0.7f)
+                    .background(Color.White)
+            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = modifier.weight(0.3f)
+            ) {
+                Text(
+                    brand.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+        }
+    }
+}
