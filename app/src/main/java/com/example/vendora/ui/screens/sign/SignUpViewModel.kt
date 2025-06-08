@@ -45,11 +45,21 @@ class SignUpViewModel : ViewModel() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _signUpState.value =
-                            SignUpState(successMessage = "Account created successfully!")
+                        val user = auth.currentUser
+                        user?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
+                            if (verifyTask.isSuccessful) {
+                                _signUpState.value = SignUpState(
+                                    successMessage = "Account created! Please verify your email before logging in."
+                                )
+                                auth.signOut()
+                            } else {
+                                _signUpState.value = SignUpState(
+                                    errorMessage = "Failed to send verification email: ${verifyTask.exception?.message}"
+                                )
+                            }
+                        }
                     } else {
-                        val exception = task.exception
-                        val errorMessage = when (exception) {
+                        val errorMessage = when (val exception = task.exception) {
                             is FirebaseAuthUserCollisionException -> "Email already registered"
                             is FirebaseAuthInvalidCredentialsException -> "Invalid email"
                             else -> exception?.message ?: "Unknown error"
@@ -59,7 +69,6 @@ class SignUpViewModel : ViewModel() {
                 }
         }
     }
-
 
     fun clearMessages() {
         _signUpState.value = _signUpState.value.copy(errorMessage = null, successMessage = null)
