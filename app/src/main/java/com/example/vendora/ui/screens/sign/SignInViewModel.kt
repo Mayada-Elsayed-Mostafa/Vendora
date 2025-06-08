@@ -39,10 +39,17 @@ class SignInViewModel : ViewModel() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _signInState.value = SignInState(successMessage = "Signed in successfully!")
+                        val user = auth.currentUser
+                        if (user != null && user.isEmailVerified) {
+                            _signInState.value =
+                                SignInState(successMessage = "Signed in successfully!")
+                        } else {
+                            auth.signOut()
+                            _signInState.value =
+                                SignInState(errorMessage = "Please verify your email first.")
+                        }
                     } else {
-                        val exception = task.exception
-                        val errorMessage = when (exception) {
+                        val errorMessage = when (val exception = task.exception) {
                             is FirebaseAuthInvalidUserException -> "No account found with this email"
                             is FirebaseAuthInvalidCredentialsException -> "Incorrect email or password"
                             else -> exception?.message ?: "Unknown error"
