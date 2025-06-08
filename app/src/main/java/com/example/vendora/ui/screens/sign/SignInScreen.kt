@@ -10,12 +10,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +41,23 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel()) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showDialog = remember { mutableStateOf(false) }
+    val dialogMessage = remember { mutableStateOf("") }
+
+    LaunchedEffect(signInState.successMessage) {
+        signInState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
+    LaunchedEffect(signInState.errorMessage) {
+        signInState.errorMessage?.let {
+            dialogMessage.value = it
+            showDialog.value = true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -121,5 +142,30 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel()) {
         TextButton(onClick = { /* TODO: Navigate to SignUp */ }) {
             Text("You haven't an account? Sign Up")
         }
+    }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .padding(16.dp)
+    )
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog.value = false
+                viewModel.clearMessages()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog.value = false
+                    viewModel.clearMessages()
+                }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Error") },
+            text = { Text(dialogMessage.value) }
+        )
     }
 }
