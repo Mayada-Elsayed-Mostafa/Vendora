@@ -21,6 +21,8 @@ import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.ui.cart_screen.CartScreen
+import com.example.vendora.ui.cart_screen.CheckoutScreen
+import com.example.vendora.ui.cart_screen.PaymentScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 
@@ -58,13 +60,23 @@ fun VendorApp() {
             }
 
             composable<Me> {
-                Column(modifier = Modifier.padding(24.dp)) {
+                /*Column(modifier = Modifier.padding(24.dp)) {
                     Icon(imageVector = Icons.Filled.AccountBox, contentDescription = null)
-                }
+                }*/
+                CartScreen(paddingValues = innerPadding, navToCheckout = {navController.navigate(ScreenRoute.CheckoutScreenRoute)})
             }
 
             composable<ScreenRoute.CartScreen>{
-                CartScreen()
+                CartScreen(paddingValues = innerPadding , navToCheckout = {navController.navigate(ScreenRoute.CheckoutScreenRoute)})
+            }
+
+            composable<ScreenRoute.CheckoutScreenRoute>{
+                CheckoutScreen(navController)
+            }
+
+            composable<ScreenRoute.PaymentScreenRoute>{ navBackStackEntry ->
+                val price:Double =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().price
+                PaymentScreen(price,navController)
             }
 
             composable<BrandDetails>{ navBackStackEntry ->
