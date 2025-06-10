@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -233,7 +234,7 @@ fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
                 modifier = Modifier
                     .padding(vertical = 12.dp)
                     .height(IntrinsicSize.Min)
-                    .clip(shape = RoundedCornerShape(16.dp))
+                    .clip(shape = RoundedCornerShape(24.dp))
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,

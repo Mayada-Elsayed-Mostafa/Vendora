@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "245153167265",
+    "project_id": "vendora0",
+    "storage_bucket": "vendora0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245153167265:android:d8bf62a97d8cbbe0c1fde0",
+        "android_client_info": {
+          "package_name": "com.example.vendora"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBOezMZh27LNuk5nacUdqHIbdVkbS99B8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

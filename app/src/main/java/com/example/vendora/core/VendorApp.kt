@@ -20,9 +20,12 @@ import com.example.vendora.core.navigation.Category
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
 import com.example.vendora.core.navigation.ScreenRoute
+import com.example.vendora.core.navigation.SignIn
 import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
+import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.home.HomeScreen
+import com.example.vendora.ui.screens.sign.SignInScreen
 
 @Composable
 fun VendorApp() {
@@ -52,9 +55,7 @@ fun VendorApp() {
             }
 
             composable<Category> {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Icon(imageVector = Icons.Filled.DateRange, contentDescription = null)
-                }
+                CategoryScreen()
             }
 
             composable<Me> {
@@ -73,6 +74,10 @@ fun VendorApp() {
                     id = brandDetails.id,
                     navigateUp = { navController.navigateUp() }
                 )
+            }
+
+            composable<SignIn> {
+                SignInScreen()
             }
         }
     }
