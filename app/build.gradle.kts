@@ -30,11 +30,6 @@ android {
             "adminApiAccessToken",
             "\"${properties.getProperty("adminApiAccessToken")}\""
         )
-        buildConfigField(
-            "String",
-            "SHOPIFY_TOKEN",
-            "\"${properties.getProperty("shopifyToken")}\""
-        )
 
     }
 
