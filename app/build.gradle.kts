@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.21"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -85,5 +86,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
-//    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
+    
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
+
+    // material3
+//    implementation(libs.material3)
 }

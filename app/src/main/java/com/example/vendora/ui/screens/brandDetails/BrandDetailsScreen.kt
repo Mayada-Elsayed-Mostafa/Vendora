@@ -195,9 +195,6 @@ fun ProductCard(
 ) {
     val context = LocalContext.current
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = MaterialTheme.shapes.medium,
         modifier = modifier
