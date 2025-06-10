@@ -1,9 +1,13 @@
 package com.example.vendora.data.remote
 
 import com.example.vendora.domain.model.brands.BrandsResponse
+import com.example.vendora.domain.model.customer.CreatedCustomerResponse
+import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.product.Products
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ShopifyService {
@@ -16,4 +20,11 @@ interface ShopifyService {
         @Query("collection_id") brandId: Long,
         @Header("X-Shopify-Access-Token") token: String
     ): Products
+
+    @POST("/admin/api/2025-04/customers.json")
+    suspend fun createCustomer(
+        @Header("X-Shopify-Access-Token") token: String,
+        @Body customerRequest: CustomerRequest
+    ): CreatedCustomerResponse
+
 }

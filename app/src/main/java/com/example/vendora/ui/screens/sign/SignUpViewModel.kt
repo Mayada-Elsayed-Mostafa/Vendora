@@ -1,13 +1,23 @@
 package com.example.vendora.ui.screens.sign
 
+import android.util.Log
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.domain.model.customer.CreatedCustomerResponse
+import com.example.vendora.domain.model.customer.Customer
+import com.example.vendora.domain.model.customer.CustomerRequest
+import com.example.vendora.domain.usecase.customer.CreateCustomerUseCase
+import com.example.vendora.utils.wrapper.Result
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SignUpState(
     val isLoading: Boolean = false,
@@ -15,15 +25,32 @@ data class SignUpState(
     val successMessage: String? = null
 )
 
-class SignUpViewModel : ViewModel() {
+@HiltViewModel
+class SignUpViewModel @Inject constructor(
+    private val createCustomerUseCase: CreateCustomerUseCase
+) : ViewModel() {
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth by lazy {
+        FirebaseAuth.getInstance()
+    }
 
     private val _signUpState = MutableStateFlow(SignUpState())
     val signUpState: StateFlow<SignUpState> = _signUpState
 
-    fun registerUser(email: String, password: String, confirmPassword: String) {
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+    private val _customerState = MutableStateFlow<Result<CreatedCustomerResponse>>(Result.Loading)
+    val customerState = _customerState.asStateFlow()
+
+
+    fun registerUser(
+        email: String,
+        password: String,
+        confirmPassword: String,
+        firstName: String,
+        lastName: String,
+        shopifyToken: String,
+        phone: String
+    ) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             _signUpState.value = SignUpState(errorMessage = "Invalid email format")
             return
         }
@@ -52,6 +79,14 @@ class SignUpViewModel : ViewModel() {
                                     successMessage = "Account created! Please verify your email before logging in."
                                 )
                                 auth.signOut()
+
+                                createShopifyCustomer(
+                                    token = shopifyToken,
+                                    email = email,
+                                    first_name = firstName,
+                                    last_name = lastName,
+                                    phone = phone
+                                )
                             } else {
                                 _signUpState.value = SignUpState(
                                     errorMessage = "Failed to send verification email: ${verifyTask.exception?.message}"
@@ -66,6 +101,30 @@ class SignUpViewModel : ViewModel() {
                         }
                         _signUpState.value = SignUpState(errorMessage = errorMessage)
                     }
+                }
+        }
+    }
+
+    private fun createShopifyCustomer(
+        token: String,
+        first_name: String,
+        last_name: String,
+        email: String,
+        phone: String
+    ) {
+        viewModelScope.launch {
+            val customer = Customer(
+                first_name = first_name,
+                last_name = last_name,
+                email = email,
+                phone = phone
+            )
+
+            val request = CustomerRequest(customer)
+            createCustomerUseCase(token, request)
+                .collect { result ->
+                    _customerState.value = result
+                    Log.d("TAG", "createShopifyCustomer: ${result}")
                 }
         }
     }

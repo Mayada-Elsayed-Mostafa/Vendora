@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
 // here we define class we will use in bottom navigation bar
-data class BottomNavRoute<T : Any>(val name: String, val route: T, val icon: ImageVector){
+data class BottomNavRoute<T : Any>(val name: String, val route: T, val icon: ImageVector) {
     override fun toString(): String {
         return route::class.qualifiedName ?: "UnKnownRoute"
     }
@@ -34,3 +34,9 @@ object Me
 
 @Serializable
 data class BrandDetails(val id: Long = 450846785767)
+
+@Serializable
+object SignIn
+
+@Serializable
+object SignUp
