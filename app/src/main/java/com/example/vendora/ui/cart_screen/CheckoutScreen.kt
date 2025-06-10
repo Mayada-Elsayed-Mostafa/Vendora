@@ -31,11 +31,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,11 +53,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.core.navigation.ScreenRoute
-
+import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.utils.wrapper.Result
 
 data class ShippingAddress(
     val type: String,
@@ -65,7 +69,7 @@ data class ShippingAddress(
 
 
 @Composable
-fun CheckoutScreen(navController: NavHostController) {
+fun CheckoutScreen(token:String,navController: NavHostController,viewModel: PaymobViewModel= hiltViewModel()) {
     var cartItems by  remember {
         mutableStateOf(listOf(
             CartItem(1, "Essence Mascara Lash Princess", 250.00,"https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp", "Color", "M"),
@@ -83,10 +87,6 @@ fun CheckoutScreen(navController: NavHostController) {
     }
     var promoCode by remember { mutableStateOf("") }
     val totalPrice = cartItems.sumOf { it.price }
-
-
-
-
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -134,7 +134,7 @@ fun CheckoutScreen(navController: NavHostController) {
         PaymentBottom(){
             /*nav to Payment Screen*/
             println("Nav To")
-            navController.navigate(ScreenRoute.PaymentScreenRoute(totalPrice))
+            navController.navigate(ScreenRoute.PaymentScreenRoute(totalPrice,token))
 
         }
 

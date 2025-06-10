@@ -34,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +48,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.example.vendora.core.navigation.ScreenRoute
+import com.example.vendora.domain.model.payment.AuthTokenResponse
+import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.utils.wrapper.Result
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -64,7 +71,13 @@ data class CartItem(
 
 
 @Composable
-fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navToCheckout :()->Unit) {
+fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: NavHostController,viewModel: PaymobViewModel = hiltViewModel()) {
+
+    LaunchedEffect(Unit) {
+        viewModel.getTokenForAuthentication()
+    }
+    val getFirstToken by viewModel.getTokenState.collectAsState()
+    var firstToken by remember { mutableStateOf("") }
 
     var cartItems by  remember {
         mutableStateOf(listOf(
@@ -114,9 +127,20 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navToCheckout :(
 
         //////
 
-        CheckoutButton(cartItems ){
-            navToCheckout()
+        when (getFirstToken){
+            is Result.Success -> {
+                firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
+                println("token :$firstToken" )
+                CheckoutButton(cartItems ){
+                    navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
+                }
+            }
+            is Result.Failure -> Text("Auth failed")
+            Result.Loading -> Text("Authenticating...")
+
         }
+
+
         
     }
 }

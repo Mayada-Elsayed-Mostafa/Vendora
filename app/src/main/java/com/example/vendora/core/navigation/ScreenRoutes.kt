@@ -13,9 +13,12 @@ sealed class ScreenRoute(
 
     //Checkout Screen
     @Serializable
-    object CheckoutScreenRoute : ScreenRoute("Checkout")
+    data class CheckoutScreenRoute(val token:String) : ScreenRoute("Checkout")
 
 
     @Serializable
-    data class PaymentScreenRoute(val price : Double = 10.0) : ScreenRoute("Payment")
+    data class PaymentScreenRoute(val price : Double = 10.0,val token:String) : ScreenRoute("Payment")
+
+    @Serializable
+    data class VisaScreenRoute(val token:String) : ScreenRoute("Visa")
 }
