@@ -9,13 +9,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,22 +33,49 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vendora.R
 
+const val shopifyToken = "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"
+
 @Composable
-fun SignUpScreen(viewModel: SignUpViewModel = viewModel()) {
+fun SignUpScreen(
+    viewModel: SignUpViewModel = hiltViewModel(),
+    onNavigateToSignIn: () -> Unit
+) {
+
     val signUpState by viewModel.signUpState.collectAsState()
 
-    var name by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
+
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showDialog = remember { mutableStateOf(false) }
+    val dialogMessage = remember { mutableStateOf("") }
+
+    LaunchedEffect(signUpState.successMessage) {
+        signUpState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
+    LaunchedEffect(signUpState.errorMessage) {
+        signUpState.errorMessage?.let {
+            dialogMessage.value = it
+            showDialog.value = true
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(Color.White)
             .padding(bottom = 48.dp)
     ) {
@@ -57,9 +90,19 @@ fun SignUpScreen(viewModel: SignUpViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Name") },
+            value = firstName,
+            onValueChange = { firstName = it },
+            label = { Text("First Name") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = { lastName = it },
+            label = { Text("Last Name") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
@@ -116,7 +159,13 @@ fun SignUpScreen(viewModel: SignUpViewModel = viewModel()) {
         Button(
             onClick = {
                 viewModel.clearMessages()
-                viewModel.registerUser(email.trim(), password, confirmPassword)
+                viewModel.registerUser(
+                    email.trim(), password, confirmPassword,
+                    firstName,
+                    lastName,
+                    shopifyToken,
+                    phone
+                )
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,30 +183,38 @@ fun SignUpScreen(viewModel: SignUpViewModel = viewModel()) {
             }
         }
 
-        if (signUpState.errorMessage != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = signUpState.errorMessage ?: "",
-                color = Color.Red,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
-
-        if (signUpState.successMessage != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = signUpState.successMessage ?: "",
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = { /* TODO: Navigate to SignIn */ }) {
+        TextButton(onClick = { onNavigateToSignIn() }) {
             Text(
                 "Already have an account? Sign In",
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
         }
+    }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .padding(16.dp)
+    )
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog.value = false
+                viewModel.clearMessages()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog.value = false
+                    viewModel.clearMessages()
+                }) {
+                    Text("OK")
+                }
+            },
+            title = { Text("Error") },
+            text = { Text(dialogMessage.value) }
+        )
     }
 }
