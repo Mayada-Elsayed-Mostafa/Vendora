@@ -35,7 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vendora.R
 
 @Composable
-fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: () -> Unit) {
+fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: () -> Unit, onNavigateToHome: () -> Unit) {
 
     val signInState by viewModel.signInState.collectAsState()
 
@@ -58,6 +58,14 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: (
             showDialog.value = true
         }
     }
+
+    LaunchedEffect(signInState.isSuccess) {
+        if (signInState.isSuccess) {
+            onNavigateToHome()
+            viewModel.clearMessages()
+        }
+    }
+
 
     Column(
         modifier = Modifier

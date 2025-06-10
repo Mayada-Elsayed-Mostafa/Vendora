@@ -75,7 +75,7 @@ fun VendorApp() {
             }
 
             composable<SignIn> {
-                SignInScreen(onNavigateToSignUp = { navController.navigate(SignUp) })
+                SignInScreen(onNavigateToSignUp = { navController.navigate(SignUp) }, onNavigateToHome = { navController.navigate(Home)})
             }
 
             composable<SignUp> {

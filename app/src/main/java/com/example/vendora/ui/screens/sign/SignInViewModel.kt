@@ -11,8 +11,9 @@ import kotlinx.coroutines.launch
 
 data class SignInState(
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val successMessage: String? = null
+    val isSuccess: Boolean = false,
+    val successMessage: String? = null,
+    val errorMessage: String? = null
 )
 
 class SignInViewModel : ViewModel() {
@@ -42,7 +43,10 @@ class SignInViewModel : ViewModel() {
                         val user = auth.currentUser
                         if (user != null && user.isEmailVerified) {
                             _signInState.value =
-                                SignInState(successMessage = "Signed in successfully!")
+                                SignInState(
+                                    isSuccess = true,
+                                    successMessage = "Signed in successfully!"
+                                )
                         } else {
                             auth.signOut()
                             _signInState.value =
