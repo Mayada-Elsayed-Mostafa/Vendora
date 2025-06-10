@@ -15,9 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.example.vendora.core.navigation.BottomNavBar
-import com.example.vendora.core.navigation.BrandDetails
 import com.example.vendora.core.navigation.Category
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
@@ -35,25 +33,18 @@ fun VendorApp() {
 
     Scaffold(
         snackbarHost = {},
-        topBar = {
-
-        },
+        topBar = {},
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
-        println(innerPadding)
         NavHost(
             navController = navController,
             startDestination = Home,
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable<Home> {
-                HomeScreen(
-                    navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
-                    navigateToFavorites = {},
-                    navigateToBrandDetails = { brandId ->
-                        navController.navigate(BrandDetails(id = brandId))
-                    },
-                    paddingValues = innerPadding
-                )
+                Column(modifier = Modifier.padding(24.dp)) {
+                    HomeScreen()
+                }
             }
 
             composable<Category> {
