@@ -1,23 +1,24 @@
 package com.example.vendora.core.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.vendora.R
 import kotlinx.serialization.Serializable
 
 // here we define class we will use in bottom navigation bar
-data class BottomNavRoute<T : Any>(val name: String, val route: T, val icon: ImageVector){
+data class BottomNavRoute<T : Any>(
+    val name: String,
+    val route: T,
+    val icon: Int,
+    val outLineIcon: Int
+){
     override fun toString(): String {
         return route::class.qualifiedName ?: "UnKnownRoute"
     }
 }
 
 val routes = listOf(
-    BottomNavRoute("Home", Home, Icons.Filled.Home),
-    BottomNavRoute("Category", Category, Icons.Outlined.Menu),
-    BottomNavRoute("Me", Me, Icons.Filled.AccountCircle)
+    BottomNavRoute("Home", Home, R.drawable.home,R.drawable.outline_home),
+    BottomNavRoute("Category", Category, R.drawable.category,R.drawable.outline_category),
+    BottomNavRoute("Me", Me, R.drawable.me,R.drawable.outline_me)
 )
 
 // Home Tab
@@ -31,3 +32,12 @@ object Category
 // Me Tab
 @Serializable
 object Me
+
+@Serializable
+data class BrandDetails(val id: Long = 450846785767)
+
+@Serializable
+object SignIn
+
+@Serializable
+object SignUp
