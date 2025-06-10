@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vendora.R
 
-const val shopifyToken = "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"
 
 @Composable
 fun SignUpScreen(
@@ -47,6 +46,8 @@ fun SignUpScreen(
     val signUpState by viewModel.signUpState.collectAsState()
 
     val scrollState = rememberScrollState()
+
+    val token = BuildConfig.SHOPIFY_TOKEN
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -163,7 +164,7 @@ fun SignUpScreen(
                     email.trim(), password, confirmPassword,
                     firstName,
                     lastName,
-                    shopifyToken,
+                    token,
                     phone
                 )
             },
