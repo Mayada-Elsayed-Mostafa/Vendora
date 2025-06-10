@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.data.repo_implementation.CategoryRepositoryImpl
 import com.example.vendora.domain.model.product.Product
-import com.example.vendora.domain.model.product.Products
 import com.example.vendora.domain.repo_interfaces.CategoryRepository
 import com.example.vendora.domain.usecase.category.GetCategoriesUseCase
 import com.example.vendora.utils.wrapper.ProductCategoryBlock
@@ -14,16 +13,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CategoryUiState(
     val categoryResult: Result<ProductCategoryBlock> = Result.Loading,
-    val filteredProducts: List<Product> = emptyList(),
+    var filteredProducts: List<Product> = emptyList(),
     val subCategory: String = "women"
 )
 
@@ -31,7 +28,7 @@ data class CategoryUiState(
 class CategoryViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val repository: CategoryRepository
-) : ViewModel(){
+) : ViewModel() {
 
     private var _uiState = MutableStateFlow(CategoryUiState())
     val uiState = _uiState.asStateFlow()
@@ -40,16 +37,16 @@ class CategoryViewModel @Inject constructor(
         startCollection()
     }
 
-    fun startCollection(){
+    fun startCollection() {
         viewModelScope.launch(Dispatchers.IO) {
             getCategoriesUseCase.invoke()
         }
     }
 
-    fun collectCategories(){
+    fun collectCategories() {
         viewModelScope.launch {
-            (repository as CategoryRepositoryImpl).resultFlow.collectLatest{ result ->
-               Log.d("Category",result.toString())
+            (repository as CategoryRepositoryImpl).resultFlow.collect { result ->
+                Log.d("Category", result.toString())
                 _uiState.update {
                     it.copy(
                         categoryResult = result,
@@ -60,13 +57,36 @@ class CategoryViewModel @Inject constructor(
         }
     }
 
-    fun onCategoryChanged(title: String){
+    fun onCategoryChanged(title: String) {
+        _uiState.update {
+            it.copy(
+                subCategory = title
+            )
+        }
         viewModelScope.launch {
             repository.categorizedProductsFactory(title)
         }
     }
 
-    fun applySubCategory(){
+    fun applySubCategory(productType: String) {
 
+        if (productType.isEmpty()) {
+            _uiState.update {
+                it.copy(
+                    filteredProducts = (it.categoryResult as Result.Success).data.products
+                )
+            }
+            return
+        }
+        val filteredList = (_uiState.value.categoryResult as Result.Success)
+            .data
+            .products
+            .filter { it.product_type == productType }
+
+        _uiState.update {
+            it.copy(
+                filteredProducts = filteredList
+            )
+        }
     }
 }

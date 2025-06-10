@@ -28,7 +28,9 @@ val DarkColorScheme = darkColorScheme(
     onSurface = Color(0xFFE0E0E0),
     error = Color(0xFFEF9A9A),
     onError = Color.Black,
-    surfaceContainer = Color(0xFF363940)
+    surfaceContainer = Color(0xFF1C1F28),
+    surfaceVariant = Color(0xff363940),
+    onSurfaceVariant = Color(0xFFFFFFFF)
 )
 
 val LightColorScheme = lightColorScheme(
@@ -38,11 +40,13 @@ val LightColorScheme = lightColorScheme(
     onSecondary = Color.White,
     background = Color(0xFFF5F5F5),    // Light background
     onBackground = Color(0xFF212121),  // Text/icon color on background
-    surface = Color(0xffe8e8e8),             // Surface color
+    surface = Color(0xFFE7E7E7),             // Surface color
     onSurface = Color(0xFF222528),     // Text/icon color on surface
     error = Color(0xFFD32F2F),         // Error color
     onError = Color.White,
-    surfaceContainer = Color(0xFFf2f2f2)
+    surfaceContainer = Color(0xFFE6E6E6),
+    surfaceVariant = Color(0xffe8e8e8),
+    onSurfaceVariant = Color(0xff212121),
 )
 
 //private val LightColorScheme = lightColorScheme(

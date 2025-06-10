@@ -1,19 +1,24 @@
 package com.example.vendora.ui.screens.category
 
-import android.util.Log
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
@@ -26,29 +31,30 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
-import com.example.vendora.domain.model.product.Products
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.screens.brandDetails.ProductCard
-import com.example.vendora.ui.screens.brandDetails.TopScreenSearchBar
+import com.example.vendora.ui.ui_model.subCategories
 import com.example.vendora.ui.ui_model.tabs
 import com.example.vendora.utils.wrapper.Result
 
@@ -57,7 +63,7 @@ fun CategoryScreen(viewModel: CategoryViewModel = hiltViewModel()) {
 
     val state = viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         viewModel.collectCategories()
     }
 
@@ -72,20 +78,21 @@ fun CategoryScreen(viewModel: CategoryViewModel = hiltViewModel()) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {}) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+            SubCategoryFAB { title ->
+                viewModel.applySubCategory(title)
             }
         }
     ) { innerPadding ->
 
-        when(state.value.categoryResult){
-            is Result.Failure -> OnError{viewModel.startCollection()}
+        when (state.value.categoryResult) {
+            is Result.Failure -> OnError { viewModel.startCollection() }
             Result.Loading -> OnLoading()
             is Result.Success -> {
                 OnSuccess(
                     paddingValues = innerPadding,
-                    onCategoryChange = {category -> viewModel.onCategoryChanged(title = category)},
-                    products = state.value.filteredProducts
+                    onCategoryChange = { category -> viewModel.onCategoryChanged(title = category) },
+                    products = state.value.filteredProducts,
+                    currentCategory = state.value.subCategory
                 )
             }
         }
@@ -96,7 +103,8 @@ fun CategoryScreen(viewModel: CategoryViewModel = hiltViewModel()) {
 fun OnSuccess(
     paddingValues: PaddingValues = PaddingValues(),
     onCategoryChange: (String) -> Unit,
-    products: List<Product>
+    products: List<Product>,
+    currentCategory: String
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -104,8 +112,11 @@ fun OnSuccess(
             .fillMaxSize()
             .padding(paddingValues)
             .verticalScroll(scrollState)
-    ){
-        CategoryTabs(onCategoryChange)
+    ) {
+        CategoryTabs(
+            onCategoryChange,
+            currentCategory
+        )
         ProductsGrid(
             modifier = Modifier.weight(1f),
             products = products
@@ -115,7 +126,7 @@ fun OnSuccess(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryAppBar(result: List<String>, onSearchQueryChange:(String) -> Unit ) {
+fun CategoryAppBar(result: List<String>, onSearchQueryChange: (String) -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
 
     SearchBar(
@@ -159,9 +170,10 @@ fun CategoryAppBar(result: List<String>, onSearchQueryChange:(String) -> Unit ) 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryTabs(
-    onCategoryChange: (String) -> Unit
+    onCategoryChange: (String) -> Unit,
+    currentCategory: String
 ) {
-    var currentIndex by remember { mutableIntStateOf(0) }
+    var currentIndex by remember { mutableIntStateOf(tabs.indexOf(currentCategory)) }
     SecondaryTabRow(
         selectedTabIndex = currentIndex,
         modifier = Modifier.fillMaxWidth(),
@@ -177,7 +189,6 @@ fun CategoryTabs(
                 selected = index == currentIndex,
                 onClick = {
                     currentIndex = index
-                    Log.d("Category",name)
                     onCategoryChange(name)
                 },
                 text = { Text(name) },
@@ -198,9 +209,70 @@ fun ProductsGrid(
     ) {
         items(
             items = products,
-            key = {item: Product -> item.id }
-        ){
+            key = { item: Product -> item.id }
+        ) {
             ProductCard(it)
         }
     }
+}
+
+@Composable
+fun SubCategoryFAB(
+    onSubCategoryClicked: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val containerColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    val contentColor = if (isSystemInDarkTheme()) Color.Black else Color.White
+
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.wrapContentWidth()
+    ) {
+
+        if (expanded) {
+            subCategories.forEach { category ->
+                SmallFloatingActionButton(
+                    onClick = {
+                        onSubCategoryClicked(category.name)
+                    },
+                    contentColor = contentColor,
+                    containerColor = containerColor
+                ) {
+                    Icon(
+                        painter = painterResource(category.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+
+        FloatingActionButton(
+            onClick = {
+                expanded = !expanded
+                if (!expanded){
+                    onSubCategoryClicked("")
+                }
+            },
+            contentColor = contentColor,
+            containerColor = containerColor
+        ) {
+            if (expanded){
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.filter),
+                    contentDescription = "Filter"
+                )
+            }
+
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+
 }
