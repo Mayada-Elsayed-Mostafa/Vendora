@@ -35,7 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vendora.R
 
 @Composable
-fun SignInScreen(viewModel: SignInViewModel = viewModel()) {
+fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: () -> Unit) {
 
     val signInState by viewModel.signInState.collectAsState()
 
@@ -120,26 +120,9 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel()) {
             }
         }
 
-        if (signInState.errorMessage != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = signInState.errorMessage ?: "",
-                color = Color.Red,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
-
-        if (signInState.successMessage != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = signInState.successMessage ?: "",
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = { /* TODO: Navigate to SignUp */ }) {
+        TextButton(onClick = { onNavigateToSignUp() }) {
             Text("You haven't an account? Sign Up")
         }
     }

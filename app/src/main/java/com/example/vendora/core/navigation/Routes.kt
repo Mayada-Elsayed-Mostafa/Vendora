@@ -38,3 +38,6 @@ data class BrandDetails(val id: Long = 450846785767)
 
 @Serializable
 object SignIn
+
+@Serializable
+object SignUp
