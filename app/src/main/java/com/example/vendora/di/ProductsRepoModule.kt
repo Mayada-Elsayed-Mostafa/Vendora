@@ -3,7 +3,9 @@ package com.example.vendora.di
 import com.example.vendora.data.remote.RemoteDataSource
 import com.example.vendora.data.remote.RemoteDataSourceImpl
 import com.example.vendora.data.remote.ShopifyService
+import com.example.vendora.data.repo_implementation.CategoryRepositoryImpl
 import com.example.vendora.data.repo_implementation.ProductsRepositoryImpl
+import com.example.vendora.domain.repo_interfaces.CategoryRepository
 import com.example.vendora.domain.repo_interfaces.ProductsRepository
 import dagger.Binds
 import dagger.Module
@@ -21,4 +23,8 @@ abstract class ProductsRepoModule {
     @Binds
     @Singleton
     abstract fun bindProductsRepository(repository: ProductsRepositoryImpl): ProductsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCategoryRepository(repository: CategoryRepositoryImpl): CategoryRepository
 }
