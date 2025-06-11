@@ -23,6 +23,7 @@ import com.example.vendora.core.navigation.SignIn
 import com.example.vendora.core.navigation.SignUp
 import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
+import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
 import com.example.vendora.ui.screens.sign.SignUpScreen
@@ -53,7 +54,7 @@ fun VendorApp() {
             }
 
             composable<Category> {
-                //CategoryScreen()
+                CategoryScreen()
             }
 
             composable<Me> {
