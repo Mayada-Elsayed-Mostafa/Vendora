@@ -21,4 +21,10 @@ sealed class ScreenRoute(
 
     @Serializable
     data class VisaScreenRoute(val token:String) : ScreenRoute("Visa")
+
+    @Serializable
+    object AddAddressScreen : ScreenRoute("AddAddressScreen")
+
+    @Serializable
+    object AddressScreen : ScreenRoute("AddressScreen")
 }

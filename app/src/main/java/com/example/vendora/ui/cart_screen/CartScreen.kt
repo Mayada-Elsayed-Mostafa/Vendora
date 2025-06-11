@@ -97,10 +97,8 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: N
             .padding(paddingValues)
             .padding(vertical = 8.dp, horizontal = 24.dp)
     ){
-        Text(
-            text = "Cart",
-            style = MaterialTheme.typography.titleSmall,
-            )
+        CustomAppBar("Cart") {navController.popBackStack() }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(

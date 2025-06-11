@@ -24,6 +24,8 @@ import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.cart_screen.CheckoutScreen
 import com.example.vendora.ui.cart_screen.PaymentScreen
 import com.example.vendora.ui.payment_methods.VisaScreen
+import com.example.vendora.ui.screens.address.view.AddAddressScreen
+import com.example.vendora.ui.screens.address.view.AddressScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 
@@ -64,7 +66,7 @@ fun VendorApp() {
                 /*Column(modifier = Modifier.padding(24.dp)) {
                     Icon(imageVector = Icons.Filled.AccountBox, contentDescription = null)
                 }*/
-                CartScreen(paddingValues = innerPadding,navController)
+
             }
 
             composable<ScreenRoute.CartScreen>{
@@ -93,6 +95,14 @@ fun VendorApp() {
                     id = brandDetails.id,
                     navigateUp = { navController.navigateUp() }
                 )
+            }
+
+            composable<ScreenRoute.AddAddressScreen>{
+                AddAddressScreen(navController)
+            }
+
+            composable<ScreenRoute.AddressScreen>{
+                AddressScreen(navController)
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.example.vendora.di
 
+import com.example.vendora.data.local.LocalDataSource
+import com.example.vendora.data.local.LocalDataSourceImpl
 import com.example.vendora.data.remote.RemoteDataSource
 import com.example.vendora.data.remote.RemoteDataSourceImpl
 import com.example.vendora.data.remote.ShopifyService
@@ -14,6 +16,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ProductsRepoModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindLocalDataSource(localDataSource: LocalDataSourceImpl):LocalDataSource
 
     @Binds
     abstract fun bindRemoteDataSource(remote: RemoteDataSourceImpl): RemoteDataSource

@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,18 +59,14 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.core.navigation.ScreenRoute
+import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.utils.wrapper.Result
-
-data class ShippingAddress(
-    val type: String,
-    val address: String,
-    val isSelected: Boolean = false
-)
 
 
 @Composable
-fun CheckoutScreen(token:String,navController: NavHostController,viewModel: PaymobViewModel= hiltViewModel()) {
+fun CheckoutScreen(token:String,navController: NavHostController,viewModel: PaymobViewModel= hiltViewModel(),addressViewModel: AddressViewModel = hiltViewModel()) {
     var cartItems by  remember {
         mutableStateOf(listOf(
             CartItem(1, "Essence Mascara Lash Princess", 250.00,"https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp", "Color", "M"),
@@ -79,12 +76,14 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
         ))
     }
 
-    val shippingAddresses = remember {
-        listOf(
-            ShippingAddress("Home", "Fayoum", true),
-            ShippingAddress("Office", "Fidamin", false)
-        )
+    LaunchedEffect(Unit) {
+        addressViewModel.getAllAddresses()
     }
+
+    val defaultAddress by addressViewModel.defaultAddress.collectAsState()
+
+
+
     var promoCode by remember { mutableStateOf("") }
     val totalPrice = cartItems.sumOf { it.price }
     Column (
@@ -103,7 +102,20 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 16.dp)
         )
-        ShippingAddressItem(shippingAddresses[0])
+
+        if (defaultAddress != null){
+
+            ShippingAddressItem(defaultAddress!!){
+                navController.navigate(ScreenRoute.AddressScreen)
+            }
+        }else {
+            Text(text = "No default address found.")
+            PaymentBottom("Add New Address"){
+                navController.navigate(ScreenRoute.AddressScreen)
+            }
+        }
+
+
         Spacer(modifier = Modifier.height(16.dp))
         Divider()
         ////Order List
@@ -131,7 +143,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
 
         //////
 
-        PaymentBottom(){
+        PaymentBottom("Continue to Payment"){
             /*nav to Payment Screen*/
             println("Nav To")
             navController.navigate(ScreenRoute.PaymentScreenRoute(totalPrice,token))
@@ -225,7 +237,7 @@ fun CheckoutItem (item: CartItem  ) {
 }
 
 @Composable
-fun ShippingAddressItem (item:  ShippingAddress  ) {
+fun ShippingAddressItem (item:  AddressEntity , navToAddress : ()->Unit ) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -298,7 +310,7 @@ fun ShippingAddressItem (item:  ShippingAddress  ) {
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .size(28.dp)
-                    .clickable { /*nav to select address*/ }
+                    .clickable { navToAddress() }
             )
 
 
@@ -338,7 +350,7 @@ fun CustomAppBar( title: String, back:()-> Unit) {
 
 
 @Composable
-fun PaymentBottom(navTo:()->Unit) {
+fun PaymentBottom(title:String,navTo:()->Unit) {
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -358,7 +370,7 @@ fun PaymentBottom(navTo:()->Unit) {
             }
         ) {
             Text(
-                text = "Continue to Payment",
+                text = title,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
             )
             Spacer(modifier = Modifier.width(16.dp))
