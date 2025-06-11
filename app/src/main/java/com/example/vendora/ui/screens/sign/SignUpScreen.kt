@@ -47,7 +47,7 @@ fun SignUpScreen(
 
     val scrollState = rememberScrollState()
 
-    val token = com.example.vendora.BuildConfig.SHOPIFY_TOKEN
+    val token = com.example.vendora.BuildConfig.adminApiAccessToken
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }

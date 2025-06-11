@@ -4,6 +4,7 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.Customer
 import com.example.vendora.domain.model.customer.CustomerRequest
@@ -27,7 +28,8 @@ data class SignUpState(
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    private val createCustomerUseCase: CreateCustomerUseCase
+    private val createCustomerUseCase: CreateCustomerUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private val auth: FirebaseAuth by lazy {
@@ -119,12 +121,22 @@ class SignUpViewModel @Inject constructor(
                 email = email,
                 phone = phone
             )
+            Log.d("TOKEN_CHECK", "Token: $token")
 
             val request = CustomerRequest(customer)
             createCustomerUseCase(token, request)
                 .collect { result ->
                     _customerState.value = result
                     Log.d("TAG", "createShopifyCustomer: ${result}")
+
+                    if (result is Result.Success) {
+                        val createdCustomer = result.data.customer
+                        val customerId = createdCustomer.id.toString()
+                        val customerEmail = createdCustomer.email
+
+                        userPreferences.saveUser(customerId, customerEmail)
+                        Log.d("TAG", "User saved in DataStore: $customerId, $customerEmail")
+                    }
                 }
         }
     }

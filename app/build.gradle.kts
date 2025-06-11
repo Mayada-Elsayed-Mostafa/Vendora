@@ -30,11 +30,6 @@ android {
             "adminApiAccessToken",
             "\"${properties.getProperty("adminApiAccessToken")}\""
         )
-        buildConfigField(
-            "String",
-            "SHOPIFY_TOKEN",
-            "\"${properties.getProperty("shopifyToken")}\""
-        )
 
     }
 
@@ -64,12 +59,17 @@ dependencies {
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
+
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    //Jetpack DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
