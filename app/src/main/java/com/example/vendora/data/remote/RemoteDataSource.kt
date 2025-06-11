@@ -1,6 +1,8 @@
 package com.example.vendora.data.remote
 
 import com.example.vendora.domain.model.brands.BrandsResponse
+import com.example.vendora.domain.model.currency.CurrencyResponse
+import com.example.vendora.domain.model.discount.DiscountCode
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
 import com.example.vendora.domain.model.payment.OrderResponse
@@ -20,4 +22,10 @@ interface RemoteDataSource {
     suspend fun  createOrder(request: OrderRequest) : OrderResponse
 
     suspend fun getPaymentKey(request: PaymentKeyRequest) : PaymentKeyResponse
+
+    //Discount code
+    suspend fun getDiscountCodes(token: String):List<DiscountCode>
+
+    //currency
+    suspend fun getCurrency(apiKey: String,baseCurrency: String) : CurrencyResponse
 }

@@ -27,6 +27,7 @@ import com.example.vendora.ui.payment_methods.VisaScreen
 import com.example.vendora.ui.screens.address.view.AddAddressScreen
 import com.example.vendora.ui.screens.address.view.AddressScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
+import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 
 @Composable
@@ -103,6 +104,12 @@ fun VendorApp() {
 
             composable<ScreenRoute.AddressScreen>{
                 AddressScreen(navController)
+            }
+
+            composable<ScreenRoute.DiscountScreen>{
+                DiscountScreen(){
+                    navController.popBackStack()
+                }
             }
         }
     }

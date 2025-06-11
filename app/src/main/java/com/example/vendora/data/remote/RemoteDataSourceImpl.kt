@@ -1,6 +1,8 @@
 package com.example.vendora.data.remote
 
 import com.example.vendora.domain.model.brands.BrandsResponse
+import com.example.vendora.domain.model.currency.CurrencyResponse
+import com.example.vendora.domain.model.discount.DiscountCode
 import com.example.vendora.domain.model.payment.AuthRequest
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
@@ -12,7 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
-class RemoteDataSourceImpl @Inject constructor(private val service: ShopifyService , private val payMobService: PaymobService) : RemoteDataSource {
+class RemoteDataSourceImpl @Inject constructor(private val service: ShopifyService , private val payMobService: PaymobService, private val currencyApiService: CurrencyApiService) : RemoteDataSource {
 
 //    private val retrofit: Retrofit = Retrofit.Builder()
 //        .baseUrl(baseUrl)
@@ -41,6 +43,14 @@ class RemoteDataSourceImpl @Inject constructor(private val service: ShopifyServi
 
     override suspend fun getPaymentKey(request: PaymentKeyRequest): PaymentKeyResponse {
         return payMobService.getPaymentKey(request)
+    }
+
+    override suspend fun getDiscountCodes(token: String): List<DiscountCode> {
+        return service.getDiscountCodes(token).discount_codes
+    }
+
+    override suspend fun getCurrency(apiKey: String, baseCurrency: String): CurrencyResponse {
+        return currencyApiService.getCurrency(apiKey,baseCurrency)
     }
 
     companion object{

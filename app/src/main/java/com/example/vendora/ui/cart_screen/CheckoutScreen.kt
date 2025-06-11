@@ -137,7 +137,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
                 PromoCodeItem(
                     promoCode,
                     onPromoCodeChange = { promoCode = it },
-                    totalPrice)
+                    totalPrice, navToDiscount = {navController.navigate(ScreenRoute.DiscountScreen)})
             }
         }
 
@@ -388,7 +388,8 @@ fun PaymentBottom(title:String,navTo:()->Unit) {
 fun PromoCodeItem(
     promoCode: String,
     onPromoCodeChange: (String) -> Unit,
-    totalPrice: Double
+    totalPrice: Double,
+    navToDiscount:() -> Unit
 ) {
     var discountApplied by remember { mutableStateOf(false) }
     var finalPrice by remember { mutableStateOf(totalPrice) }
@@ -410,6 +411,13 @@ fun PromoCodeItem(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
             shape = RoundedCornerShape(12.dp)
         ) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onBackground) ,
+                onClick = {navToDiscount()}
+            ){
+                Text("Choose Discount Code")
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -477,7 +485,7 @@ fun PromoCodeItem(
                 } else {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Total: ${"%.2f".format(totalPrice)} EGP",
+                        text = "Total: $totalPrice} EGP",
                         fontWeight = FontWeight.Bold
                     )
                 }

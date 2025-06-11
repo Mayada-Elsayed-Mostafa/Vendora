@@ -1,5 +1,6 @@
 package com.example.vendora.di
 
+import com.example.vendora.data.remote.CurrencyApiService
 import com.example.vendora.data.remote.PaymobService
 import com.example.vendora.data.remote.RemoteDataSourceImpl
 import com.example.vendora.data.remote.ShopifyService
@@ -19,6 +20,10 @@ annotation class ShopifyRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class PaymobRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class CurrencyRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -51,6 +56,21 @@ class ServicesProviderModule {
     @Provides
     fun providePaymobService(@PaymobRetrofit retrofit: Retrofit): PaymobService {
         return retrofit.create(PaymobService::class.java)
+    }
+
+
+    @CurrencyRetrofit
+    @Provides
+    fun provideCurrencyRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://api.currencyapi.com/v3/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    fun provideCurrencyService(@CurrencyRetrofit retrofit: Retrofit): CurrencyApiService {
+        return retrofit.create(CurrencyApiService::class.java)
     }
 
 

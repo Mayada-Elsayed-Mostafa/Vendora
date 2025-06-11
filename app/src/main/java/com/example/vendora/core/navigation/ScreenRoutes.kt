@@ -27,4 +27,7 @@ sealed class ScreenRoute(
 
     @Serializable
     object AddressScreen : ScreenRoute("AddressScreen")
+
+    @Serializable
+    object DiscountScreen : ScreenRoute("DiscountScreen")
 }
