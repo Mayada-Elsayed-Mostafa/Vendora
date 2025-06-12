@@ -38,10 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.Optional
-import com.apollographql.apollo.network.okHttpClient
-import com.example.vendora.GetProductsQuery
 import com.example.vendora.R
 import kotlinx.coroutines.launch
 import okhttp3.Interceptor
@@ -82,30 +78,7 @@ fun OnSuccess(modifier: Modifier = Modifier) {
             icon = R.drawable.pin,
             title = "Address"
         ) {
-            coroutineScope.launch {
-                val authInterceptor = Interceptor { chain ->
-                    val request = chain.request().newBuilder()
-                        .addHeader("X-Shopify-Storefront-Access-Token", "702b21e78cf63f5083b1a9317c624bf7") // 👈 Change this
-                        .build()
-                    chain.proceed(request)
-                }
 
-                // 2. Create OkHttpClient with the interceptor
-                val okHttpClient = OkHttpClient.Builder()
-                    .addInterceptor(authInterceptor)
-                    .build()
-
-                // Create a client
-                val apolloClient = ApolloClient.Builder()
-                    .serverUrl("https://mad45-ism-and1.myshopify.com/api/2025-04/graphql.json") // 👈 Use real URL
-                    .okHttpClient(okHttpClient)
-                    .build()
-
-                // Execute your query. This will suspend until the response is received.
-                val response = apolloClient.query(GetProductsQuery(Optional.present(10))).execute()
-
-                println("products.data=${response.data?.products}")
-            }
         }
         //orders item
         OptionItem(
