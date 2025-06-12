@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.productInfo
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,6 +54,7 @@ fun ProductInfoScreen(productId: Long, viewModel: ProductInfoViewModel = hiltVie
     val productResult by viewModel.product.collectAsState()
 
     LaunchedEffect(productId) {
+        Log.d("InfoScreen",productId.toString())
         viewModel.loadProduct(productId)
     }
 

@@ -18,6 +18,7 @@ import com.example.vendora.core.navigation.BrandDetails
 import com.example.vendora.core.navigation.Category
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
+import com.example.vendora.core.navigation.ProductInfo
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.SignIn
 import com.example.vendora.core.navigation.SignUp
@@ -25,6 +26,7 @@ import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.home.HomeScreen
+import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
 import com.example.vendora.ui.screens.sign.SignUpScreen
 
@@ -40,7 +42,7 @@ fun VendorApp() {
         println(innerPadding)
         NavHost(
             navController = navController,
-            startDestination = SignUp,
+            startDestination = Home,
         ) {
             composable<Home> {
                 HomeScreen(
@@ -54,7 +56,11 @@ fun VendorApp() {
             }
 
             composable<Category> {
-                CategoryScreen()
+                CategoryScreen(
+                    navigateToProductInfo = { productId ->
+                        navController.navigate(ProductInfo(productId))
+                    }
+                )
             }
 
             composable<Me> {
@@ -71,7 +77,8 @@ fun VendorApp() {
                 val brandDetails: BrandDetails = navBackStackEntry.toRoute()
                 BrandDetailsScreen(
                     id = brandDetails.id,
-                    navigateUp = { navController.navigateUp() }
+                    navigateUp = { navController.navigateUp() },
+                    navigateToProduct = { productId -> navController.navigate(ProductInfo(productId))}
                 )
             }
 
@@ -81,6 +88,13 @@ fun VendorApp() {
 
             composable<SignUp> {
                 SignUpScreen(onNavigateToSignIn = { navController.navigate(SignIn) })
+            }
+
+            composable<ProductInfo> { navBackStackEntry ->
+                val productInfo: ProductInfo = navBackStackEntry.toRoute()
+                ProductInfoScreen(
+                    productId = productInfo.id
+                )
             }
 
         }

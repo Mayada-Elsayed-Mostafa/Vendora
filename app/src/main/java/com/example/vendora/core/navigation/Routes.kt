@@ -41,3 +41,6 @@ object SignIn
 
 @Serializable
 object SignUp
+
+@Serializable
+data class ProductInfo(val id: Long)

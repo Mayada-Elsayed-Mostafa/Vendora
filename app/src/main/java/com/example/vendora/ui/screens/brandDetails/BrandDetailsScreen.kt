@@ -55,6 +55,7 @@ import com.example.vendora.utils.wrapper.Result
 fun BrandDetailsScreen(
     id: Long = 450846785767,
     navigateUp: () -> Unit,
+    navigateToProduct: (Long) -> Unit,
     viewModel: BrandDetailsViewModel = hiltViewModel()
 ) {
 
@@ -89,7 +90,10 @@ fun BrandDetailsScreen(
                     modifier = Modifier.padding(8.dp)
                 )
                 val list = products.value.filteredProducts
-                OnSuccess(list)
+                OnSuccess(
+                    list,
+                    navigateToProduct = navigateToProduct
+                )
             }
         }
     }
@@ -148,7 +152,10 @@ fun TopScreenSearchBar(
 }
 
 @Composable
-fun OnSuccess(products: List<Product>) {
+fun OnSuccess(
+    products: List<Product>,
+    navigateToProduct: (Long) -> Unit
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         state = rememberLazyGridState(),
@@ -157,7 +164,7 @@ fun OnSuccess(products: List<Product>) {
             items = products,
             key = { item -> item.id }
         ) { product ->
-            ProductCard(product)
+            ProductCard(product,navigateToProduct)
         }
     }
 }
@@ -191,10 +198,12 @@ fun OnLoading(modifier: Modifier = Modifier) {
 @Composable
 fun ProductCard(
     product: Product,
+    navigateToProduct: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     Card(
+        onClick = { navigateToProduct(product.id) },
         elevation = CardDefaults.cardElevation(4.dp),
         shape = MaterialTheme.shapes.medium,
         modifier = modifier

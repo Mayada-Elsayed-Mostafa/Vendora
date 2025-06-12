@@ -59,7 +59,10 @@ import com.example.vendora.ui.ui_model.tabs
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
-fun CategoryScreen(viewModel: CategoryViewModel = hiltViewModel()) {
+fun CategoryScreen(
+    viewModel: CategoryViewModel = hiltViewModel(),
+    navigateToProductInfo: (Long) -> Unit
+) {
 
     val state = viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -92,7 +95,8 @@ fun CategoryScreen(viewModel: CategoryViewModel = hiltViewModel()) {
                     paddingValues = innerPadding,
                     onCategoryChange = { category -> viewModel.onCategoryChanged(title = category) },
                     products = state.value.filteredProducts,
-                    currentCategory = state.value.subCategory
+                    currentCategory = state.value.subCategory,
+                    navigateToProductInfo = navigateToProductInfo
                 )
             }
         }
@@ -104,6 +108,7 @@ fun OnSuccess(
     paddingValues: PaddingValues = PaddingValues(),
     onCategoryChange: (String) -> Unit,
     products: List<Product>,
+    navigateToProductInfo: (Long) -> Unit,
     currentCategory: String
 ) {
     val scrollState = rememberScrollState()
@@ -119,7 +124,8 @@ fun OnSuccess(
         )
         ProductsGrid(
             modifier = Modifier.weight(1f),
-            products = products
+            products = products,
+            navigateToProductInfo = navigateToProductInfo
         )
     }
 }
@@ -201,7 +207,8 @@ fun CategoryTabs(
 @Composable
 fun ProductsGrid(
     modifier: Modifier = Modifier,
-    products: List<Product>
+    products: List<Product>,
+    navigateToProductInfo: (Long) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -211,7 +218,7 @@ fun ProductsGrid(
             items = products,
             key = { item: Product -> item.id }
         ) {
-            ProductCard(it)
+            ProductCard(it,navigateToProductInfo)
         }
     }
 }
