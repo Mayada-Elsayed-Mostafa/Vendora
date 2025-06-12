@@ -7,4 +7,14 @@ import kotlinx.coroutines.flow.Flow
 
 interface CurrencyRepository {
     fun getCurrency(baseCurrency: String): Flow<Result<CurrencyResponse>>
+    fun getRates(): Flow<Result<List<CurrencyInfo>>>
+
+    //
+    fun saveCurrency(code: String, value: String)
+
+    fun geTCurrency(code: String, defaultValue: String): String
+
+    fun saveSelectedCurrency(code: String)
+
+    fun getSelectedCurrency(): String
 }

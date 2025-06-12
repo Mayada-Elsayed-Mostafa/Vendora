@@ -14,3 +14,12 @@ class GetCurrencyRatesUseCase @Inject constructor(private val repository: Curren
     }
 
 }
+
+
+class GetRatesUseCase @Inject constructor(private val repository: CurrencyRepository) {
+
+    operator fun invoke() : Flow<Result<List<CurrencyInfo>>>{
+        return repository.getRates()
+    }
+
+}

@@ -1,6 +1,7 @@
 package com.example.vendora.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.vendora.data.local.AddressDao
 import com.example.vendora.data.local.AppDatabase
@@ -26,6 +27,13 @@ object DatabaseModule {
     @Provides
     fun provideAddressDao (db:AppDatabase):AddressDao {
         return db.addressDao()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("vendora", Context.MODE_PRIVATE)
     }
 
 }

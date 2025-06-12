@@ -53,8 +53,14 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.core.navigation.ScreenRoute
+import com.example.vendora.domain.model.currency.CurrencyInfo
+import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.ui.screens.currency.CurrencyDropDown
+import com.example.vendora.ui.screens.currency.CurrencyViewModel
+import com.example.vendora.ui.screens.currency.changeCurrency
+import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.utils.wrapper.Result
 import kotlinx.serialization.Serializable
 
@@ -71,10 +77,12 @@ data class CartItem(
 
 
 @Composable
-fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: NavHostController,viewModel: PaymobViewModel = hiltViewModel()) {
+fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: NavHostController,viewModel: PaymobViewModel = hiltViewModel(),currencyViewModel: CurrencyViewModel= hiltViewModel()) {
 
     LaunchedEffect(Unit) {
         viewModel.getTokenForAuthentication()
+        currencyViewModel.getCurrency()
+        currencyViewModel.getRates()
     }
     val getFirstToken by viewModel.getTokenState.collectAsState()
     var firstToken by remember { mutableStateOf("") }
@@ -90,6 +98,9 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: N
         ))
     }
 
+    val selectedCurrency by currencyViewModel.selectedCurrency.collectAsState()
+    val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
+
 
     Column (
         modifier = Modifier
@@ -98,9 +109,8 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: N
             .padding(vertical = 8.dp, horizontal = 24.dp)
     ){
         CustomAppBar("Cart") {navController.popBackStack() }
-
+        CurrencyDropDown()
         Spacer(modifier = Modifier.height(16.dp))
-
         LazyColumn(
             modifier = Modifier
                 .weight(1f),
@@ -117,7 +127,8 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: N
                     },
                     onDelete = {
                         cartItems = cartItems.filter { it.id != item.id }
-                    }
+                    },
+                    getChangeRate = getChangeRate
 
                 )
             }
@@ -129,9 +140,7 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: N
             is Result.Success -> {
                 firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
                 println("token :$firstToken" )
-                CheckoutButton(cartItems ){
-                    navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
-                }
+                CheckoutButton(cartItems , getChangeRate = getChangeRate, navToCheckout = {navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))})
             }
             is Result.Failure -> Text("Auth failed")
             Result.Loading -> Text("Authenticating...")
@@ -144,7 +153,7 @@ fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: N
 }
 
 @Composable
-fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit ) {
+fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -154,7 +163,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
         Row(
            modifier = Modifier
                .fillMaxWidth()
-               .height(120.dp)
+               .height(130.dp)
                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         )
@@ -179,7 +188,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
             {
                 Text(
                     text = item.name,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2
                 )
@@ -200,7 +209,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${item.price}",
+                    text = "${item.price.convertToCurrency(getChangeRate)}",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
 
@@ -273,7 +282,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
 }
 
 @Composable
-fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit) {
+fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit,getChangeRate: Double) {
     val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Column (
@@ -295,7 +304,7 @@ fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit) {
                 )
 
                 Text(
-                    text = "${totalPrice}",
+                    text = "${totalPrice.convertToCurrency(getChangeRate)}",
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
