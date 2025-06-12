@@ -26,7 +26,7 @@ class LocalDataSourceImpl @Inject constructor(private val addressDao: AddressDao
     }
 
     override fun getString(key: String, defaultValue: String): String {
-       return sharedPreferences.getString(key, defaultValue) ?: defaultValue
+        return sharedPreferences.getString(key, defaultValue) ?: "EGP"
     }
 
     override fun saveCurrency(code: String, value: String) {
@@ -34,14 +34,14 @@ class LocalDataSourceImpl @Inject constructor(private val addressDao: AddressDao
     }
 
     override fun geTCurrency(code: String, defaultValue: String): String {
-        return sharedPreferences.getString(code, defaultValue) ?: defaultValue
+        return sharedPreferences.getString(code, defaultValue) ?: "EGP"
     }
 
     override fun saveSelectedCurrency(code: String) {
-       putString("selected_currency", code)
+        putString("selected_currency", code)
     }
 
     override fun getSelectedCurrency(): String {
-        return getString("selected_currency", "")
+        return getString("selected_currency", "EGP")
     }
 }

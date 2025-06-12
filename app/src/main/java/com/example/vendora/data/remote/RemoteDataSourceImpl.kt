@@ -16,16 +16,11 @@ import com.example.vendora.domain.model.product.Products
 import com.example.vendora.domain.model.product.SingleProduct
 import javax.inject.Inject
 
-class RemoteDataSourceImpl @Inject constructor(private val service: ShopifyService , private val payMobService: PaymobService, private val currencyApiService: CurrencyApiService) : RemoteDataSource {
-
-//    private val retrofit: Retrofit = Retrofit.Builder()
-//        .baseUrl(baseUrl)
-//        .addConverterFactory(GsonConverterFactory.create())
-//        .build()
-
-//    private val retrofitService: ShopifyService by lazy {
-//        retrofit.create(ShopifyService::class.java)
-//    }
+class RemoteDataSourceImpl @Inject constructor(
+    private val service: ShopifyService ,
+    private val payMobService: PaymobService,
+    private val currencyApiService: CurrencyApiService
+) : RemoteDataSource {
 
     override suspend fun getBrands(token: String): BrandsResponse {
         return service.getBrands(token)
@@ -56,7 +51,7 @@ class RemoteDataSourceImpl @Inject constructor(private val service: ShopifyServi
         return service.getProductById(token, productId)
     }
 
-    companion object {
+
     override suspend fun getAuthToken(apiKey: String): AuthTokenResponse {
         return payMobService.getAuthToken(AuthRequest(apiKey))
     }

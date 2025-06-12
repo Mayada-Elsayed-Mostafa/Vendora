@@ -12,7 +12,7 @@ class SaveCurrencyUseCase @Inject constructor(private val repository: CurrencyRe
 
 class GetCurrencyUseCase @Inject constructor(private val repository: CurrencyRepository) {
     operator fun invoke (code: String, defaultValue: String) : Double{
-        return repository.geTCurrency(code,defaultValue).toDouble()
+        return repository.geTCurrency(code,"1").toDouble()
     }
 }
 

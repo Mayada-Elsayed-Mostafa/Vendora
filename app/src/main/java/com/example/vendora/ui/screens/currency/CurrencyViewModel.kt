@@ -102,18 +102,4 @@ fun Double.convertToCurrency(toCurrency: Double ): Double {
 }
 
 
-fun Double.changeCurrency(
-    fromCurrency: String="EGP",
-    toCurrency: String,
-    rates: List<CurrencyInfo>
-): Double {
-
-    if (fromCurrency == toCurrency) return this
-
-    val fromRate = rates.find { it.code == fromCurrency }?.value ?: return this
-    val toRate = rates.find { it.code == toCurrency }?.value ?: return this
-
-    return this * (toRate / fromRate)
-}
-
 
