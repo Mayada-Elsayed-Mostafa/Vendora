@@ -1,6 +1,7 @@
 package com.example.vendora.data.remote
 
 import com.example.vendora.domain.model.brands.BrandsResponse
+import com.example.vendora.domain.model.discount.DiscountCodesResponse
 import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
@@ -46,4 +47,7 @@ interface ShopifyService {
         @Header("X-Shopify-Access-Token") token: String,
         @Path("product_id") productId: Long
     ): SingleProduct
+
+    @GET("/admin/api/2025-04/price_rules/1499001651431/discount_codes.json")
+    suspend fun getDiscountCodes(@Header("X-Shopify-Access-Token") token: String) : DiscountCodesResponse
 }

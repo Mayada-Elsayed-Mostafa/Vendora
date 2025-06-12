@@ -23,8 +23,14 @@ import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.SignIn
 import com.example.vendora.core.navigation.SignUp
 import com.example.vendora.ui.cart_screen.CartScreen
+import com.example.vendora.ui.cart_screen.CheckoutScreen
+import com.example.vendora.ui.cart_screen.PaymentScreen
+import com.example.vendora.ui.payment_methods.VisaScreen
+import com.example.vendora.ui.screens.address.view.AddAddressScreen
+import com.example.vendora.ui.screens.address.view.AddressScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.category.CategoryScreen
+import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
@@ -69,11 +75,27 @@ fun VendorApp() {
                 }
             }
 
-            composable<ScreenRoute.CartScreen> {
-                CartScreen()
+            composable<ScreenRoute.CartScreen>{
+                CartScreen(paddingValues = innerPadding , navController)
             }
 
-            composable<BrandDetails> { navBackStackEntry ->
+            composable<ScreenRoute.CheckoutScreenRoute>{ navBackStackEntry ->
+                val token = navBackStackEntry.toRoute<ScreenRoute.CheckoutScreenRoute>().token
+                CheckoutScreen(token,navController)
+            }
+
+            composable<ScreenRoute.PaymentScreenRoute>{ navBackStackEntry ->
+                val price:Double =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().price
+                val token:String =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().token
+                PaymentScreen( token = token,totalPrice = price, navController = navController)
+            }
+
+            composable<ScreenRoute.VisaScreenRoute> { navBackStackEntry ->
+                val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
+                VisaScreen(token)
+            }
+
+            composable<BrandDetails>{ navBackStackEntry ->
                 val brandDetails: BrandDetails = navBackStackEntry.toRoute()
                 BrandDetailsScreen(
                     id = brandDetails.id,
@@ -95,6 +117,20 @@ fun VendorApp() {
                 ProductInfoScreen(
                     productId = productInfo.id
                 )
+            }
+
+            composable<ScreenRoute.AddAddressScreen>{
+                AddAddressScreen(navController)
+            }
+
+            composable<ScreenRoute.AddressScreen>{
+                AddressScreen(navController)
+            }
+
+            composable<ScreenRoute.DiscountScreen>{
+                DiscountScreen(){
+                    navController.popBackStack()
+                }
             }
         }
     }

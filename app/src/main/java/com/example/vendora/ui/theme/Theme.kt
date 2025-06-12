@@ -21,7 +21,7 @@ val DarkColorScheme = darkColorScheme(
     primary = Color(0xFFfafafa),       // Primary brand color (lighter for dark mode)
     onPrimary = Color.Black,
     secondary = Color(0xFFA5D6A7),
-    onSecondary = Color.Black,
+    onSecondary = Color(0xFF35383f),
     background = Color(0xFF121212),    // Dark background
     onBackground = Color(0xFFE0E0E0),
     surface = Color(0xFF1e2129),
@@ -30,7 +30,8 @@ val DarkColorScheme = darkColorScheme(
     onError = Color.Black,
     surfaceContainer = Color(0xFF1C1F28),
     surfaceVariant = Color(0xff363940),
-    onSurfaceVariant = Color(0xFFFFFFFF)
+    onSurfaceVariant = Color(0xFFFFFFFF),
+    surfaceTint = Color(0xff1f222b)
 )
 
 val LightColorScheme = lightColorScheme(
@@ -44,7 +45,8 @@ val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF222528),     // Text/icon color on surface
     error = Color(0xFFD32F2F),         // Error color
     onError = Color.White,
-    surfaceContainer = Color(0xFFE6E6E6),
+    surfaceContainer = Color(0xFFf2f2f2),
+    surfaceTint = Color.White,
     surfaceVariant = Color(0xffe8e8e8),
     onSurfaceVariant = Color(0xff212121),
 )
