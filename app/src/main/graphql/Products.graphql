@@ -1,0 +1,14 @@
+query getProducts($first: Int) {
+    products(first: $first) {
+        edges {
+            cursor
+            node {
+                title
+                description
+                featuredImage {
+                    url
+                }
+            }
+        }
+    }
+}

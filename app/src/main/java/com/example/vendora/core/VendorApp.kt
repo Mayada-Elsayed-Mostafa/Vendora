@@ -1,14 +1,7 @@
 package com.example.vendora.core
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -25,6 +18,7 @@ import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.home.HomeScreen
+import com.example.vendora.ui.screens.profile.ProfileScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
 import com.example.vendora.ui.screens.sign.SignUpScreen
 
@@ -40,7 +34,7 @@ fun VendorApp() {
         println(innerPadding)
         NavHost(
             navController = navController,
-            startDestination = SignUp,
+            startDestination = Me,
         ) {
             composable<Home> {
                 HomeScreen(
@@ -54,13 +48,18 @@ fun VendorApp() {
             }
 
             composable<Category> {
-                CategoryScreen()
+                CategoryScreen(
+                    navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToFavorite = {}
+                )
             }
 
             composable<Me> {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Icon(imageVector = Icons.Filled.AccountBox, contentDescription = null)
-                }
+                ProfileScreen(
+                    navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToFavorite = {},
+                    navigateToOrders = {}
+                )
             }
 
             composable<ScreenRoute.CartScreen> {

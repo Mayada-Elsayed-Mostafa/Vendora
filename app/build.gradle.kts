@@ -8,6 +8,13 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id("com.apollographql.apollo") version "4.3.0"
+}
+
+apollo {
+    service("service") {
+        packageName.set("com.example.vendora")
+    }
 }
 
 android {
@@ -80,6 +87,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.espresso.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -95,6 +103,6 @@ dependencies {
     
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
 
-    // material3
-//    implementation(libs.material3)
+    // Apollo
+    implementation("com.apollographql.apollo:apollo-runtime:4.3.0")
 }
