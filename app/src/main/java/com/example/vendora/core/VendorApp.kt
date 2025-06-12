@@ -96,7 +96,6 @@ fun VendorApp() {
                     productId = productInfo.id
                 )
             }
-
         }
     }
 }
