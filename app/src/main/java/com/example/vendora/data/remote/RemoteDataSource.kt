@@ -5,6 +5,7 @@ import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.product.Products
+import com.example.vendora.domain.model.product.SingleProduct
 
 interface RemoteDataSource {
     suspend fun getBrands(token: String): BrandsResponse
@@ -19,4 +20,6 @@ interface RemoteDataSource {
     suspend fun getProducts(token: String): Products
 
     suspend fun getCategories(token: String): CategoryResponse
+
+    suspend fun getProductById(token: String, productId: Long): SingleProduct
 }
