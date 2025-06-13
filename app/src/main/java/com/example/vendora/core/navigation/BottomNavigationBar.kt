@@ -2,6 +2,7 @@ package com.example.vendora.core.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -33,7 +34,8 @@ fun BottomNavBar(navController: NavController) {
     }
 
     NavigationBar(
-        containerColor = (if (isSystemInDarkTheme()) Color.Black else Color.White)
+        containerColor = (if (isSystemInDarkTheme()) Color.Black else Color.White),
+        modifier = Modifier.height(110.dp)
     ) {
         routes.forEach { route ->
             val isSelected = currentDestination?.route == route.toString()

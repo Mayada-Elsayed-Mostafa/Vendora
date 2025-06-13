@@ -33,6 +33,7 @@ import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
+import com.example.vendora.ui.screens.profile.ProfileScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
 import com.example.vendora.ui.screens.sign.SignUpScreen
 
@@ -65,14 +66,18 @@ fun VendorApp() {
                 CategoryScreen(
                     navigateToProductInfo = { productId ->
                         navController.navigate(ProductInfo(productId))
-                    }
+                    },
+                    navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToFavorite = {}
                 )
             }
 
             composable<Me> {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Icon(imageVector = Icons.Filled.AccountBox, contentDescription = null)
-                }
+                ProfileScreen(
+                    navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToFavorite = {},
+                    navigateToOrders = {}
+                )
             }
 
             composable<ScreenRoute.CartScreen>{

@@ -61,7 +61,9 @@ import com.example.vendora.utils.wrapper.Result
 @Composable
 fun CategoryScreen(
     viewModel: CategoryViewModel = hiltViewModel(),
-    navigateToProductInfo: (Long) -> Unit
+    navigateToProductInfo: (Long) -> Unit,
+    navigateToCart: () -> Unit,
+    navigateToFavorite: () -> Unit
 ) {
 
     val state = viewModel.uiState.collectAsStateWithLifecycle()
@@ -77,7 +79,9 @@ fun CategoryScreen(
         topBar = {
             CategoryAppBar(
                 result = emptyList(),
-                onSearchQueryChange = { query -> println(query) }
+                onSearchQueryChange = { query -> println(query) },
+                navigateToCart = navigateToCart,
+                navigateToFavorite = navigateToFavorite
             )
         },
         floatingActionButton = {
@@ -132,7 +136,12 @@ fun OnSuccess(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryAppBar(result: List<String>, onSearchQueryChange: (String) -> Unit) {
+fun CategoryAppBar(
+    result: List<String>,
+    onSearchQueryChange: (String) -> Unit,
+    navigateToCart:() -> Unit,
+    navigateToFavorite: () -> Unit
+) {
     var searchQuery by remember { mutableStateOf("") }
 
     SearchBar(
@@ -151,15 +160,17 @@ fun CategoryAppBar(result: List<String>, onSearchQueryChange: (String) -> Unit) 
             Row {
                 IconButton(onClick = { /* do something */ }) {
                     Icon(
-                        imageVector = Icons.Outlined.Favorite,
-                        contentDescription = "Favorite"
+                        painter = painterResource(R.drawable.favorite),
+                        contentDescription = "Favorite",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
-                IconButton(onClick = { }) {
+                IconButton(onClick = { navigateToCart() }) {
                     Icon(
-                        imageVector = Icons.Filled.ShoppingCart,
-                        contentDescription = "Favorite"
+                        painter = painterResource(R.drawable.cart),
+                        contentDescription = "cart",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
