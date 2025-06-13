@@ -59,7 +59,7 @@ import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
 import com.example.vendora.ui.screens.currency.CurrencyDropDown
 import com.example.vendora.ui.screens.currency.CurrencyViewModel
-import com.example.vendora.ui.screens.currency.changeCurrency
+
 import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.utils.wrapper.Result
 import kotlinx.serialization.Serializable
@@ -297,7 +297,7 @@ fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit,getChange
             verticalAlignment = Alignment.CenterVertically
         )
         {
-            Column {
+            Column (Modifier.weight(1f)){
                 Text(
                     text = "Total Price",
                     style = MaterialTheme.typography.titleLarge,
@@ -309,12 +309,10 @@ fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit,getChange
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp),
+                    .height(60.dp).weight(1f),
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.onBackground

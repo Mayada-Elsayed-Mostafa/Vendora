@@ -98,7 +98,7 @@ class CurrencyViewModel @Inject constructor(
 
 
 fun Double.convertToCurrency(toCurrency: Double ): Double {
-    return this * toCurrency
+    return String.format("%.2f", this * toCurrency).toDouble()
 }
 
 
