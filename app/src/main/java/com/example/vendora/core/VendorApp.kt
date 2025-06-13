@@ -1,5 +1,6 @@
 package com.example.vendora.core
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -87,7 +88,14 @@ fun VendorApp() {
 
             composable<ScreenRoute.VisaScreenRoute> { navBackStackEntry ->
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
-                VisaScreen(token)
+                VisaScreen(token = token) { isSuccess ->
+                    if (isSuccess) {
+                       navController.navigate(ScreenRoute.DiscountScreen)
+
+                    } else {
+                        navController.navigate(Home)
+                    }
+                }
             }
 
                 composable<BrandDetails>{ navBackStackEntry ->

@@ -98,22 +98,10 @@ class CurrencyViewModel @Inject constructor(
 
 
 fun Double.convertToCurrency(toCurrency: Double ): Double {
-    return this * toCurrency
+    return String.format("%.2f", this * toCurrency).toDouble()
 }
 
 
-fun Double.changeCurrency(
-    fromCurrency: String="EGP",
-    toCurrency: String,
-    rates: List<CurrencyInfo>
-): Double {
 
-    if (fromCurrency == toCurrency) return this
-
-    val fromRate = rates.find { it.code == fromCurrency }?.value ?: return this
-    val toRate = rates.find { it.code == toCurrency }?.value ?: return this
-
-    return this * (toRate / fromRate)
-}
 
 

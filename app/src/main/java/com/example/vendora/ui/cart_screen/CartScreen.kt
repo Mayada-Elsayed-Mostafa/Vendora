@@ -59,7 +59,6 @@ import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
 import com.example.vendora.ui.screens.currency.CurrencyDropDown
 import com.example.vendora.ui.screens.currency.CurrencyViewModel
-import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.utils.wrapper.Result
 import kotlinx.serialization.Serializable
