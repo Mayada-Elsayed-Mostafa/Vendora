@@ -50,4 +50,11 @@ interface ShopifyService {
 
     @GET("/admin/api/2025-04/price_rules/1499001651431/discount_codes.json")
     suspend fun getDiscountCodes(@Header("X-Shopify-Access-Token") token: String) : DiscountCodesResponse
+
+    @GET("/admin/api/2025-04/products.json")
+    suspend fun searchProducts(
+        @Header("X-Shopify-Access-Token") token: String,
+        @Query("title") query: String
+    ): Products
+
 }

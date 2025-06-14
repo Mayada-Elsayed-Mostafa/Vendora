@@ -72,6 +72,10 @@ class RemoteDataSourceImpl @Inject constructor(
         return currencyApiService.getCurrency(apiKey,baseCurrency)
     }
 
+    override suspend fun searchProducts(token: String, query: String): Products {
+        return service.searchProducts(token, query)
+    }
+
     companion object{
         const val BASE_URL = "https://mad45-ism-and1.myshopify.com"
     }

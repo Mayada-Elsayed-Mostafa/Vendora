@@ -43,4 +43,7 @@ interface RemoteDataSource {
 
     //currency
     suspend fun getCurrency(apiKey: String,baseCurrency: String) : CurrencyResponse
+
+    //Search
+    suspend fun searchProducts(token: String, query: String): Products
 }

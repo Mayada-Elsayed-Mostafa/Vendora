@@ -57,13 +57,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.R
 import com.example.vendora.domain.model.brands.SmartCollection
+import com.example.vendora.domain.model.product.Product
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.ui_model.GiftCardAd
@@ -79,6 +79,9 @@ fun HomeScreen(
     paddingValues: PaddingValues = PaddingValues()
 ) {
     val brands = viewModel.brands.collectAsStateWithLifecycle()
+
+    val searchResults = viewModel.searchResults.collectAsStateWithLifecycle()
+    val searchQuery = viewModel.searchQuery.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.fetchBrands()
@@ -99,10 +102,10 @@ fun HomeScreen(
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                     HomeHeader(navigateToCart = navigateToCart)
                 }
-
+                //Search Task
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     ProductsSearchBar(
-                        onInputQuery = { query -> println(query) }
+                        onInputQuery = { query -> viewModel.updateSearchQuery(query) }
                     )
                 }
 
@@ -114,18 +117,38 @@ fun HomeScreen(
                     Text("Our Partners", style = MaterialTheme.typography.titleLarge)
                 }
 
-                val list = (brands.value as Result.Success).data.smart_collections
-                items(
-                    items = list,
-                    key = { brand -> brand.id }
-                ) { brand ->
-                    BrandCard(
-                        brand,
-                        Modifier
-                            .padding(4.dp)
-                            .fillMaxWidth()
-                            .clickable { navigateToBrandDetails(brand.id) }
-                    )
+                if (searchQuery.value.isNotEmpty()) {
+                    when (val results = searchResults.value) {
+                        is Result.Loading -> {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Text("Loading search results...")
+                            }
+                        }
+
+                        is Result.Failure -> {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Text("Failed to load search results")
+                            }
+                        }
+
+                        is Result.Success -> {
+                            val products = results.data
+                            items(products, key = { it.id }) { product ->
+                                ProductCard(product = product)
+                            }
+                        }
+                    }
+                } else {
+                    val list = (brands.value as Result.Success).data.smart_collections
+                    items(list, key = { it.id }) { brand ->
+                        BrandCard(
+                            brand,
+                            Modifier
+                                .padding(4.dp)
+                                .fillMaxWidth()
+                                .clickable { navigateToBrandDetails(brand.id) }
+                        )
+                    }
                 }
             }
         }
@@ -346,6 +369,41 @@ fun BrandCard(brand: SmartCollection, modifier: Modifier) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductCard(product: Product) {
+    Card(
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth()
+            .height(200.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Column {
+            AsyncImage(
+                model = product.image.src,
+                contentDescription = product.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = product.title,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${product.variants.firstOrNull()?.price ?: "N/A"} EGP",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
         }
