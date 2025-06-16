@@ -16,8 +16,10 @@ import androidx.navigation.toRoute
 import com.example.vendora.core.navigation.BottomNavBar
 import com.example.vendora.core.navigation.BrandDetails
 import com.example.vendora.core.navigation.Category
+import com.example.vendora.core.navigation.CustomerOrders
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
+import com.example.vendora.core.navigation.OrderDetails
 import com.example.vendora.core.navigation.ProductInfo
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.SignIn
@@ -32,6 +34,8 @@ import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.home.HomeScreen
+import com.example.vendora.ui.screens.order.CustomerOrders
+import com.example.vendora.ui.screens.order.OrderDetailsScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.profile.ProfileScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
@@ -49,7 +53,8 @@ fun VendorApp() {
         println(innerPadding)
         NavHost(
             navController = navController,
-            startDestination = Home,
+//            startDestination = CustomerOrders
+            startDestination = OrderDetails(id = 6655953076455),
         ) {
             composable<Home> {
                 HomeScreen(
@@ -76,7 +81,7 @@ fun VendorApp() {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToFavorite = {},
-                    navigateToOrders = {}
+                    navigateToOrders = { navController.navigate(CustomerOrders) }
                 )
             }
 
@@ -142,6 +147,23 @@ fun VendorApp() {
                 DiscountScreen(){
                     navController.popBackStack()
                 }
+            }
+
+            composable<CustomerOrders> {
+                CustomerOrders(
+                    navigateUp = { navController.navigateUp() },
+                    navigateToOrderDetails = { id ->
+                        navController.navigate(OrderDetails(id = id))
+                    }
+                )
+            }
+
+            composable<OrderDetails> { navBackStackEntry ->
+                val orderDetails: OrderDetails = navBackStackEntry.toRoute()
+                OrderDetailsScreen(
+                    orderId = orderDetails.id,
+                    navigateUp = { navController.navigateUp() }
+                )
             }
         }
     }

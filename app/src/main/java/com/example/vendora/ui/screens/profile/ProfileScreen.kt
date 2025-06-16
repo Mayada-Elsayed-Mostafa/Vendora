@@ -58,13 +58,18 @@ fun ProfileScreen(
         },
     ) { innerPadding ->
         println(innerPadding)
-        OnSuccess(modifier = Modifier.padding(innerPadding))
+        OnSuccess(
+            modifier = Modifier.padding(innerPadding),
+            navigateToOrders = navigateToOrders
+        )
     }
 }
 
 @Composable
-fun OnSuccess(modifier: Modifier = Modifier) {
-    val coroutineScope = rememberCoroutineScope()
+fun OnSuccess(
+    modifier: Modifier = Modifier,
+    navigateToOrders: () -> Unit
+) {
     Column(
         modifier = modifier
     ) {
@@ -77,14 +82,12 @@ fun OnSuccess(modifier: Modifier = Modifier) {
         OptionItem(
             icon = R.drawable.pin,
             title = "Address"
-        ) {
-
-        }
+        ) {}
         //orders item
         OptionItem(
             icon = R.drawable.order,
             title = "Orders"
-        ) { }
+        ) { navigateToOrders() }
         //wishlist item
         OptionItem(
             icon = R.drawable.wishlist,

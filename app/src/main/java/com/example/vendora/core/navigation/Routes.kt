@@ -44,3 +44,9 @@ object SignUp
 
 @Serializable
 data class ProductInfo(val id: Long)
+
+@Serializable
+object CustomerOrders
+
+@Serializable
+data class OrderDetails(val id: Long)

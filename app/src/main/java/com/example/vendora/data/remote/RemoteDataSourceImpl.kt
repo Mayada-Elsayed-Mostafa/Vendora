@@ -12,6 +12,8 @@ import com.example.vendora.domain.model.payment.PaymentKeyResponse
 import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
+import com.example.vendora.domain.model.order.SingleOrderResponse
+import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.model.product.Products
 import com.example.vendora.domain.model.product.SingleProduct
 import javax.inject.Inject
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class RemoteDataSourceImpl @Inject constructor(
     private val service: ShopifyService ,
     private val payMobService: PaymobService,
-    private val currencyApiService: CurrencyApiService
+    private val currencyApiService: CurrencyApiService,
+    private val orderService: OrderService
 ) : RemoteDataSource {
 
     override suspend fun getBrands(token: String): BrandsResponse {
@@ -74,6 +77,14 @@ class RemoteDataSourceImpl @Inject constructor(
 
     override suspend fun searchProducts(token: String, query: String): Products {
         return service.searchProducts(token, query)
+    }
+
+    override suspend fun getOrdersByEmail(token: String, email: String): UserOrdersResponse {
+        return orderService.getOrdersByEmail(token,email)
+    }
+
+    override suspend fun getOrderById(token: String, orderId: Long): SingleOrderResponse {
+        return orderService.getOrderById(token,orderId)
     }
 
     companion object{

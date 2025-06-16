@@ -6,6 +6,8 @@ import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.discount.DiscountCode
+import com.example.vendora.domain.model.order.SingleOrderResponse
+import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
 import com.example.vendora.domain.model.payment.OrderResponse
@@ -30,7 +32,6 @@ interface RemoteDataSource {
 
     suspend fun getProductById(token: String, productId: Long): SingleProduct
 
-
     ///PayMob
     suspend fun getAuthToken(apiKey: String):AuthTokenResponse
 
@@ -46,4 +47,9 @@ interface RemoteDataSource {
 
     //Search
     suspend fun searchProducts(token: String, query: String): Products
+
+    //Orders
+    suspend fun getOrdersByEmail(token: String,email: String): UserOrdersResponse
+
+    suspend fun getOrderById(token: String,orderId: Long): SingleOrderResponse
 }

@@ -1,6 +1,7 @@
 package com.example.vendora.di
 
 import com.example.vendora.data.remote.CurrencyApiService
+import com.example.vendora.data.remote.OrderService
 import com.example.vendora.data.remote.PaymobService
 import com.example.vendora.data.remote.RemoteDataSourceImpl
 import com.example.vendora.data.remote.ShopifyService
@@ -73,6 +74,8 @@ class ServicesProviderModule {
         return retrofit.create(CurrencyApiService::class.java)
     }
 
-
-
+    @Provides
+    fun provideOrderService(@ShopifyRetrofit retrofit: Retrofit): OrderService{
+        return retrofit.create(OrderService::class.java)
+    }
 }
