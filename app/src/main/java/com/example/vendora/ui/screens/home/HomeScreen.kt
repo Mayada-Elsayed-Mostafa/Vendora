@@ -61,6 +61,10 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
 import com.example.vendora.domain.model.brands.SmartCollection
 import com.example.vendora.domain.model.product.Product
@@ -69,6 +73,7 @@ import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.ui_model.GiftCardAd
 import com.example.vendora.ui.ui_model.couponList
 import com.example.vendora.utils.wrapper.Result
+
 
 @Composable
 fun HomeScreen(
@@ -121,13 +126,34 @@ fun HomeScreen(
                     when (val results = searchResults.value) {
                         is Result.Loading -> {
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                Text("Loading search results...")
+                                LottieLoader(
+                                    resId = R.raw.search_loading,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .padding(vertical = 16.dp)
+                                )
                             }
                         }
 
                         is Result.Failure -> {
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                Text("Failed to load search results")
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    LottieLoader(
+                                        resId = R.raw.search_error,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp)
+                                            .padding(vertical = 16.dp)
+                                    )
+                                    Text(
+                                        "Failed to load search results",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
                         }
 
@@ -238,7 +264,6 @@ fun ProductsSearchBar(
         shape = MaterialTheme.shapes.medium,
     ) {}
 }
-
 
 @Composable
 fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
@@ -408,4 +433,19 @@ fun ProductCard(product: Product) {
             }
         }
     }
+}
+
+@Composable
+fun LottieLoader(
+    resId: Int,
+    modifier: Modifier = Modifier
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(resId))
+    val progress by animateLottieCompositionAsState(composition)
+
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        modifier = modifier
+    )
 }

@@ -36,9 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import kotlinx.coroutines.launch
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -46,14 +48,14 @@ import okhttp3.OkHttpClient
 @Composable
 fun ProfileScreen(
     navigateToCart: () -> Unit,
-    navigateToFavorite: () -> Unit,
+    navigateToSettings: () -> Unit,
     navigateToOrders: () -> Unit
 ) {
     Scaffold(
         topBar = {
             ProfileAppBar(
                 navigateToCart = navigateToCart,
-                navigateToFavorite = navigateToFavorite
+                navigateToSettings = navigateToSettings
             )
         },
     ) { innerPadding ->
@@ -93,6 +95,13 @@ fun OnSuccess(
             icon = R.drawable.wishlist,
             title = "Wishlist"
         ) { }
+        //
+        OptionItem(
+            icon = R.drawable.cart,
+            title = "Create Cart"
+        ) {
+            cartViewModel.createCart()
+        }
         // logout item
         OptionItem(
             icon = R.drawable.logout,
@@ -106,7 +115,7 @@ fun OnSuccess(
 @Composable
 fun ProfileAppBar(
     navigateToCart: () -> Unit,
-    navigateToFavorite: () -> Unit
+    navigateToSettings: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -139,7 +148,7 @@ fun ProfileAppBar(
                     )
                 }
 
-                IconButton(onClick = { /* do something */ }) {
+                IconButton(onClick = { navigateToSettings() }) {
                     Icon(
                         painter = painterResource(R.drawable.settings),
                         contentDescription = "Settings",
@@ -235,7 +244,7 @@ fun OptionItem(
 private fun ProfileAppBarPreview() {
     ProfileAppBar(
         navigateToCart = {},
-        navigateToFavorite = {}
+        navigateToSettings = {}
     )
 }
 

@@ -33,6 +33,9 @@ class AddressViewModel @Inject constructor(
     private val _defaultAddress = MutableStateFlow<AddressEntity?>(null)
     val defaultAddress: StateFlow<AddressEntity?> = _defaultAddress
 
+    init {
+        getAllAddresses()
+    }
     fun getAllAddresses() {
         viewModelScope.launch {
             _address.value = getAllAddressesUseCase()

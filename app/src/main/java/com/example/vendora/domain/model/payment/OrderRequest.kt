@@ -5,5 +5,12 @@ data class OrderRequest(
     val amount_cents: Int,
     val delivery_needed: Boolean = false,
     val currency: String = "EGP",
-    val items: List<Any> = listOf()
+    val items: List<OrderList> = listOf()
     )
+
+data class OrderList(
+    val name:String = "",
+    val amount_cents : Int =1,
+    val description : String= "",
+    val quantity : Int= 1,
+)

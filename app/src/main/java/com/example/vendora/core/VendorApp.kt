@@ -33,6 +33,7 @@ import com.example.vendora.ui.screens.order.OrderDetailsScreen
 import com.example.vendora.ui.screens.order.PaymentResultScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.profile.ProfileScreen
+import com.example.vendora.ui.screens.setting.SettingsScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
 import com.example.vendora.ui.screens.sign.SignUpScreen
 
@@ -75,7 +76,8 @@ fun VendorApp() {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToFavorite = {},
-                    navigateToOrders = { navController.navigate(CustomerOrders) }
+                    navigateToOrders = { navController.navigate(CustomerOrders) },
+                    navigateToSettings = {navController.navigate(ScreenRoute.SettingsScreen)},
                 )
             }
 
@@ -91,12 +93,15 @@ fun VendorApp() {
             composable<ScreenRoute.PaymentScreenRoute>{ navBackStackEntry ->
                 val price:Double =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().price
                 val token:String =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().token
-                PaymentScreen( token = token,totalPrice = price, navController = navController)
+                val orderId:Int =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().orderId
+                PaymentScreen( token = token,totalPrice = price ,orderId=orderId, navController = navController)
             }
 
             composable<ScreenRoute.VisaScreenRoute> { navBackStackEntry ->
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
-                VisaScreen(token = token) { isSuccess ->
+                val firstToken = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().firstToken
+                val orderId = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().orderId
+                VisaScreen(token = token, firstToken = firstToken, orderId = orderId) { orderID, firstToken, isSuccess ->
                     if (isSuccess) {
                         navController.navigate(ScreenRoute.DiscountScreen)
                     } else {
@@ -140,6 +145,14 @@ fun VendorApp() {
             composable<ScreenRoute.DiscountScreen>{
                 DiscountScreen{
                     navController.popBackStack()
+                DiscountScreen(){selectedCode ->
+                    println(selectedCode)
+                    if (selectedCode != null) {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("selected_discount_code", selectedCode)
+                    }
+                    navController.navigateUp()
                 }
             }
 
@@ -166,6 +179,10 @@ fun VendorApp() {
                     orderId = paymentResult.id,
                     token = paymentResult.token
                 )
+            }
+
+            composable<ScreenRoute.SettingsScreen>{
+                SettingsScreen(navController)
             }
         }
     }

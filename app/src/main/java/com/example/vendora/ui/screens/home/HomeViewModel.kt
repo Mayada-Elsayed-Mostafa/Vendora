@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,7 +34,7 @@ class HomeViewModel @Inject constructor(
 
     fun fetchBrands() {
         viewModelScope.launch {
-            getBrandsUseCase.invoke()
+            getBrandsUseCase()
                 .flowOn(Dispatchers.IO)
                 .collect {
                     _brands.value = it
@@ -43,18 +44,20 @@ class HomeViewModel @Inject constructor(
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
-        if (query.length >= 2) searchProducts(query)
+        if (query.length >= 2) {
+            searchProducts(query)
+        } else {
+            _searchResults.value = Result.Success(emptyList())
+        }
     }
 
-    fun searchProducts(query: String) {
+    private fun searchProducts(query: String) {
         viewModelScope.launch {
-            _searchResults.emit(Result.Loading)
-            try {
-                val result = searchProductsUseCase(query)
-                _searchResults.emit(Result.Success(result))
-            } catch (e: Exception) {
-                _searchResults.emit(Result.Failure(e))
-            }
+            searchProductsUseCase(query)
+                .flowOn(Dispatchers.IO)
+                .collectLatest { result ->
+                    _searchResults.value = result
+                }
         }
     }
 }
