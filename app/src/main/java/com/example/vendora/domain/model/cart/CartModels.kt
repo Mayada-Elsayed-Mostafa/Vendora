@@ -1,5 +1,7 @@
 package com.example.vendora.domain.model.cart
 
+import kotlinx.serialization.Serializable
+
 data class CartLineInput (
     val merchandiseId: String,
     val quantity: Int
@@ -82,4 +84,16 @@ data class Cart(
     val totalQuantity: Int,
     val lines: CartLines,
     val cost: CartCost
+)
+
+
+@Serializable
+data class CartItem(
+    val id: String,
+    val name: String,
+    val price: Double,
+    val imageUrl: String,
+    val color: String? = null,
+    val size: String? = null,
+    var quantity: Int = 1
 )

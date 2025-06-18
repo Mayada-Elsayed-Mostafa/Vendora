@@ -71,17 +71,6 @@ import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.utils.wrapper.Result
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class CartItem(
-    val id: String,
-    val name: String,
-    val price: Double,
-    val imageUrl: String,
-    val color: String? = null,
-    val size: String? = null,
-    var quantity: Int = 1
-)
-
 
 @Composable
 fun CartScreen(
@@ -154,7 +143,7 @@ fun CartScreen(
                     is Result.Success -> {
                         firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
                         CheckoutButton(
-                            totalPrice = result.data.cost,
+                            totalPrice = uiState.totalAmount,
                             getChangeRate = getChangeRate,
                             currency = currency,
                             navToCheckout = {
@@ -177,6 +166,7 @@ fun CartScreen(
 @Composable
 fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
     val context = LocalContext.current
+    var quantity by remember { mutableStateOf(item.node.quantity) }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -265,8 +255,9 @@ fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange 
                 )
                 {
                     IconButton(onClick = {
-                        if (item.node.quantity >1){
-                            onCountChange(item.node.quantity - 1)
+                        if (quantity >1){
+                            quantity--
+                            onCountChange(quantity)
                         }else {
                             onDelete()
                         }
@@ -281,12 +272,12 @@ fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange 
                     }
 
                     Text(
-                        text = "${item.node.quantity}",
+                        text = "${quantity}",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
                     )
 
                     IconButton(onClick = {
-                        onCountChange(item.node.quantity + 1)
+                        onCountChange(++quantity)
                     },
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -304,7 +295,7 @@ fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange 
 }
 
 @Composable
-fun CheckoutButton(totalPrice :  GetCartQuery.Cost ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
+fun CheckoutButton(totalPrice : String ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
     //val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Column (
@@ -326,7 +317,7 @@ fun CheckoutButton(totalPrice :  GetCartQuery.Cost ,currency: String ,navToCheck
                 )
 
                 Text(
-                    text = "${totalPrice.totalAmount.amount.toString().toDoubleOrNull()?.convertToCurrency(getChangeRate)} $currency" ,
+                    text = "${totalPrice.toDoubleOrNull()?.convertToCurrency(getChangeRate)} $currency" ,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }

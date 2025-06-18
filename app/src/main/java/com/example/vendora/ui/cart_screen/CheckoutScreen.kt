@@ -160,7 +160,8 @@ fun CheckoutScreen(token:String,navController: NavHostController,
                 println("$$$$$"+result.data.lines)
                 val card = result.data.lines.edges
                 val totalPrice = result.data.cost.totalAmount.amount.toString().toDouble()
-                val priceToUse = if (finalPrice > 0.0) finalPrice else totalPrice
+                val priceToUse = finalPrice?.takeIf { it != 100.0 } ?: totalPrice
+                println("Final: $finalPrice | Total: $totalPrice | Used: $priceToUse")
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f),
@@ -182,10 +183,9 @@ fun CheckoutScreen(token:String,navController: NavHostController,
 
                     }
                 }
-
                 PaymentBottom(
                     title = "Continue to Payment",
-                    totalPrice = finalPrice.toInt(),
+                    totalPrice = priceToUse.toInt(),
                     token = token,
                     items = result.data.lines.edges,
                     currency = currency,
@@ -567,7 +567,7 @@ fun PromoCodeItem(
                     textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground),
 
                     decorationBox = { innerTextField ->
-                        if (promoCode.isEmpty()) {
+                        if (promo.isEmpty()) {
                             Text(
                                 text = "Enter promo code",
                                 fontSize = 14.sp
