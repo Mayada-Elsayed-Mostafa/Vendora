@@ -52,29 +52,36 @@ import com.example.vendora.domain.model.payment.OrderResponse
 import com.example.vendora.domain.model.payment.PaymentKeyRequest
 import com.example.vendora.domain.model.payment.PaymentKeyResponse
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.utils.wrapper.Result
+import kotlinx.coroutines.flow.StateFlow
 
 
 @Composable
-fun PaymentScreen(token:String,totalPrice : Double, viewModel: PaymobViewModel= hiltViewModel(), navController: NavHostController) {
+fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewModel: AddressViewModel = hiltViewModel(), viewModel: PaymobViewModel= hiltViewModel(), navController: NavHostController) {
 
-    LaunchedEffect(Unit) {
-        viewModel.createOrder(
-            orderRequest = OrderRequest(
-                auth_token = token,
-                amount_cents = totalPrice.toInt(),
-                items = listOf(),
-                currency = "EGP"
-            )
+    val defaultAddress by addressViewModel.defaultAddress.collectAsState()
+    var billing_data = BillingData()
+    if (defaultAddress != null){
+       println(defaultAddress)
+        billing_data = BillingData(
+            city = defaultAddress!!.city,
+            country = defaultAddress!!.country,
+            phone_number = defaultAddress!!.phone ,
+            state = defaultAddress!!.type ,
+            apartment = defaultAddress!!.address,
         )
     }
 
-
-
-    val orderState by viewModel.orderState.collectAsState()
-    var orderId by remember { mutableStateOf(0) }
-
-
+    LaunchedEffect(Unit) {
+        viewModel.getPaymentKey(paymentKeyRequest = PaymentKeyRequest(
+            auth_token = token,
+            amount_cents = totalPrice.toInt(),
+            order_id = orderId,
+            billing_data =  billing_data,
+            integration_id = 5134520,
+        ))
+    }
 
     val paymentKeyState by viewModel.paymentKeyState.collectAsState()
 
@@ -86,40 +93,20 @@ fun PaymentScreen(token:String,totalPrice : Double, viewModel: PaymobViewModel= 
             .padding(16.dp),
     ) {
         CustomAppBar("Checkout Screen : $totalPrice EGP"){navController.popBackStack()}
-        when (orderState) {
-            is Result.Loading -> {
-                CircularProgressIndicator()
+
+
+        PaymentMethodItem ("Visa", navToPaymentMethod = {
+            if (paymentKeyState is Result.Success){
+                val paymentToken = (paymentKeyState as Result.Success<PaymentKeyResponse>).data.token
+                println("final token : $paymentToken")
+
+                navController.navigate(ScreenRoute.VisaScreenRoute(paymentToken))
             }
-            is Result.Success -> {
-                orderId = (orderState as Result.Success<OrderResponse>).data.id
-                println("orderId: $orderId")
-
-                LaunchedEffect(Unit) {
-                    viewModel.getPaymentKey(paymentKeyRequest = PaymentKeyRequest(
-                        auth_token = token,
-                        amount_cents = totalPrice.toInt(),
-                        order_id = orderId,
-                        billing_data = BillingData(),
-                        integration_id = 5134520,
-                    ))
-                }
-
-                PaymentMethodItem ("Visa", navToPaymentMethod = {
-                    if (paymentKeyState is Result.Success){
-                        val paymentToken = (paymentKeyState as Result.Success<PaymentKeyResponse>).data.token
-                        println("final token : $paymentToken")
-
-                        navController.navigate(ScreenRoute.VisaScreenRoute(paymentToken))
-                    }
-                })
-                Divider()
-                PaymentMethodItem ("PayPal", navToPaymentMethod = {/**/})
-                Divider()
-                PaymentMethodItem ("Vodafone Cash", navToPaymentMethod = {/**/})
-            }
-            is Result.Failure -> Text("Order failed")
-
-        }
+        })
+        Divider()
+        PaymentMethodItem ("PayPal", navToPaymentMethod = {/**/})
+        Divider()
+        PaymentMethodItem ("Vodafone Cash", navToPaymentMethod = {/**/})
 
     }
 }
