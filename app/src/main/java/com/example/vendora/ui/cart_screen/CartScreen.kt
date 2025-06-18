@@ -107,6 +107,7 @@ fun CartScreen(
 
     val currency by currencyViewModel.selectedCurrency.collectAsState()
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,7 +117,7 @@ fun CartScreen(
         CustomAppBar("Cart") { navController.popBackStack() }
         Spacer(modifier = Modifier.height(16.dp))
 
-        var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
+        //var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
 
         when (val result = uiState.loadCartResult) {
             is Result.Failure -> {
@@ -131,69 +132,50 @@ fun CartScreen(
             }
 
             is Result.Success -> {
-                val cart = result.data
-                val edge= cart.lines.edges
-                cartItems = cart.lines.edges.map { edge ->
-                    val line = edge.node
-                    val variant = line.merchandise.onProductVariant
-                    val product = variant?.product
-                    val imageUrl = product?.images?.edges?.firstOrNull()?.node?.url ?: ""
-
-                     CartItem(
-                        id = line.id,
-                        name = product?.title ?: "Unknown",
-                        price = variant?.price?.amount.toString().toDoubleOrNull() ?: 0.0,
-                        imageUrl = imageUrl.toString(),
-                        color = variant?.title?.substringAfter("/")?.trim(),
-                        size = variant?.title?.substringBefore("/")?.trim(),
-                        quantity = line.quantity
-                    )
-                }
-
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(cartItems) { item ->
+                    items(result.data.lines.edges) { item ->
                         CartItem(
                             item = item,
                             currency=currency,
                             onCountChange = { newQuantity ->
-                                cartViewModel.updateCartLineQuantity(lineId = item.id, quantity = newQuantity)
+                                cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
                             },
                             onDelete = {
-                                cartViewModel.removeFromCart(item.id)
-
+                                cartViewModel.removeFromCart(item.node.id)
                             },
                             getChangeRate = getChangeRate
                         )
                     }
                 }
-            }
-        }
-
-        when (getFirstToken) {
-            is Result.Success -> {
-                firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
-                CheckoutButton(
-                    cartItems = cartItems,
-                    getChangeRate = getChangeRate,
-                    currency = currency,
-                    navToCheckout = {
-                        navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
+                when (getFirstToken) {
+                    is Result.Success -> {
+                        firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
+                        CheckoutButton(
+                            totalPrice = result.data.cost,
+                            getChangeRate = getChangeRate,
+                            currency = currency,
+                            navToCheckout = {
+                                navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
+                            }
+                        )
                     }
-                )
-            }
 
-            is Result.Failure -> Text("Auth failed")
-            Result.Loading -> Text("Authenticating...")
+                    is Result.Failure -> Text("Auth failed")
+                    Result.Loading -> Text("Authenticating...")
+                }
+            }
         }
+
+
     }
 }
 
 
 @Composable
-fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
+fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -210,9 +192,9 @@ fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->
         {
             AsyncImage(
                 model = ImageRequest.Builder(context)
-                    .data(item.imageUrl)
+                    .data(item.node.merchandise.onProductVariant?.product?.images?.edges?.get(0)?.node?.url)
                     .build(),
-                contentDescription = item.name,
+                contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
                     .size(90.dp)
                     .clip(RoundedCornerShape(12.dp))
@@ -227,7 +209,7 @@ fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->
             )
             {
                 Text(
-                    text = item.name,
+                    text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2
@@ -238,18 +220,18 @@ fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->
                 Row( verticalAlignment = Alignment.CenterVertically)
                 {
                     Text(
-                        text ="${item.color}",
+                        text ="${item.node.merchandise.onProductVariant?.title}",
                         style = MaterialTheme.typography.titleSmall,
                     )
 
-                    Text(
-                        text = " | Size = ${item.size}",
-                        style = MaterialTheme.typography.titleSmall,
-                    )
+//                    Text(
+//                        text = " | Size = ${item.size}",
+//                        style = MaterialTheme.typography.titleSmall,
+//                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${item.price.convertToCurrency(getChangeRate)} " + currency,
+                    text = "${item.node.merchandise.onProductVariant?.price?.amount.toString().toDoubleOrNull()?.convertToCurrency(getChangeRate)} " + currency,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
 
@@ -283,8 +265,8 @@ fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->
                 )
                 {
                     IconButton(onClick = {
-                        if (item.quantity >1){
-                            onCountChange(item.quantity - 1)
+                        if (item.node.quantity >1){
+                            onCountChange(item.node.quantity - 1)
                         }else {
                             onDelete()
                         }
@@ -299,12 +281,12 @@ fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->
                     }
 
                     Text(
-                        text = "${item.quantity}",
+                        text = "${item.node.quantity}",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
                     )
 
                     IconButton(onClick = {
-                        onCountChange(item.quantity + 1)
+                        onCountChange(item.node.quantity + 1)
                     },
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -322,8 +304,8 @@ fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->
 }
 
 @Composable
-fun CheckoutButton(cartItems : List<CartItem> ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
-    val totalPrice = cartItems.sumOf { it.price * it.quantity }
+fun CheckoutButton(totalPrice :  GetCartQuery.Cost ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
+    //val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Column (
         modifier = Modifier
@@ -344,7 +326,7 @@ fun CheckoutButton(cartItems : List<CartItem> ,currency: String ,navToCheckout :
                 )
 
                 Text(
-                    text = "${totalPrice.convertToCurrency(getChangeRate)} $currency" ,
+                    text = "${totalPrice.totalAmount.amount.toString().toDoubleOrNull()?.convertToCurrency(getChangeRate)} $currency" ,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
