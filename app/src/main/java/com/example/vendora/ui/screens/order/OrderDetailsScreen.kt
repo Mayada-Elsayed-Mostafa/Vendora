@@ -10,10 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +50,7 @@ import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.utils.wrapper.formatTimestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +73,7 @@ fun OrderDetailsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { navigateUp() }
-                    ){
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "navigate back"
@@ -106,7 +109,7 @@ fun OnSuccess(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .padding(paddingValues)
-            .padding(vertical = 8.dp , horizontal = 16.dp)
+            .padding(vertical = 16.dp, horizontal = 16.dp)
             .fillMaxSize()
             .verticalScroll(verticalScroll)
     ) {
@@ -114,11 +117,15 @@ fun OnSuccess(
             items = order.line_items,
             currency = order.currency
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        DiscountSection(order = order)
+        Spacer(modifier = Modifier.height(16.dp))
+        InfoSection(order = order)
     }
 }
 
 @Composable
-fun ProductsList(items: List<LineItem>,currency: String) {
+fun ProductsList(items: List<LineItem>, currency: String) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -137,7 +144,7 @@ fun ProductsList(items: List<LineItem>,currency: String) {
 }
 
 @Composable
-fun ProductItem(item: LineItem,currency: String) {
+fun ProductItem(item: LineItem, currency: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -161,7 +168,8 @@ fun ProductItem(item: LineItem,currency: String) {
         Spacer(modifier = Modifier.width(8.dp))
         Column(
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .fillMaxHeight()
                 .weight(1f)
         ) {
             Text(
@@ -181,7 +189,8 @@ fun ProductItem(item: LineItem,currency: String) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.End,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .fillMaxHeight()
                 .padding(end = 8.dp)
                 .wrapContentWidth()
         ) {
@@ -195,6 +204,72 @@ fun ProductItem(item: LineItem,currency: String) {
                 currency,
                 style = MaterialTheme.typography.bodySmall
             )
+        }
+    }
+}
+
+@Composable
+fun DiscountSection(order: Order) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            DiscountLine("Amount", order.total_line_items_price,order.currency)
+            DiscountLine("Discount", order.total_discounts, "- ${ order.currency }")
+            DiscountLine("Discount Code", order.discount_codes[0].code)
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+            DiscountLine("Total", order.total_price,order.currency)
+        }
+    }
+}
+
+@Composable
+fun DiscountLine(title: String, amount: String, currency: String = "") {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        Text(title, style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            currency,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Text(
+            amount,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Bold
+            )
+        )
+    }
+}
+
+@Composable
+fun InfoSection(order: Order) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            DiscountLine("Payment Method", if (order.financial_status == "paid") "Visa" else "Cash on Delivery" )
+            DiscountLine("Data", order.created_at.formatTimestamp() )
+            DiscountLine("Confirmation number", order.confirmation_number)
         }
     }
 }

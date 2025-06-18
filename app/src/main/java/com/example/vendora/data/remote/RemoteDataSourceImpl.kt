@@ -12,6 +12,7 @@ import com.example.vendora.domain.model.payment.PaymentKeyResponse
 import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
+import com.example.vendora.domain.model.order.OrderWrapper
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.model.product.Products
@@ -61,6 +62,10 @@ class RemoteDataSourceImpl @Inject constructor(
 
     override suspend fun createOrder(request: OrderRequest): OrderResponse {
         return payMobService.createOrder(request)
+    }
+
+    override suspend fun createShopifyOrder(token: String, orderWrapper: OrderWrapper): SingleOrderResponse {
+        return orderService.createOrder(token,orderWrapper)
     }
 
     override suspend fun getPaymentKey(request: PaymentKeyRequest): PaymentKeyResponse {

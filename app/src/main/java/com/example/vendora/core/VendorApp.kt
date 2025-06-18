@@ -1,14 +1,7 @@
 package com.example.vendora.core
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +13,7 @@ import com.example.vendora.core.navigation.CustomerOrders
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
 import com.example.vendora.core.navigation.OrderDetails
+import com.example.vendora.core.navigation.PaymentResult
 import com.example.vendora.core.navigation.ProductInfo
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.SignIn
@@ -36,6 +30,7 @@ import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 import com.example.vendora.ui.screens.order.CustomerOrders
 import com.example.vendora.ui.screens.order.OrderDetailsScreen
+import com.example.vendora.ui.screens.order.PaymentResultScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.profile.ProfileScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
@@ -53,8 +48,7 @@ fun VendorApp() {
         println(innerPadding)
         NavHost(
             navController = navController,
-//            startDestination = CustomerOrders
-            startDestination = OrderDetails(id = 6655953076455),
+            startDestination = Home
         ) {
             composable<Home> {
                 HomeScreen(
@@ -144,7 +138,7 @@ fun VendorApp() {
             }
 
             composable<ScreenRoute.DiscountScreen>{
-                DiscountScreen(){
+                DiscountScreen{
                     navController.popBackStack()
                 }
             }
@@ -163,6 +157,14 @@ fun VendorApp() {
                 OrderDetailsScreen(
                     orderId = orderDetails.id,
                     navigateUp = { navController.navigateUp() }
+                )
+            }
+
+            composable<PaymentResult> { navBackStackEntry ->
+                val paymentResult: PaymentResult = navBackStackEntry.toRoute()
+                PaymentResultScreen(
+                    orderId = paymentResult.id,
+                    token = paymentResult.token
                 )
             }
         }

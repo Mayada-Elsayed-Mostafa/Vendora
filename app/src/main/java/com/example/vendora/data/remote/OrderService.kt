@@ -1,9 +1,12 @@
 package com.example.vendora.data.remote
 
+import com.example.vendora.domain.model.order.OrderWrapper
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.model.order.UserOrdersResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -19,5 +22,11 @@ interface OrderService {
     suspend fun getOrderById(
         @Header("X-Shopify-Access-Token") token: String,
         @Path("orderId") orderId: Long
+    ): SingleOrderResponse
+
+    @POST("/admin/api/2025-04/orders.json")
+    suspend fun createOrder(
+        @Header("X-Shopify-Access-Token") token: String,
+        @Body orderWrapper: OrderWrapper
     ): SingleOrderResponse
 }

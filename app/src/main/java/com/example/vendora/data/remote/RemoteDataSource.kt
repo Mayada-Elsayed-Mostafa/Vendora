@@ -6,6 +6,7 @@ import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.discount.DiscountCode
+import com.example.vendora.domain.model.order.OrderWrapper
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.model.payment.AuthTokenResponse
@@ -52,4 +53,6 @@ interface RemoteDataSource {
     suspend fun getOrdersByEmail(token: String,email: String): UserOrdersResponse
 
     suspend fun getOrderById(token: String,orderId: Long): SingleOrderResponse
+
+    suspend fun createShopifyOrder(token: String,orderWrapper: OrderWrapper): SingleOrderResponse
 }

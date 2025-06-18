@@ -2,6 +2,7 @@ package com.example.vendora.data.repo_implementation
 
 import com.example.vendora.BuildConfig
 import com.example.vendora.data.remote.RemoteDataSource
+import com.example.vendora.domain.model.order.OrderWrapper
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.repo_interfaces.OrdersRepository
@@ -39,6 +40,20 @@ class OrdersRepositoryImpl @Inject constructor(
             emit(Result.Failure(e))
         }
     }
+
+    override fun createOrder(orderWrapper: OrderWrapper): Flow<Result<SingleOrderResponse>> = flow {
+        emit(Result.Loading)
+        try {
+            val response = remoteSource.createShopifyOrder(
+                token = BuildConfig.adminApiAccessToken,
+                orderWrapper = orderWrapper
+            )
+            emit(Result.Success(response))
+        } catch (e: Exception) {
+            emit(Result.Failure(e))
+        }
+    }
+
 
     companion object{
         const val TAG = "OrdersRepositoryImpl"
