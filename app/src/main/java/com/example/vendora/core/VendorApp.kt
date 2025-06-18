@@ -99,7 +99,9 @@ fun VendorApp() {
 
             composable<ScreenRoute.VisaScreenRoute> { navBackStackEntry ->
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
-                VisaScreen(token = token) { isSuccess ->
+                val firstToken = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().firstToken
+                val orderId = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().orderId
+                VisaScreen(token = token, firstToken = firstToken, orderId = orderId) { orderID, firstToken, isSuccess ->
                     if (isSuccess) {
                         navController.navigate(ScreenRoute.DiscountScreen)
                     } else {

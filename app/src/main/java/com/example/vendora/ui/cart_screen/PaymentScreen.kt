@@ -100,7 +100,11 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
                 val paymentToken = (paymentKeyState as Result.Success<PaymentKeyResponse>).data.token
                 println("final token : $paymentToken")
 
-                navController.navigate(ScreenRoute.VisaScreenRoute(paymentToken))
+                navController.navigate(ScreenRoute.VisaScreenRoute(
+                    token = paymentToken,
+                    orderId = orderId,
+                    firstToken = token
+                ))
             }
         })
         Divider()
