@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,11 +53,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.example.vendora.CartCreateMutation
+import com.example.vendora.GetCartQuery
+import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.currency.CurrencyInfo
 import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.payment.AuthTokenResponse
+import com.example.vendora.type.Cart
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.ui.screens.brandDetails.OnError
+import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.screens.currency.CurrencyDropDown
 import com.example.vendora.ui.screens.currency.CurrencyViewModel
 import com.example.vendora.ui.screens.currency.convertToCurrency
@@ -65,7 +73,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CartItem(
-    val id: Int,
+    val id: String,
     val name: String,
     val price: Double,
     val imageUrl: String,
@@ -76,83 +84,116 @@ data class CartItem(
 
 
 @Composable
-fun CartScreen( paddingValues: PaddingValues = PaddingValues(), navController: NavHostController,viewModel: PaymobViewModel = hiltViewModel(),currencyViewModel: CurrencyViewModel= hiltViewModel()) {
+fun CartScreen(
+    paddingValues: PaddingValues = PaddingValues(),
+    navController: NavHostController,
+    viewModel: PaymobViewModel = hiltViewModel(),
+    currencyViewModel: CurrencyViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel()
+) {
+    val uiState by cartViewModel.uiState.collectAsState()
+    val getFirstToken by viewModel.getTokenState.collectAsState()
+
+    val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
+
+    var firstToken by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         viewModel.getTokenForAuthentication()
         currencyViewModel.getCurrency()
         currencyViewModel.getRates()
-    }
-    val getFirstToken by viewModel.getTokenState.collectAsState()
-    var firstToken by remember { mutableStateOf("") }
-
-    var cartItems by  remember {
-        mutableStateOf(listOf(
-            CartItem(1, "Essence Mascara Lash Princess", 250.00,"https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp", "Color", "M"),
-            CartItem(2, "Eyeshadow Palette with Mirror", 120.00,"https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp", "Color", "M"),
-            CartItem(3, "Powder Canister", 150.00,"https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp", "Color", "M"),
-            CartItem(4, "Red Lipstick", 100.00,"https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp", "Color", "M"),
-            CartItem(5, "Red Lipstick", 100.00,"https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp", "Color", "M"),
-            CartItem(6, "Red Lipstick", 100.00,"https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp", "Color", "M"),
-        ))
+        cartViewModel.loadCart(uiState.cartId?:"")
     }
 
-    val selectedCurrency by currencyViewModel.selectedCurrency.collectAsState()
-    val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
+    val currency by currencyViewModel.selectedCurrency.collectAsState()
 
-
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
             .padding(vertical = 8.dp, horizontal = 24.dp)
-    ){
-        CustomAppBar("Cart") {navController.popBackStack() }
-        CurrencyDropDown()
+    ) {
+        CustomAppBar("Cart") { navController.popBackStack() }
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(cartItems){ item ->
-                CartItem(
-                    item = item,
-                    onCountChange = {newQuantity ->
-                        cartItems = cartItems.map {
-                            if (it.id == item.id) it.copy(quantity = newQuantity)
-                            else it
-                        }
-                    },
-                    onDelete = {
-                        cartItems = cartItems.filter { it.id != item.id }
-                    },
-                    getChangeRate = getChangeRate
 
-                )
+        var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
+
+        when (val result = uiState.loadCartResult) {
+            is Result.Failure -> {
+                println("error $result")
+                OnError { }
+            }
+
+            Result.Loading -> {
+                if (uiState.isLoading ){
+                    OnLoading()
+                }
+            }
+
+            is Result.Success -> {
+                val cart = result.data
+                val edge= cart.lines.edges
+                cartItems = cart.lines.edges.map { edge ->
+                    val line = edge.node
+                    val variant = line.merchandise.onProductVariant
+                    val product = variant?.product
+                    val imageUrl = product?.images?.edges?.firstOrNull()?.node?.url ?: ""
+
+                     CartItem(
+                        id = line.id,
+                        name = product?.title ?: "Unknown",
+                        price = variant?.price?.amount.toString().toDoubleOrNull() ?: 0.0,
+                        imageUrl = imageUrl.toString(),
+                        color = variant?.title?.substringAfter("/")?.trim(),
+                        size = variant?.title?.substringBefore("/")?.trim(),
+                        quantity = line.quantity
+                    )
+                }
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(cartItems) { item ->
+                        CartItem(
+                            item = item,
+                            currency=currency,
+                            onCountChange = { newQuantity ->
+                                cartViewModel.updateCartLineQuantity(lineId = item.id, quantity = newQuantity)
+                            },
+                            onDelete = {
+                                cartViewModel.removeFromCart(item.id)
+
+                            },
+                            getChangeRate = getChangeRate
+                        )
+                    }
+                }
             }
         }
 
-        //////
-
-        when (getFirstToken){
+        when (getFirstToken) {
             is Result.Success -> {
                 firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
-                println("token :$firstToken" )
-                CheckoutButton(cartItems , getChangeRate = getChangeRate, navToCheckout = {navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))})
+                CheckoutButton(
+                    cartItems = cartItems,
+                    getChangeRate = getChangeRate,
+                    currency = currency,
+                    navToCheckout = {
+                        navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
+                    }
+                )
             }
+
             is Result.Failure -> Text("Auth failed")
             Result.Loading -> Text("Authenticating...")
-
         }
-
-
-        
     }
 }
 
+
 @Composable
-fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
+fun CartItem (item: CartItem , currency:String = "EGP" , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -208,7 +249,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${item.price.convertToCurrency(getChangeRate)}",
+                    text = "${item.price.convertToCurrency(getChangeRate)} " + currency,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
 
@@ -224,7 +265,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        painterResource(R.drawable.trash),
                         contentDescription = "Delete",
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
@@ -251,7 +292,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
                         modifier = Modifier.size(32.dp)
                         ) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
+                            painter = painterResource(R.drawable.minus),
                             contentDescription = "Decrease",
                             modifier = Modifier.size(16.dp)
                         )
@@ -268,7 +309,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Add,
+                            painter = painterResource(R.drawable.plus1),
                             contentDescription = "Increase",
                             modifier = Modifier.size(16.dp)
                         )
@@ -281,7 +322,7 @@ fun CartItem (item: CartItem , onCountChange : (Int)->Unit , onDelete : ()->Unit
 }
 
 @Composable
-fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit,getChangeRate: Double) {
+fun CheckoutButton(cartItems : List<CartItem> ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
     val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Column (
@@ -303,7 +344,7 @@ fun CheckoutButton(cartItems : List<CartItem> ,navToCheckout :()->Unit,getChange
                 )
 
                 Text(
-                    text = "${totalPrice.convertToCurrency(getChangeRate)}",
+                    text = "${totalPrice.convertToCurrency(getChangeRate)} $currency" ,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }

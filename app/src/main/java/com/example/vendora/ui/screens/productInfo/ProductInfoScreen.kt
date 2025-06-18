@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +48,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.domain.model.product.Image
 import com.example.vendora.domain.model.product.Product
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
@@ -294,7 +296,9 @@ fun ProductInfoBodySection(viewModel: ProductInfoViewModel, product: Product) {
 }
 
 @Composable
-fun ProductInfoFooterSection(product: Product) {
+fun ProductInfoFooterSection(product: Product, cartViewModel: CartViewModel= hiltViewModel()) {
+    val uiState by cartViewModel.uiState.collectAsState()
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -310,16 +314,30 @@ fun ProductInfoFooterSection(product: Product) {
             )
         }
         Button(
-            onClick = {/* Handle adding to card */ }, modifier = Modifier
+            enabled = !uiState.isAddingToCart,
+            onClick = {
+            /* Handle adding to card */
+                println("Clicked ${product.variants[0].admin_graphql_api_id}")
+                println("Clicked ${product.variants}")
+                cartViewModel.addToCart(product.variants[0].admin_graphql_api_id)
+            }
+
+            , modifier = Modifier
                 .padding(start = 16.dp)
                 .weight(1f)
         ) {
-            Icon(
-                imageVector = Icons.Filled.ShoppingCart,
-                contentDescription = "Add to cart",
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text("Add to cart", fontSize = 16.sp)
+            if (uiState.isAddingToCart) {
+                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+            }else{
+                Icon(
+                    imageVector = Icons.Filled.ShoppingCart,
+                    contentDescription = "Add to cart",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text("Add to cart", fontSize = 16.sp)
+            }
+
+
         }
     }
 }

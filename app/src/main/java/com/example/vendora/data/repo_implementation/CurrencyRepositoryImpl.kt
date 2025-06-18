@@ -15,7 +15,7 @@ class CurrencyRepositoryImpl @Inject constructor(private val apiService: Currenc
 
     override fun getCurrency(baseCurrency: String): Flow<Result<CurrencyResponse>> = flow {
         emit(Result.Loading)
-        val apiKey = "cur_live_mcQbFfeHmOBwgazJYDgaNrW1X3VkvJ6DXPsuu43X"
+        val apiKey = "cur_live_4cQIDYbg1FLING5emKqlgdVkzL4A0LvQs69eKwbC"
         try {
             val response = apiService.getCurrency(apiKey,baseCurrency)
             emit(Result.Success(response))
@@ -27,7 +27,7 @@ class CurrencyRepositoryImpl @Inject constructor(private val apiService: Currenc
 
     override fun getRates(): Flow<Result<List<CurrencyInfo>>> = flow {
         emit(Result.Loading)
-        val apiKey = "cur_live_mcQbFfeHmOBwgazJYDgaNrW1X3VkvJ6DXPsuu43X"
+        val apiKey = "cur_live_4cQIDYbg1FLING5emKqlgdVkzL4A0LvQs69eKwbC"
         try {
             val response = apiService.getCurrency(apiKey)
             emit(Result.Success(response.data.values.toList()))

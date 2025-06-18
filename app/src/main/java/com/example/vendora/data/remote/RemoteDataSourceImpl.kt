@@ -1,5 +1,12 @@
 package com.example.vendora.data.remote
 
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Optional
+import com.example.vendora.CartCreateMutation
+import com.example.vendora.CartLinesAddMutation
+import com.example.vendora.CartLinesRemoveMutation
+import com.example.vendora.CartLinesUpdateMutation
+import com.example.vendora.GetCartQuery
 import com.example.vendora.domain.model.brands.BrandsResponse
 import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.discount.DiscountCode
@@ -14,12 +21,16 @@ import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.product.Products
 import com.example.vendora.domain.model.product.SingleProduct
+import com.example.vendora.type.CartInput
+import com.example.vendora.type.CartLineInput
+import com.example.vendora.type.CartLineUpdateInput
 import javax.inject.Inject
 
 class RemoteDataSourceImpl @Inject constructor(
-    private val service: ShopifyService ,
+    private val service: ShopifyService,
     private val payMobService: PaymobService,
-    private val currencyApiService: CurrencyApiService
+    private val currencyApiService: CurrencyApiService,
+    private val apolloClient: ApolloClient,
 ) : RemoteDataSource {
 
     override suspend fun getBrands(token: String): BrandsResponse {
@@ -70,6 +81,80 @@ class RemoteDataSourceImpl @Inject constructor(
 
     override suspend fun getCurrency(apiKey: String, baseCurrency: String): CurrencyResponse {
         return currencyApiService.getCurrency(apiKey,baseCurrency)
+    }
+
+    override suspend fun createCart(): CartCreateMutation.Data {
+        val response = apolloClient.mutation(
+            CartCreateMutation(
+                input = CartInput(
+                    lines = Optional.absent(),
+                    attributes = Optional.absent()
+                )
+            )
+        ).execute()
+
+        return response.data ?: throw Exception("No data returned from create cart")
+    }
+
+    override suspend fun addToCart(
+        cartId: String,
+        lines: List<CartLineInput>
+    ): CartLinesAddMutation.Data {
+
+        val response = apolloClient.mutation(
+            CartLinesAddMutation(
+                cartId = cartId,
+                lines = lines
+            )
+        ).execute()
+
+        return response.data ?: throw Exception("No data returned from add to cart")
+    }
+
+
+    override suspend fun updateCartLines(
+        cartId: String,
+        lines: List<CartLineUpdateInput>
+    ): CartLinesUpdateMutation.Data {
+        val response = apolloClient.mutation(
+            CartLinesUpdateMutation(
+                cartId = cartId,
+                lines = lines
+            )
+        ).execute()
+
+
+        return response.data ?: throw Exception("No data returned from update cart")
+    }
+
+    override suspend fun removeFromCart(
+        cartId: String,
+        lineIds: List<String>
+    ): CartLinesRemoveMutation.Data {
+        val response = apolloClient.mutation(
+            CartLinesRemoveMutation(
+                cartId = cartId,
+                lineIds = lineIds
+            )
+        ).execute()
+
+        if (response.hasErrors()) {
+            throw Exception(response.errors?.first()?.message ?: "Failed to remove from cart")
+        }
+
+        return response.data ?: throw Exception("No data returned from remove from cart")
+    }
+
+    override suspend fun getCart(cartId: String): GetCartQuery.Data {
+        val response = apolloClient.query(
+            GetCartQuery(id = cartId)
+        ).execute()
+
+        if (response.hasErrors()) {
+            throw Exception(response.errors?.first()?.message ?: "Failed to get cart")
+        }
+
+        return response.data ?: throw Exception("No data returned from get cart")
     }
 
     companion object{

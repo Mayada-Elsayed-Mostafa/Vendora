@@ -1,6 +1,5 @@
 package com.example.vendora.core.navigation
 
-import com.example.vendora.ui.cart_screen.CartItem
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,7 +16,7 @@ sealed class ScreenRoute(
 
 
     @Serializable
-    data class PaymentScreenRoute(val price : Double = 10.0,val token:String) : ScreenRoute("Payment")
+    data class PaymentScreenRoute(val price : Double = 10.0,val token:String,val orderId: Int) : ScreenRoute("Payment")
 
     @Serializable
     data class VisaScreenRoute(val token:String) : ScreenRoute("Visa")
@@ -30,4 +29,7 @@ sealed class ScreenRoute(
 
     @Serializable
     object DiscountScreen : ScreenRoute("DiscountScreen")
+
+    @Serializable
+    object SettingsScreen : ScreenRoute("SettingsScreen")
 }

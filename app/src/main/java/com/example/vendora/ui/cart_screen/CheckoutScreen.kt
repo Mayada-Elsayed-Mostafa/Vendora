@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -58,34 +59,54 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.example.vendora.GetCartQuery
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.address.AddressEntity
+import com.example.vendora.domain.model.payment.OrderList
+import com.example.vendora.domain.model.payment.OrderRequest
+import com.example.vendora.domain.model.payment.OrderResponse
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
 import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
+import com.example.vendora.ui.screens.brandDetails.OnError
+import com.example.vendora.ui.screens.brandDetails.OnLoading
+import com.example.vendora.ui.screens.currency.CurrencyViewModel
+import com.example.vendora.ui.screens.currency.convertToCurrency
+import com.example.vendora.ui.screens.discount.viewModel.DiscountViewModel
 import com.example.vendora.utils.wrapper.Result
 
 
 @Composable
-fun CheckoutScreen(token:String,navController: NavHostController,viewModel: PaymobViewModel= hiltViewModel(),addressViewModel: AddressViewModel = hiltViewModel()) {
-    var cartItems by  remember {
-        mutableStateOf(listOf(
-            CartItem(1, "Essence Mascara Lash Princess", 250.00,"https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp", "Color", "M"),
-            CartItem(2, "Eyeshadow Palette with Mirror", 120.00,"https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp", "Color", "M"),
-            CartItem(3, "Powder Canister", 150.00,"https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp", "Color", "M"),
-            CartItem(4, "Red Lipstick", 100.00,"https://cdn.dummyjson.com/product-images/beauty/red-lipstick/thumbnail.webp", "Color", "M"),
-        ))
-    }
+fun CheckoutScreen(token:String,navController: NavHostController,
+                   paymobviewModel: PaymobViewModel= hiltViewModel(),
+                   discountViewModel: DiscountViewModel = hiltViewModel(),
+                   addressViewModel: AddressViewModel = hiltViewModel(),
+                   cartViewModel: CartViewModel= hiltViewModel(),
+                   currencyViewModel: CurrencyViewModel = hiltViewModel(),
+) {
+
+
+    val uiState by cartViewModel.uiState.collectAsState()
+    val cartItem by cartViewModel.cartItems.collectAsState()
 
     LaunchedEffect(Unit) {
         addressViewModel.getAllAddresses()
+        cartViewModel.loadCart(uiState.cartId ?:"card Id not Found")
     }
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
 
+    val selectedDiscountCode = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<String>("selected_discount_code")
 
+    println("selected_discount_code :$selectedDiscountCode")
+    val finalPrice by discountViewModel.finalPrice.collectAsState()
 
-    var promoCode by remember { mutableStateOf("") }
-    val totalPrice = cartItems.sumOf { it.price }
+    val currency by currencyViewModel.selectedCurrency.collectAsState()
+    val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -110,7 +131,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
             }
         }else {
             Text(text = "No default address found.")
-            PaymentBottom("Add New Address"){
+            AddressButton("Add New Address"){
                 navController.navigate(ScreenRoute.AddressScreen)
             }
         }
@@ -124,31 +145,65 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 16.dp)
         )
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(cartItems){ item ->
-                CheckoutItem(item)
+        when (val result = cartItem) {
+            is Result.Failure -> {
+                println("error $result")
+                OnError { }
             }
 
-            item{
-                PromoCodeItem(
-                    promoCode,
-                    onPromoCodeChange = { promoCode = it },
-                    totalPrice, navToDiscount = {navController.navigate(ScreenRoute.DiscountScreen)})
+            Result.Loading -> {
+                if (uiState.isLoading ){
+                    OnLoading()
+                }
+            }
+            is Result.Success -> {
+                println("$$$$$"+result.data.lines)
+                val card = result.data.lines.edges
+                val totalPrice = result.data.cost.totalAmount.amount.toString().toDouble()
+                val priceToUse = if (finalPrice > 0.0) finalPrice else totalPrice
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(card){ item ->
+                        CheckoutItem(item)
+                    }
+
+                    item{
+                        PromoCodeItem(
+                                selectedDiscountCode?: "Select Discount Code",
+                                totalPrice =  totalPrice.convertToCurrency(getChangeRate),
+                                currency = currency,
+                                navToDiscount = {
+                                    navController.navigate(ScreenRoute.DiscountScreen)
+                                }
+                            )
+
+                    }
+                }
+
+                PaymentBottom(
+                    title = "Continue to Payment",
+                    totalPrice = finalPrice.toInt(),
+                    token = token,
+                    items = result.data.lines.edges,
+                    currency = currency,
+
+                ){orderId  ->
+                    /*nav to Payment Screen*/
+                    println("Nav To")
+                    println("$orderId")
+                    navController.navigate(ScreenRoute.PaymentScreenRoute(priceToUse,token,orderId))
+                }
+
             }
         }
 
-        //////
 
-        PaymentBottom("Continue to Payment"){
-            /*nav to Payment Screen*/
-            println("Nav To")
-            navController.navigate(ScreenRoute.PaymentScreenRoute(totalPrice,token))
 
-        }
+
+
 
 
     }
@@ -156,7 +211,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,viewModel: Paym
 
 
 @Composable
-fun CheckoutItem (item: CartItem  ) {
+fun CheckoutItem (item: GetCartQuery.Edge ) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -173,13 +228,14 @@ fun CheckoutItem (item: CartItem  ) {
         {
             AsyncImage(
                 model = ImageRequest.Builder(context)
-                    .data(item.imageUrl)
+                    .data(item.node.merchandise.onProductVariant?.product?.images?.edges?.get(0)?.node?.url)
                     .build(),
-                contentDescription = item.name,
+                contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
                     .size(90.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+
             )
 
 
@@ -190,7 +246,7 @@ fun CheckoutItem (item: CartItem  ) {
             )
             {
                 Text(
-                    text = item.name,
+                    text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2
@@ -201,18 +257,18 @@ fun CheckoutItem (item: CartItem  ) {
                 Row( verticalAlignment = Alignment.CenterVertically)
                 {
                     Text(
-                        text ="${item.color}",
+                        text ="${item.node.merchandise.onProductVariant?.title}",
                         style = MaterialTheme.typography.titleSmall,
                     )
 
-                    Text(
+                   /* Text(
                         text = " | Size = ${item.size}",
                         style = MaterialTheme.typography.titleSmall,
-                    )
+                    )*/
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${item.price}",
+                    text = "${item.node.merchandise.onProductVariant?.price?.amount}",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
 
@@ -226,7 +282,7 @@ fun CheckoutItem (item: CartItem  ) {
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Text(
-                    text = "${item.quantity}",
+                    text = "${item.node.quantity}",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
                 )
             }
@@ -350,54 +406,126 @@ fun CustomAppBar( title: String, back:()-> Unit) {
 
 
 @Composable
-fun PaymentBottom(title:String,navTo:()->Unit) {
+fun PaymentBottom(title:String,
+                  items: List<GetCartQuery.Edge>,
+                  totalPrice: Int,
+                  token:String,
+                  currency: String="EGP",
+                  paymobviewModel: PaymobViewModel= hiltViewModel(),
+                  navTo:(orderId: Int)->Unit
+) {
+
+    val orderList : List<OrderList> = items.map { item ->
+        println("name : ${item.node.merchandise.onProductVariant?.title}")
+        println("token : $token")
+        OrderList(
+            name = item.node.merchandise.onProductVariant?.product?.title ?:"",
+            description = item.node.merchandise.onProductVariant?.product?.images?.edges?.get(0)?.node?.url.toString() ,
+            amount_cents = item.node.merchandise.onProductVariant?.price?.amount
+                ?.toString()?.toDouble()?.toInt() ?: 0,
+            quantity = item.node.quantity
+        )
+    }
+    LaunchedEffect(Unit) {
+        paymobviewModel.createOrder(
+                orderRequest = OrderRequest(
+                    auth_token = token,
+                    amount_cents = totalPrice,
+                    items = orderList ,
+                    currency = currency
+                )
+        )
+    }
+    val orderState by paymobviewModel.orderState.collectAsState()
+    var orderId by remember { mutableStateOf(0) }
     Row (
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)) {
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onBackground
-            ),
-            onClick = {
-            /*nav to payment*/
-            navTo()
+
+        when (orderState){
+            is Result.Failure -> {
+                println("Error :"+orderState)
+                Text("Failed:")
             }
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Checkout",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(20.dp)
-            )
+            Result.Loading -> { CircularProgressIndicator() }
+            is Result.Success -> {
+                orderId = (orderState as Result.Success<OrderResponse>).data.id
+                println("orderId: $orderId")
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onBackground
+                    ),
+                    onClick = {
+                        /*nav to payment*/
+                        navTo(orderId)
+                    }
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "Checkout",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
+
+
 }
+}
+
+@Composable
+fun AddressButton(title:String,navToAddress: () -> Unit) {
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.onBackground
+        ),
+        onClick = {
+
+            navToAddress()
+        }
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600),
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Icon(
+            imageVector = Icons.Default.ArrowForward,
+            contentDescription = "Checkout",
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(20.dp)
+        )
+    }
 }
 
 @Composable
 fun PromoCodeItem(
     promoCode: String,
-    onPromoCodeChange: (String) -> Unit,
+    discountViewModel: DiscountViewModel= hiltViewModel(),
     totalPrice: Double,
+    currency: String,
     navToDiscount:() -> Unit
 ) {
     var discountApplied by remember { mutableStateOf(false) }
-    var finalPrice by remember { mutableStateOf(totalPrice) }
+    val finalPrice by discountViewModel.finalPrice.collectAsState()
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    val validPromoCode = "mka10"
-    val discountPercentage = 10
-
+    var promo by remember { mutableStateOf(promoCode) }
     Column {
         Text(
             text = "Promo Code",
@@ -412,7 +540,9 @@ fun PromoCodeItem(
             shape = RoundedCornerShape(12.dp)
         ) {
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onBackground) ,
                 onClick = {navToDiscount()}
             ){
@@ -426,22 +556,20 @@ fun PromoCodeItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 BasicTextField(
-                    value = promoCode,
+                    value = promo,
                     onValueChange = {
-                        onPromoCodeChange(it)
+                        promo = it
                         discountApplied = false
                         errorMessage = null
-                        finalPrice = totalPrice
                     },
                     singleLine = true,
 
-                    textStyle = TextStyle(fontSize = 16.sp),
+                    textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground),
 
                     decorationBox = { innerTextField ->
                         if (promoCode.isEmpty()) {
                             Text(
                                 text = "Enter promo code",
-
                                 fontSize = 14.sp
                             )
                         }
@@ -453,14 +581,13 @@ fun PromoCodeItem(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Button(onClick = {
-                    if (promoCode.equals(validPromoCode, ignoreCase = true)) {
-                        finalPrice = totalPrice * (1 - discountPercentage / 100.0)
+                    if (discountViewModel.isDiscountCodeValid(promo)){
+                        discountViewModel.calculateFinalPriceWithCode(promo,totalPrice)
                         discountApplied = true
                         errorMessage = null
                     } else {
                         errorMessage = "Invalid promo code"
                         discountApplied = false
-                        finalPrice = totalPrice
                     }
                 },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onBackground) ,
@@ -479,19 +606,26 @@ fun PromoCodeItem(
                 if (discountApplied) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Discount applied : ${finalPrice} EGP",
+                        text = "Total : ${totalPrice} $currency",
                         style = MaterialTheme.typography.titleMedium,
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Discount applied : ${finalPrice} $currency",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+
                 } else {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Total: $totalPrice} EGP",
+                        text = "Total: $totalPrice $currency",
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
         }
+
 
 
     }
