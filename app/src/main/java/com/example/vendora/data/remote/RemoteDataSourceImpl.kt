@@ -1,7 +1,10 @@
 package com.example.vendora.data.remote
 
 import com.example.vendora.domain.model.brands.BrandsResponse
+import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.currency.CurrencyResponse
+import com.example.vendora.domain.model.customer.CreatedCustomerResponse
+import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.discount.DiscountCode
 import com.example.vendora.domain.model.payment.AuthRequest
 import com.example.vendora.domain.model.payment.AuthTokenResponse
@@ -9,15 +12,12 @@ import com.example.vendora.domain.model.payment.OrderRequest
 import com.example.vendora.domain.model.payment.OrderResponse
 import com.example.vendora.domain.model.payment.PaymentKeyRequest
 import com.example.vendora.domain.model.payment.PaymentKeyResponse
-import com.example.vendora.domain.model.category.CategoryResponse
-import com.example.vendora.domain.model.customer.CreatedCustomerResponse
-import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.product.Products
 import com.example.vendora.domain.model.product.SingleProduct
 import javax.inject.Inject
 
 class RemoteDataSourceImpl @Inject constructor(
-    private val service: ShopifyService ,
+    private val service: ShopifyService,
     private val payMobService: PaymobService,
     private val currencyApiService: CurrencyApiService
 ) : RemoteDataSource {
@@ -69,14 +69,14 @@ class RemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getCurrency(apiKey: String, baseCurrency: String): CurrencyResponse {
-        return currencyApiService.getCurrency(apiKey,baseCurrency)
+        return currencyApiService.getCurrency(apiKey, baseCurrency)
     }
 
     override suspend fun searchProducts(token: String, query: String): Products {
         return service.searchProducts(token, query)
     }
 
-    companion object{
+    companion object {
         const val BASE_URL = "https://mad45-ism-and1.myshopify.com"
     }
 }

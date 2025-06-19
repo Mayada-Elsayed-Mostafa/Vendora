@@ -2,9 +2,9 @@ package com.example.vendora.data.remote
 
 import com.example.vendora.domain.model.brands.BrandsResponse
 import com.example.vendora.domain.model.category.CategoryResponse
+import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
-import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.discount.DiscountCode
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
@@ -32,17 +32,17 @@ interface RemoteDataSource {
 
 
     ///PayMob
-    suspend fun getAuthToken(apiKey: String):AuthTokenResponse
+    suspend fun getAuthToken(apiKey: String): AuthTokenResponse
 
-    suspend fun  createOrder(request: OrderRequest) : OrderResponse
+    suspend fun createOrder(request: OrderRequest): OrderResponse
 
-    suspend fun getPaymentKey(request: PaymentKeyRequest) : PaymentKeyResponse
+    suspend fun getPaymentKey(request: PaymentKeyRequest): PaymentKeyResponse
 
     //Discount code
-    suspend fun getDiscountCodes(token: String):List<DiscountCode>
+    suspend fun getDiscountCodes(token: String): List<DiscountCode>
 
     //currency
-    suspend fun getCurrency(apiKey: String,baseCurrency: String) : CurrencyResponse
+    suspend fun getCurrency(apiKey: String, baseCurrency: String): CurrencyResponse
 
     //Search
     suspend fun searchProducts(token: String, query: String): Products
