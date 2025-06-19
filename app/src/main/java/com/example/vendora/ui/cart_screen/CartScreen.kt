@@ -29,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -109,8 +110,6 @@ fun CartScreen(
         CustomAppBar("Cart") { navController.popBackStack() }
         Spacer(modifier = Modifier.height(16.dp))
 
-        //var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
-
         when (val result = uiState.loadCartResult) {
             is Result.Failure -> {
                 println("error $result")
@@ -124,39 +123,44 @@ fun CartScreen(
             }
 
             is Result.Success -> {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(result.data.lines.edges) { item ->
-                        CartItem(
-                            item = item,
-                            currency=currency,
-                            onCountChange = { newQuantity ->
-                                cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
-                            },
-                            onDelete = {
-                                itemIdToDelete.value = item.node.id
-                            },
-                            getChangeRate = getChangeRate
-                        )
+                if (result.data.lines.edges.isEmpty()) {
+                    CustomEmpty()
+                } else
+                {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(result.data.lines.edges) { item ->
+                            CartItem(
+                                item = item,
+                                currency=currency,
+                                onCountChange = { newQuantity ->
+                                    cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
+                                },
+                                onDelete = {
+                                    itemIdToDelete.value = item.node.id
+                                },
+                                getChangeRate = getChangeRate
+                            )
+                        }
                     }
-                }
-                when (getFirstToken) {
-                    is Result.Success -> {
-                        firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
-                        CheckoutButton(
-                            totalPrice = uiState.totalAmount,
-                            getChangeRate = getChangeRate,
-                            currency = currency,
-                            navToCheckout = {
-                                navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
-                            }
-                        )
-                    }
+                    when (getFirstToken) {
+                        is Result.Success -> {
+                            firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
+                            CheckoutButton(
+                                totalPrice = uiState.totalAmount,
+                                getChangeRate = getChangeRate,
+                                currency = currency,
+                                navToCheckout = {
+                                    navController.navigate(ScreenRoute.CheckoutScreenRoute(firstToken))
+                                }
+                            )
+                        }
 
-                    is Result.Failure -> Text("Auth failed")
-                    Result.Loading -> Text("Authenticating...")
+                        is Result.Failure -> Text("Auth failed")
+                        Result.Loading -> CircularProgressIndicator()
+                    }
                 }
             }
         }
@@ -361,6 +365,28 @@ fun CheckoutButton(totalPrice : String ,currency: String ,navToCheckout :()->Uni
                     modifier = Modifier.size(20.dp)
                 )
             }
+        }
+    }
+}
+
+
+@Composable
+fun CustomEmpty(title:String ="Your cart is empty!" ) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            AsyncImage(
+                model = R.drawable.empty,
+                contentDescription = "Empty Cart",
+                modifier = Modifier.size(180.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Your cart is empty!",
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }
