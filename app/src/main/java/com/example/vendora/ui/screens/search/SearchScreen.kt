@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +44,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.utils.wrapper.Result
 
@@ -52,7 +53,6 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onProductClicked: (Long) -> Unit
 ) {
-    val searchQuery = viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults = viewModel.searchResults.collectAsStateWithLifecycle()
 
     LazyColumn(
@@ -71,11 +71,16 @@ fun SearchScreen(
                 item {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp),
+                            .fillParentMaxSize()
+                            .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        LottieLoader(
+                            resId = R.raw.search_loading,
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(300.dp)
+                        )
                     }
                 }
             }
@@ -85,11 +90,16 @@ fun SearchScreen(
                     item {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),
+                                .fillParentMaxSize()
+                                .padding(vertical = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("No results found.")
+                            LottieLoader(
+                                resId = R.raw.no_results,
+                                modifier = Modifier
+                                    .width(300.dp)
+                                    .height(300.dp)
+                            )
                         }
                     }
                 } else {
@@ -114,11 +124,16 @@ fun SearchScreen(
                 item {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp),
+                            .fillParentMaxSize()
+                            .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Error: ${result.exception.message ?: "Unknown error"}")
+                        LottieLoader(
+                            resId = R.raw.search_error,
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(300.dp)
+                        )
                     }
                 }
             }
