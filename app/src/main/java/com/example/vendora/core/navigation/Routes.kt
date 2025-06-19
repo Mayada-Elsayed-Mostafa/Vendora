@@ -17,6 +17,7 @@ data class BottomNavRoute<T : Any>(
 
 val routes = listOf(
     BottomNavRoute("Home", Home, R.drawable.home,R.drawable.outline_home),
+    BottomNavRoute("Search", Search, R.drawable.search,R.drawable.outline_search),
     BottomNavRoute("Category", Category, R.drawable.category,R.drawable.outline_category),
     BottomNavRoute("Me", Me, R.drawable.me,R.drawable.outline_me)
 )
@@ -32,6 +33,9 @@ object Category
 // Me Tab
 @Serializable
 object Me
+
+@Serializable
+object Search
 
 @Serializable
 data class BrandDetails(val id: Long = 450846785767)

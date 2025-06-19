@@ -20,6 +20,7 @@ import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
 import com.example.vendora.core.navigation.ProductInfo
 import com.example.vendora.core.navigation.ScreenRoute
+import com.example.vendora.core.navigation.Search
 import com.example.vendora.core.navigation.SignIn
 import com.example.vendora.core.navigation.SignUp
 import com.example.vendora.ui.cart_screen.CartScreen
@@ -34,6 +35,7 @@ import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.profile.ProfileScreen
+import com.example.vendora.ui.screens.search.SearchScreen
 import com.example.vendora.ui.screens.setting.SettingsScreen
 import com.example.vendora.ui.screens.sign.SignInScreen
 import com.example.vendora.ui.screens.sign.SignUpScreen
@@ -79,6 +81,12 @@ fun VendorApp() {
                     navigateToSettings = {navController.navigate(ScreenRoute.SettingsScreen)},
                     navigateToOrders = {}
                 )
+            }
+
+            composable<Search> {
+                SearchScreen { id ->
+                    navController.navigate(ProductInfo(id))
+                }
             }
 
             composable<ScreenRoute.CartScreen>{
