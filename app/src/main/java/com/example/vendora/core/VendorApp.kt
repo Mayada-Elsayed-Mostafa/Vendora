@@ -49,7 +49,7 @@ fun VendorApp() {
         println(innerPadding)
         NavHost(
             navController = navController,
-            startDestination = Home
+            startDestination = Category
         ) {
             composable<Home> {
                 HomeScreen(
@@ -101,12 +101,10 @@ fun VendorApp() {
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
                 val firstToken = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().firstToken
                 val orderId = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().orderId
-                VisaScreen(token = token, firstToken = firstToken, orderId = orderId) { orderID, firstToken, isSuccess ->
-                    if (isSuccess) {
-                        navController.navigate(ScreenRoute.DiscountScreen)
-                    } else {
-                        navController.navigate(Home)
-                    }
+                VisaScreen(token = token, firstToken = firstToken, orderId = orderId) { order_Id, first_token, _ ->
+                    navController.navigate(
+                        PaymentResult(id = order_Id, token = first_token)
+                    )
                 }
             }
 
@@ -143,9 +141,7 @@ fun VendorApp() {
             }
 
             composable<ScreenRoute.DiscountScreen>{
-                DiscountScreen{
-                    navController.popBackStack()
-                DiscountScreen(){selectedCode ->
+                DiscountScreen{selectedCode ->
                     println(selectedCode)
                     if (selectedCode != null) {
                         navController.previousBackStackEntry

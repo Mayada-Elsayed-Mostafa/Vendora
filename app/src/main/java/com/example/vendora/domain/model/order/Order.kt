@@ -1,5 +1,7 @@
 package com.example.vendora.domain.model.order
 
+import java.util.UUID
+
 data class UserOrdersResponse(
     val orders: List<Order>
 )
@@ -54,10 +56,10 @@ data class Address(
 )
 
 data class LineItem(
-    val id: Long,
+    val id: Long = UUID.randomUUID().leastSignificantBits,
     val name: String,
     val price: String,
     val quantity: Int,
     val title: String,
-    val total_discount: String
+    val total_discount: String = ""
 )
