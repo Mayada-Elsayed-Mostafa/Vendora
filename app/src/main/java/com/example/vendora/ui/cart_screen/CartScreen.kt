@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +64,7 @@ import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.type.Cart
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.ui.screens.address.view.ConfirmDeleteDialog
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.screens.currency.CurrencyDropDown
@@ -70,17 +72,6 @@ import com.example.vendora.ui.screens.currency.CurrencyViewModel
 import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.utils.wrapper.Result
 import kotlinx.serialization.Serializable
-
-@Serializable
-data class CartItem(
-    val id: String,
-    val name: String,
-    val price: Double,
-    val imageUrl: String,
-    val color: String? = null,
-    val size: String? = null,
-    var quantity: Int = 1
-)
 
 
 @Composable
@@ -97,6 +88,7 @@ fun CartScreen(
     val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
 
     var firstToken by remember { mutableStateOf("") }
+    val itemIdToDelete = remember { mutableStateOf<String>("") }
 
     LaunchedEffect(Unit) {
         viewModel.getTokenForAuthentication()
@@ -144,7 +136,7 @@ fun CartScreen(
                                 cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
                             },
                             onDelete = {
-                                cartViewModel.removeFromCart(item.node.id)
+                                itemIdToDelete.value = item.node.id
                             },
                             getChangeRate = getChangeRate
                         )
@@ -154,7 +146,7 @@ fun CartScreen(
                     is Result.Success -> {
                         firstToken = (getFirstToken as Result.Success<AuthTokenResponse>).data.token
                         CheckoutButton(
-                            totalPrice = result.data.cost,
+                            totalPrice = uiState.totalAmount,
                             getChangeRate = getChangeRate,
                             currency = currency,
                             navToCheckout = {
@@ -170,23 +162,36 @@ fun CartScreen(
         }
 
 
+        if (itemIdToDelete.value.isNotBlank() && itemIdToDelete.value.isNotEmpty() ) {
+            ConfirmDeleteDialog(
+                message = "Are you sure you want to delete this product ?",
+                onConfirm = {
+                    cartViewModel.removeFromCart(itemIdToDelete.value)
+                    itemIdToDelete.value = ""
+                },
+                onDismiss = {
+                    itemIdToDelete.value = ""
+                }
+            )
+        }
     }
 }
 
 
 @Composable
-fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
+fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : (Int)->Unit, onDelete : ()->Unit, getChangeRate: Double) {
     val context = LocalContext.current
+    var quantity by remember { mutableStateOf(item.node.quantity) }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
-           modifier = Modifier
-               .fillMaxWidth()
-               .height(130.dp)
-               .padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(130.dp)
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         )
         {
@@ -265,14 +270,15 @@ fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange 
                 )
                 {
                     IconButton(onClick = {
-                        if (item.node.quantity >1){
-                            onCountChange(item.node.quantity - 1)
+                        if (quantity >1){
+                            quantity--
+                            onCountChange(quantity)
                         }else {
                             onDelete()
                         }
                     },
                         modifier = Modifier.size(32.dp)
-                        ) {
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.minus),
                             contentDescription = "Decrease",
@@ -281,12 +287,12 @@ fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange 
                     }
 
                     Text(
-                        text = "${item.node.quantity}",
+                        text = "${quantity}",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
                     )
 
                     IconButton(onClick = {
-                        onCountChange(item.node.quantity + 1)
+                        onCountChange(++quantity)
                     },
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -304,7 +310,7 @@ fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange 
 }
 
 @Composable
-fun CheckoutButton(totalPrice :  GetCartQuery.Cost ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
+fun CheckoutButton(totalPrice : String ,currency: String ,navToCheckout :()->Unit,getChangeRate: Double) {
     //val totalPrice = cartItems.sumOf { it.price * it.quantity }
 
     Column (
@@ -326,7 +332,7 @@ fun CheckoutButton(totalPrice :  GetCartQuery.Cost ,currency: String ,navToCheck
                 )
 
                 Text(
-                    text = "${totalPrice.totalAmount.amount.toString().toDoubleOrNull()?.convertToCurrency(getChangeRate)} $currency" ,
+                    text = "${totalPrice.toDoubleOrNull()?.convertToCurrency(getChangeRate)} $currency" ,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
