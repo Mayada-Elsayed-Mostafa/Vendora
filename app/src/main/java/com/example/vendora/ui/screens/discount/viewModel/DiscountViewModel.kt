@@ -23,7 +23,7 @@ class DiscountViewModel @Inject constructor(private val discountCodesUseCase: Ge
 
     private val _discountPercentage = 10
 
-    private val _finalPrice = MutableStateFlow<Double>(100.0)
+    private val _finalPrice = MutableStateFlow<Double?>(null)
     val finalPrice = _finalPrice.asStateFlow()
 
 
@@ -54,10 +54,10 @@ class DiscountViewModel @Inject constructor(private val discountCodesUseCase: Ge
 
     fun calculateFinalPriceWithCode(code :String, totalPrice: Double) {
         val discount = isDiscountCodeValid(code)
-        _finalPrice.value = if (discount != null) {
+        _finalPrice.value = if (discount) {
             totalPrice * (1 - _discountPercentage / 100.0)
         } else {
-            totalPrice
+            null
         }
 
     }

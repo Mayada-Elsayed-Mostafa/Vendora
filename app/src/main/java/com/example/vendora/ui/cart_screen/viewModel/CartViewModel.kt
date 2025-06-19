@@ -13,7 +13,6 @@ import com.example.vendora.domain.usecase.cart.CreateCartUseCase
 import com.example.vendora.domain.usecase.cart.GetCartUseCase
 import com.example.vendora.domain.usecase.cart.RemoveFromCartUseCase
 import com.example.vendora.domain.usecase.cart.UpdateCartLineUseCase
-import com.example.vendora.ui.cart_screen.CartItem
 import com.example.vendora.utils.wrapper.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +41,6 @@ class CartViewModel @Inject constructor(
 
     init {
         _uiState.update { it.copy(cartId = repository.getCartId()) }
-
     }
 
     fun createCart(){
@@ -196,7 +194,7 @@ class CartViewModel @Inject constructor(
                                     errorMessage = null
                                 )
                             }
-                            loadCart(cartId)
+                            //loadCart(cartId)
                         }
                         is Result.Failure -> {
                             _uiState.update {
@@ -289,7 +287,6 @@ class CartViewModel @Inject constructor(
                                     errorMessage = null
                                 )
                             }
-
                             _cartItems.value = Result.Success(result.data)
 
                         }
@@ -316,8 +313,6 @@ class CartViewModel @Inject constructor(
     }
 
 
-
-
 }
 
 
@@ -336,4 +331,3 @@ data class CartUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
-

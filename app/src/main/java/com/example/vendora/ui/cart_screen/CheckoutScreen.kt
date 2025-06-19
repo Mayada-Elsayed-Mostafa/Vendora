@@ -160,7 +160,8 @@ fun CheckoutScreen(token:String,navController: NavHostController,
                 println("$$$$$"+result.data.lines)
                 val card = result.data.lines.edges
                 val totalPrice = result.data.cost.totalAmount.amount.toString().toDouble()
-                val priceToUse = if (finalPrice > 0.0) finalPrice else totalPrice
+                val priceToUse = finalPrice?.takeIf { it != 100.0 } ?: totalPrice
+                println("Final: $finalPrice | Total: $totalPrice | Used: $priceToUse")
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f),
@@ -172,25 +173,24 @@ fun CheckoutScreen(token:String,navController: NavHostController,
 
                     item{
                         PromoCodeItem(
-                                selectedDiscountCode?: "Select Discount Code",
-                                totalPrice =  totalPrice.convertToCurrency(getChangeRate),
-                                currency = currency,
-                                navToDiscount = {
-                                    navController.navigate(ScreenRoute.DiscountScreen)
-                                }
-                            )
+                            selectedDiscountCode?: "Select Discount Code",
+                            totalPrice =  totalPrice.convertToCurrency(getChangeRate),
+                            currency = currency,
+                            navToDiscount = {
+                                navController.navigate(ScreenRoute.DiscountScreen)
+                            }
+                        )
 
                     }
                 }
-
                 PaymentBottom(
                     title = "Continue to Payment",
-                    totalPrice = finalPrice.toInt(),
+                    totalPrice = priceToUse.toInt(),
                     token = token,
                     items = result.data.lines.edges,
                     currency = currency,
 
-                ){orderId  ->
+                    ){orderId  ->
                     /*nav to Payment Screen*/
                     println("Nav To")
                     println("$orderId")
@@ -236,7 +236,7 @@ fun CheckoutItem (item: GetCartQuery.Edge ) {
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer),
 
-            )
+                )
 
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -261,10 +261,10 @@ fun CheckoutItem (item: GetCartQuery.Edge ) {
                         style = MaterialTheme.typography.titleSmall,
                     )
 
-                   /* Text(
-                        text = " | Size = ${item.size}",
-                        style = MaterialTheme.typography.titleSmall,
-                    )*/
+                    /* Text(
+                         text = " | Size = ${item.size}",
+                         style = MaterialTheme.typography.titleSmall,
+                     )*/
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -274,10 +274,10 @@ fun CheckoutItem (item: GetCartQuery.Edge ) {
 
             }
             Row (
-               modifier =  Modifier
-                   .size(50.dp)
-                   .clip(RoundedCornerShape(25.dp))
-                   .background(MaterialTheme.colorScheme.surfaceContainer),
+                modifier =  Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ){
@@ -428,12 +428,12 @@ fun PaymentBottom(title:String,
     }
     LaunchedEffect(Unit) {
         paymobviewModel.createOrder(
-                orderRequest = OrderRequest(
-                    auth_token = token,
-                    amount_cents = totalPrice,
-                    items = orderList ,
-                    currency = currency
-                )
+            orderRequest = OrderRequest(
+                auth_token = token,
+                amount_cents = totalPrice,
+                items = orderList ,
+                currency = currency
+            )
         )
     }
     val orderState by paymobviewModel.orderState.collectAsState()
@@ -482,7 +482,7 @@ fun PaymentBottom(title:String,
         }
 
 
-}
+    }
 }
 
 @Composable
@@ -567,7 +567,7 @@ fun PromoCodeItem(
                     textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground),
 
                     decorationBox = { innerTextField ->
-                        if (promoCode.isEmpty()) {
+                        if (promo.isEmpty()) {
                             Text(
                                 text = "Enter promo code",
                                 fontSize = 14.sp
@@ -576,7 +576,7 @@ fun PromoCodeItem(
                         innerTextField()
                     },
 
-                )
+                    )
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -630,4 +630,3 @@ fun PromoCodeItem(
 
     }
 }
-
