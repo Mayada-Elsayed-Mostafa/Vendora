@@ -13,16 +13,19 @@ class SearchRepositoryImpl @Inject constructor(private val remoteSource: RemoteD
     SearchRepository {
 
     private val token = BuildConfig.adminApiAccessToken
+
     override fun searchProducts(query: String): Flow<Result<List<Product>>> = flow {
         emit(Result.Loading)
         try {
-            val response = remoteSource.searchProducts(
-                token = token,
-                query = query
-            )
-            emit(Result.Success(response.products))
+            val response = remoteSource.searchProducts(token = token, query = "")
+            val filtered = response.products.filter {
+                it.title.contains(query, ignoreCase = true)
+            }
+
+            emit(Result.Success(filtered))
         } catch (e: Exception) {
             emit(Result.Failure(e))
         }
     }
+
 }
