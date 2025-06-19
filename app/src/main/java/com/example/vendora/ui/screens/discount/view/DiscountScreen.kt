@@ -51,7 +51,7 @@ import com.example.vendora.utils.wrapper.Result
 
 
 @Composable
-fun DiscountScreen(viewModel: DiscountViewModel = hiltViewModel(),back:()->Unit) {
+fun DiscountScreen(viewModel: DiscountViewModel = hiltViewModel(),back: (selectedCode: String) -> Unit) {
     val discountCode by viewModel.discountCodes.collectAsState()
     var selectedCode by remember { mutableStateOf<String?>(null) }
     LaunchedEffect (Unit){
@@ -85,7 +85,11 @@ fun DiscountScreen(viewModel: DiscountViewModel = hiltViewModel(),back:()->Unit)
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onBackground) ,
-                    onClick = {/* Selected Code */}
+                    onClick = {
+                    /* Selected Code */
+                        selectedCode?.let { back(it) }
+
+                    }
                 ){
                     Text("Apply",style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),)
                 }

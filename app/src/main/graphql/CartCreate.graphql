@@ -1,0 +1,22 @@
+
+mutation CartCreate($input: CartInput!) {
+    cartCreate(input: $input) {
+        cart {
+            id
+            totalQuantity
+            cost {
+                totalAmount {
+                    amount
+                }
+            }
+        }
+        userErrors {
+            code
+            field
+            message
+        }
+        warnings {
+            message
+        }
+    }
+}

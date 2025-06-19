@@ -22,7 +22,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.vendora.ui.cart_screen.CustomAppBar
 
 @Composable
-fun VisaScreen(token: String,onPaymentResult: (Boolean) -> Unit) {
+fun VisaScreen(
+    token: String,
+    orderId: Int,
+    firstToken: String,
+    onPaymentResult: (Int,String,Boolean) -> Unit,
+) {
     val iframeId = 929198
     val url = "https://accept.paymob.com/api/acceptance/iframes/$iframeId?payment_token=$token"
     val context = LocalContext.current
@@ -43,9 +48,9 @@ fun VisaScreen(token: String,onPaymentResult: (Boolean) -> Unit) {
                         val txnResponse = uri.getQueryParameter("txn_response_code")
 
                         if (isSuccess && txnResponse == "APPROVED") {
-                            onPaymentResult(true)
+                            onPaymentResult(orderId,firstToken, true)
                         } else {
-                            onPaymentResult(false)
+                            onPaymentResult(orderId,firstToken, false)
                         }
 
                         return true

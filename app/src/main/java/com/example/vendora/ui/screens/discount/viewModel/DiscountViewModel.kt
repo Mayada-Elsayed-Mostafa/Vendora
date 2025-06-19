@@ -18,6 +18,19 @@ class DiscountViewModel @Inject constructor(private val discountCodesUseCase: Ge
     private val _discountCodes = MutableStateFlow<Result<List<DiscountCode>>>(Result.Loading)
     val discountCodes  = _discountCodes.asStateFlow()
 
+    private val _code = MutableStateFlow<String?>(null)
+    val code = _code.asStateFlow()
+
+    private val _discountPercentage = 10
+
+    private val _finalPrice = MutableStateFlow<Double>(100.0)
+    val finalPrice = _finalPrice.asStateFlow()
+
+
+    init {
+        getDiscountCode()
+    }
+
     fun getDiscountCode(){
         viewModelScope.launch {
             discountCodesUseCase.invoke()
@@ -26,5 +39,26 @@ class DiscountViewModel @Inject constructor(private val discountCodesUseCase: Ge
                     _discountCodes.value = it
                 }
         }
+    }
+
+
+
+    fun isDiscountCodeValid(code: String): Boolean {
+        val currentState = _discountCodes.value
+        return if (currentState is Result.Success) {
+            currentState.data.any { it.code == code }
+        } else {
+            false
+        }
+    }
+
+    fun calculateFinalPriceWithCode(code :String, totalPrice: Double) {
+        val discount = isDiscountCodeValid(code)
+        _finalPrice.value = if (discount != null) {
+            totalPrice * (1 - _discountPercentage / 100.0)
+        } else {
+            totalPrice
+        }
+
     }
 }
