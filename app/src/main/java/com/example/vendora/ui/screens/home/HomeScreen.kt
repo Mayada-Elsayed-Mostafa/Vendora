@@ -107,19 +107,11 @@ fun HomeScreen(
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                     HomeHeader(navigateToCart = navigateToCart)
                 }
-                //Search Task
+
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     ProductsSearchBar(
                         onInputQuery = { query -> viewModel.updateSearchQuery(query) }
                     )
-                }
-
-                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                    GiftCardAd(couponList)
-                }
-
-                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                    Text("Our Partners", style = MaterialTheme.typography.titleLarge)
                 }
 
                 if (searchQuery.value.isNotEmpty()) {
@@ -159,12 +151,37 @@ fun HomeScreen(
 
                         is Result.Success -> {
                             val products = results.data
-                            items(products, key = { it.id }) { product ->
-                                ProductCard(product = product)
+                            if (products.isEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        LottieLoader(
+                                            resId = R.raw.no_results,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(200.dp)
+                                                .padding(vertical = 16.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(products, key = { it.id }) { product ->
+                                    ProductCard(product = product)
+                                }
                             }
                         }
                     }
                 } else {
+                    item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                        GiftCardAd(couponList)
+                    }
+
+                    item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                        Text("Our Partners", style = MaterialTheme.typography.titleLarge)
+                    }
+
                     val list = (brands.value as Result.Success).data.smart_collections
                     items(list, key = { it.id }) { brand ->
                         BrandCard(
