@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -30,8 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,39 +55,71 @@ fun SearchScreen(
     val searchQuery = viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults = viewModel.searchResults.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-
-        ProductsSearchBar(
-            onInputQuery = { viewModel.updateSearchQuery(it) }
-        )
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 100.dp)
+    ) {
+        item {
+            ProductsSearchBar(
+                onInputQuery = { viewModel.updateSearchQuery(it) }
+            )
+        }
 
         when (val result = searchResults.value) {
             is Result.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
 
             is Result.Success -> {
                 if (result.data.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No results found.")
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No results found.")
+                        }
                     }
                 } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        items(result.data, key = { it.id }) { product ->
-                            ProductCard(product = product, navigateToProduct = onProductClicked)
+                    item {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 0.dp, max = 10000.dp)
+                                .padding(8.dp),
+                            userScrollEnabled = false
+                        ) {
+                            items(result.data, key = { it.id }) { product ->
+                                ProductCard(product = product, navigateToProduct = onProductClicked)
+                            }
                         }
                     }
                 }
             }
 
             is Result.Failure -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Error: ${result.exception.message ?: "Unknown error"}")
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Error: ${result.exception.message ?: "Unknown error"}")
+                    }
                 }
             }
         }
@@ -100,7 +136,7 @@ fun ProductCard(
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth()
-            .height(200.dp),
+            .height(220.dp),
         shape = RoundedCornerShape(8.dp),
         onClick = { navigateToProduct(product.id) }
     ) {
@@ -110,7 +146,8 @@ fun ProductCard(
                 contentDescription = product.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
                 contentScale = ContentScale.Crop
             )
             Column(
@@ -118,7 +155,9 @@ fun ProductCard(
             ) {
                 Text(
                     text = product.title,
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -129,6 +168,7 @@ fun ProductCard(
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
