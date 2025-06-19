@@ -1,6 +1,5 @@
 package com.example.vendora.ui.screens.order
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -59,17 +59,18 @@ fun CustomerOrders(
     }
 
     Scaffold(
-        topBar = { OrdersScreenTopBar(navigateUp = navigateUp) }
+        topBar = {
+            OrdersScreenTopBar(
+                navigateUp = navigateUp,
+                deleteAllOrders = {}
+            )
+        }
     ) { innerPadding ->
         println(innerPadding)
         when (orders.value) {
             is Result.Failure -> OnError { viewModel.collectOrders() }
             Result.Loading -> OnLoading()
             is Result.Success -> {
-                Log.d(
-                    viewModel.TAG,
-                    (orders.value as Result.Success).data.orders[0].created_at.formatTimestamp()
-                )
                 OnSuccess(
                     orders = (orders.value as Result.Success).data.orders,
                     paddingValues = innerPadding,
@@ -110,7 +111,8 @@ fun OnSuccess(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersScreenTopBar(
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    deleteAllOrders: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     TopAppBar(
@@ -120,6 +122,14 @@ fun OrdersScreenTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "navigate back"
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = deleteAllOrders) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "delete all orders"
                 )
             }
         },

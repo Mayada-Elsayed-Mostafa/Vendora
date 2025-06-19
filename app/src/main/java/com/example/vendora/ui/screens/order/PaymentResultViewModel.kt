@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.order
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.data.local.UserPreferences
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,12 +34,15 @@ class PaymentResultViewModel @Inject constructor(
     private var _uiState = MutableStateFlow(PaymentResultUiState())
     val uiState = _uiState.asStateFlow()
 
+    val TAG = "PaymentResultViewModel"
+
     fun getOrderResult(
         orderId: Int,
         token: String
     ) {
+        val bearerToken = "Bearer $token"
         viewModelScope.launch {
-            paymentResultUseCase.invoke(orderId, token)
+            paymentResultUseCase.invoke(orderId, bearerToken)
                 .flowOn(Dispatchers.IO)
                 .collect { result ->
                     _uiState.update {
@@ -60,6 +65,7 @@ class PaymentResultViewModel @Inject constructor(
                     .build()
 
             createShopifyOrderUserCase.invoke(requestBody).collect{ creationResult ->
+                Log.d(TAG,creationResult.toString())
                 _uiState.update {
                     it.copy(
                         orderCreationResult = creationResult

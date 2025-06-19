@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -35,8 +37,8 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
 import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.order.SingleOrderResponse
+import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.utils.wrapper.Result
-import com.google.android.gms.tasks.OnFailureListener
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,6 @@ fun PaymentResultScreen(
     orderId: Int,
     token: String,
 ) {
-
     val state = viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -71,10 +72,15 @@ fun PaymentResultScreen(
     ) { innerPadding ->
 
         when(state.value.result){
-            is Result.Failure -> OnFailureListener{}
+            is Result.Failure -> OnError{}
             Result.Loading -> OnLoading()
             is Result.Success -> {
-                viewModel.createOrder((state.value.result as Result.Success).data)
+
+                val result = (state.value.result as Result.Success).data
+                LaunchedEffect(Unit) {
+                    viewModel.createOrder(result)
+                }
+
                 OnSuccess(
                     paddingValues = innerPadding,
                     result = (state.value.result as Result.Success).data,
@@ -124,6 +130,7 @@ fun OnSuccess(
     ) {
         val animation = if (result.payment_status == "PAID") R.raw.payment_success else R.raw.payment_failed
         val message = if (result.payment_status == "PAID") "payment successful" else "payment failed"
+
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animation))
         val progress by animateLottieCompositionAsState(
             composition = composition,
@@ -133,7 +140,7 @@ fun OnSuccess(
         LottieAnimation(
             composition = composition,
             modifier = Modifier
-                .fillMaxSize(),
+                .size(240.dp),
             progress = { progress },
         )
         Spacer(modifier = Modifier.height(24.dp))

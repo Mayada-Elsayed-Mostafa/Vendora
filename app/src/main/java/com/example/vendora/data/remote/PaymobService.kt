@@ -23,7 +23,7 @@ interface PaymobService {
     @POST("acceptance/payment_keys")
     suspend fun getPaymentKey(@Body request: PaymentKeyRequest): PaymentKeyResponse
 
-    @GET("/ecommerce/orders/{orderId}")
+    @GET("ecommerce/orders/{orderId}")
     suspend fun getOrderPaymentProcessResult(
         @Path("orderId") id: Int,
         @Header("Authorization") token: String

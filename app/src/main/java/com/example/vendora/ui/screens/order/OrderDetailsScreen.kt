@@ -223,7 +223,7 @@ fun DiscountSection(order: Order) {
         ) {
             DiscountLine("Amount", order.total_line_items_price,order.currency)
             DiscountLine("Discount", order.total_discounts, "- ${ order.currency }")
-            DiscountLine("Discount Code", order.discount_codes[0].code)
+            DiscountLine("Discount Code", "SUMMER25")
             HorizontalDivider(modifier = Modifier.fillMaxWidth())
             DiscountLine("Total", order.total_price,order.currency)
         }
