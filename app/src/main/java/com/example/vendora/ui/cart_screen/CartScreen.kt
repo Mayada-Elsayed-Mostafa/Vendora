@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +64,7 @@ import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.type.Cart
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.cart_screen.viewModel.PaymobViewModel
+import com.example.vendora.ui.screens.address.view.ConfirmDeleteDialog
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.screens.currency.CurrencyDropDown
@@ -86,6 +88,7 @@ fun CartScreen(
     val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
 
     var firstToken by remember { mutableStateOf("") }
+    val itemIdToDelete = remember { mutableStateOf<String>("") }
 
     LaunchedEffect(Unit) {
         viewModel.getTokenForAuthentication()
@@ -133,7 +136,7 @@ fun CartScreen(
                                 cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
                             },
                             onDelete = {
-                                cartViewModel.removeFromCart(item.node.id)
+                                itemIdToDelete.value = item.node.id
                             },
                             getChangeRate = getChangeRate
                         )
@@ -159,12 +162,24 @@ fun CartScreen(
         }
 
 
+        if (itemIdToDelete.value.isNotBlank() && itemIdToDelete.value.isNotEmpty() ) {
+            ConfirmDeleteDialog(
+                message = "Are you sure you want to delete this product ?",
+                onConfirm = {
+                    cartViewModel.removeFromCart(itemIdToDelete.value)
+                    itemIdToDelete.value = ""
+                },
+                onDismiss = {
+                    itemIdToDelete.value = ""
+                }
+            )
+        }
     }
 }
 
 
 @Composable
-fun CartItem (item: GetCartQuery.Edge , currency:String = "EGP" , onCountChange : (Int)->Unit , onDelete : ()->Unit ,getChangeRate: Double) {
+fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : (Int)->Unit, onDelete : ()->Unit, getChangeRate: Double) {
     val context = LocalContext.current
     var quantity by remember { mutableStateOf(item.node.quantity) }
     Card(
