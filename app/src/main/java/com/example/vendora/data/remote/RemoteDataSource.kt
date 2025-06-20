@@ -5,6 +5,7 @@ import com.example.vendora.CartLinesAddMutation
 import com.example.vendora.CartLinesRemoveMutation
 import com.example.vendora.CartLinesUpdateMutation
 import com.example.vendora.GetCartQuery
+import com.example.vendora.domain.model.address.CountryResponse
 import com.example.vendora.domain.model.brands.BrandsResponse
 import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.currency.CurrencyResponse
@@ -79,4 +80,7 @@ interface RemoteDataSource {
     suspend fun removeFromCart(cartId: String, lineIds: List<String>) : CartLinesRemoveMutation.Data
 
     suspend fun getCart(cartId: String): GetCartQuery.Data
+
+    //address
+    suspend fun getCountryById(token: String, countryId: Long): CountryResponse
 }

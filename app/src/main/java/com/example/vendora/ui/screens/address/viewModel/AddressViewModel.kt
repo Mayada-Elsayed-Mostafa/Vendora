@@ -3,9 +3,12 @@ package com.example.vendora.ui.screens.address.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.domain.model.address.AddressEntity
+import com.example.vendora.domain.model.address.CountryResponse
+import com.example.vendora.domain.model.address.Province
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.usecase.addresses.DeleteAddressUseCase
 import com.example.vendora.domain.usecase.addresses.GetAllAddressesUseCase
+import com.example.vendora.domain.usecase.addresses.GetCountryByIdUseCase
 import com.example.vendora.domain.usecase.addresses.InsertAddressUseCase
 import com.example.vendora.utils.wrapper.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +24,8 @@ import javax.inject.Inject
 class AddressViewModel @Inject constructor(
     private val getAllAddressesUseCase: GetAllAddressesUseCase,
     private val insertAddressUseCase: InsertAddressUseCase,
-    private val deleteAddressUseCase: DeleteAddressUseCase
+    private val deleteAddressUseCase: DeleteAddressUseCase,
+    private val getCountryByIdUseCase: GetCountryByIdUseCase
 ) : ViewModel() {
 
     private val _address = MutableStateFlow<Result<List<AddressEntity>>>(Result.Loading)
@@ -33,8 +37,17 @@ class AddressViewModel @Inject constructor(
     private val _defaultAddress = MutableStateFlow<AddressEntity?>(null)
     val defaultAddress: StateFlow<AddressEntity?> = _defaultAddress
 
+    private val _provinces = MutableStateFlow<Result<CountryResponse>>(Result.Loading)
+     val provinces = _provinces.asStateFlow()
+
+    private val _selectedProvince = MutableStateFlow<String?>(null)
+    val selectedProvince = _selectedProvince.asStateFlow()
+
+
+
     init {
         getAllAddresses()
+        getCountry()
     }
     fun getAllAddresses() {
         viewModelScope.launch {
@@ -68,5 +81,26 @@ class AddressViewModel @Inject constructor(
     fun clearMessage() {
         _message.value = null
     }
+
+
+    fun getCountry(){
+        viewModelScope.launch {
+            getCountryByIdUseCase.invoke(countryId = 719296200935)
+                .flowOn(Dispatchers.IO)
+                .collect{
+                    _provinces.value = it
+                }
+        }
+    }
+
+    fun changeSelectedProvince(provinceName: String) {
+        _selectedProvince.value = provinceName
+    }
+
+    fun isValidPhoneNumber(phone: String): Boolean {
+        val regex = Regex("^01[0125]\\d{8}$")
+        return regex.matches(phone)
+    }
+
 
 }

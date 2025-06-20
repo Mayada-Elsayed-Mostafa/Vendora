@@ -7,6 +7,7 @@ import com.example.vendora.CartLinesAddMutation
 import com.example.vendora.CartLinesRemoveMutation
 import com.example.vendora.CartLinesUpdateMutation
 import com.example.vendora.GetCartQuery
+import com.example.vendora.domain.model.address.CountryResponse
 import com.example.vendora.domain.model.brands.BrandsResponse
 import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.discount.DiscountCode
@@ -36,6 +37,7 @@ class RemoteDataSourceImpl @Inject constructor(
     private val orderService: OrderService,
     private val currencyApiService: CurrencyApiService,
     private val apolloClient: ApolloClient,
+    private val addressService: AddressService
 ) : RemoteDataSource {
 
     override suspend fun getBrands(token: String): BrandsResponse {
@@ -184,6 +186,10 @@ class RemoteDataSourceImpl @Inject constructor(
         }
 
         return response.data ?: throw Exception("No data returned from get cart")
+    }
+
+    override suspend fun getCountryById(token: String, countryId: Long): CountryResponse {
+        return addressService.getCountryById(token,countryId)
     }
 
     companion object{
