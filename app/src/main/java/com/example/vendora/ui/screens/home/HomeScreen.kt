@@ -27,24 +27,19 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,18 +56,17 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
 import com.example.vendora.domain.model.brands.SmartCollection
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.ui.screens.brandDetails.OnError
-import com.example.vendora.ui.screens.brandDetails.OnLoading
+import com.example.vendora.ui.screens.order.OnLoading
+import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GiftCardAd
+import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.ui.ui_model.couponList
 import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun HomeScreen(
@@ -80,12 +74,24 @@ fun HomeScreen(
     navigateToCart: () -> Unit,
     navigateToFavorites: () -> Unit,
     navigateToBrandDetails: (brandId: Long) -> Unit,
+    navigateToLogin: () -> Unit,
     paddingValues: PaddingValues = PaddingValues()
 ) {
     val brands = viewModel.brands.collectAsStateWithLifecycle()
+    val username = viewModel.username.collectAsStateWithLifecycle()
+    val showGuestModeDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchBrands()
+    }
+
+    if (showGuestModeDialog.value) {
+        GuestModeDialog(
+            attributes = DialogAttributes(
+                onDismiss = { showGuestModeDialog.value = false },
+                onAccept = { navigateToLogin() }
+            )
+        )
     }
 
     when (brands.value) {
@@ -101,33 +107,43 @@ fun HomeScreen(
                     .padding(top = 8.dp, start = 12.dp, end = 12.dp)
             ) {
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                    HomeHeader(navigateToCart = navigateToCart)
+                    HomeHeader(
+                        username = username.value,
+                        navigateToCart = navigateToCart,
+                        isGuestMode = viewModel.isGuestMode(),
+                        showDialog = showGuestModeDialog
+                    )
                 }
-                    item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                        GiftCardAd(couponList)
-                    }
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    GiftCardAd(couponList)
+                }
 
-                    item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                        Text("Our Partners", style = MaterialTheme.typography.titleLarge)
-                    }
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    Text("Our Partners", style = MaterialTheme.typography.titleLarge)
+                }
 
-                    val list = (brands.value as Result.Success).data.smart_collections
-                    items(list, key = { it.id }) { brand ->
-                        BrandCard(
-                            brand,
-                            Modifier
-                                .padding(4.dp)
-                                .fillMaxWidth()
-                                .clickable { navigateToBrandDetails(brand.id) }
-                        )
-                    }
+                val list = (brands.value as Result.Success).data.smart_collections
+                items(list, key = { it.id }) { brand ->
+                    BrandCard(
+                        brand,
+                        Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth()
+                            .clickable { navigateToBrandDetails(brand.id) }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun HomeHeader(navigateToCart: () -> Unit) {
+fun HomeHeader(
+    username: String,
+    navigateToCart: () -> Unit,
+    isGuestMode: Boolean,
+    showDialog: MutableState<Boolean>
+) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -155,20 +171,32 @@ fun HomeHeader(navigateToCart: () -> Unit) {
                 style = MaterialTheme.typography.titleSmall
             )
             Text(
-                text = "Zeyad Ma'moun",
+                text = username.ifEmpty { "Guest" },
                 style = MaterialTheme.typography.titleMedium
             )
         }
         Spacer(modifier = Modifier.weight(1f))
 
-        IconButton(onClick = { /* do something */ }) {
+        IconButton(onClick = {
+            if (isGuestMode) {
+                showDialog.value = true
+            } else {
+                //TODO call navigation to favorites
+            }
+        }) {
             Icon(
                 imageVector = Icons.Outlined.Favorite,
                 contentDescription = "Favorite"
             )
         }
 
-        IconButton(onClick = { navigateToCart() }) {
+        IconButton(onClick = {
+            if (isGuestMode) {
+                showDialog.value = true
+            } else {
+                navigateToCart()
+            }
+        }) {
             Icon(
                 imageVector = Icons.Filled.ShoppingCart,
                 contentDescription = "Favorite"

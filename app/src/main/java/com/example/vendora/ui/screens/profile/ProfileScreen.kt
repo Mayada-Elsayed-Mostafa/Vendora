@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -25,6 +26,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,18 +42,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
+import com.example.vendora.ui.ui_model.DialogAttributes
+import com.example.vendora.ui.ui_model.GuestModeDialog
 
 @Composable
 fun ProfileScreen(
+    viewModel: ProfileViewModel = viewModel(),
     navigateToCart: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToFavorite: () -> Unit,
-    navigateToOrders: () -> Unit
+    navigateToOrders: () -> Unit,
+    navigateToLogin: () -> Unit
 ) {
+
+    val userInfo = viewModel.userInfo.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.collectUserState()
+        Log.d("Profile",userInfo.value.email)
+        Log.d("Profile",userInfo.value.isGuest.toString())
+    }
+
     Scaffold(
         topBar = {
             ProfileAppBar(
@@ -59,7 +80,10 @@ fun ProfileScreen(
         println(innerPadding)
         OnSuccess(
             modifier = Modifier.padding(innerPadding),
-            navigateToOrders = navigateToOrders
+            navigateToOrders = navigateToOrders,
+            userInfo = userInfo.value,
+            viewModel = viewModel,
+            navigateToLogin = navigateToLogin
         )
     }
 }
@@ -68,12 +92,35 @@ fun ProfileScreen(
 fun OnSuccess(
     modifier: Modifier = Modifier,
     cartViewModel: CartViewModel = hiltViewModel(),
-    navigateToOrders: () -> Unit
+    navigateToOrders: () -> Unit,
+    userInfo: UserInfo,
+    viewModel: ProfileViewModel,
+    navigateToLogin: () -> Unit
 ) {
+
+    var showDialog by remember { mutableStateOf(false) }
+    val dialogAttributes = remember {
+        mutableStateOf(
+            DialogAttributes(
+                onDismiss = { showDialog = false },
+                onAccept = { navigateToLogin() }
+            )
+        )
+    }
+
+    if (showDialog) {
+        GuestModeDialog(
+            attributes = dialogAttributes.value
+        )
+    }
+
     Column(
         modifier = modifier
     ) {
-        ProfileAvatarSection()
+        ProfileAvatarSection(
+            email = userInfo.email,
+            username = userInfo.fullName
+        )
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,18 +131,48 @@ fun OnSuccess(
         OptionItem(
             icon = R.drawable.pin,
             title = "Address"
-        ) {}
+        ) {
+            if (userInfo.isGuest) {
+                dialogAttributes.value = DialogAttributes(
+                    onDismiss = { showDialog = false },
+                    onAccept = { navigateToLogin() }
+                )
+                showDialog = true
+            } else {
+                //TODO add navigation to Address
+            }
+        }
         //orders item
         OptionItem(
             icon = R.drawable.order,
             title = "Orders"
-        ) { navigateToOrders() }
+        ) {
+            if (userInfo.isGuest) {
+                dialogAttributes.value = DialogAttributes(
+                    onDismiss = { showDialog = false },
+                    onAccept = { navigateToLogin() }
+                )
+                showDialog = true
+            } else {
+                navigateToOrders()
+            }
+        }
         //wishlist item
         OptionItem(
             icon = R.drawable.wishlist,
             title = "Wishlist"
-        ) { }
-        //
+        ) {
+            if (userInfo.isGuest) {
+                dialogAttributes.value = DialogAttributes(
+                    onDismiss = { showDialog = false },
+                    onAccept = { navigateToLogin() }
+                )
+                showDialog = true
+            } else {
+                //TODO add navigation to favorites
+            }
+        }
+
         OptionItem(
             icon = R.drawable.cart,
             title = "Create Cart"
@@ -103,13 +180,29 @@ fun OnSuccess(
             cartViewModel.createCart()
         }
         // logout item
-        OptionItem(
-            icon = R.drawable.logout,
-            color = Color.Red,
-            title = "Logout"
-        ) { }
+        if (!userInfo.isGuest) {
+            OptionItem(
+                icon = R.drawable.logout,
+                color = Color.Red,
+                title = "Logout"
+            ) {
+                dialogAttributes.value = DialogAttributes(
+                    guestModeMessage = "you are about to logout?",
+                    acceptTitle = "logout",
+                    dismissTitle = "cancel",
+                    onDismiss = { showDialog = false },
+                    onAccept = {
+                        viewModel.logoutUser()
+                        showDialog = false
+                        navigateToLogin()
+                    }
+                )
+                showDialog = true
+            }
+        }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,7 +254,10 @@ fun ProfileAppBar(
 }
 
 @Composable
-fun ProfileAvatarSection() {
+fun ProfileAvatarSection(
+    username: String,
+    email: String
+) {
     val context = LocalContext.current
 
     Column(
@@ -171,7 +267,7 @@ fun ProfileAvatarSection() {
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(vertical = 16.dp)
-    ){
+    ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(R.drawable.user)
@@ -185,12 +281,12 @@ fun ProfileAvatarSection() {
         )
 
         Text(
-            "Username name",
+            username,
             style = MaterialTheme.typography.headlineSmall
         )
 
         Text(
-            "+201002176725",
+            email,
             style = MaterialTheme.typography.titleSmall
         )
 
@@ -248,11 +344,11 @@ private fun ProfileAppBarPreview() {
     )
 }
 
-@Preview
-@Composable
-private fun ProfileAvatarSectionPreview() {
-    ProfileAvatarSection()
-}
+//@Preview
+//@Composable
+//private fun ProfileAvatarSectionPreview() {
+//    ProfileAvatarSection()
+//}
 
 @Preview
 @Composable

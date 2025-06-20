@@ -50,6 +50,7 @@ import coil3.request.ImageRequest
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.ui.screens.order.OnLoading
 
 @Composable
 fun BrandDetailsScreen(

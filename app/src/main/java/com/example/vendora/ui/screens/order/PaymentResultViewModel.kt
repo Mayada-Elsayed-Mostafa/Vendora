@@ -13,6 +13,7 @@ import com.example.vendora.domain.usecase.order.GetOrderPaymentResultUseCase
 import com.example.vendora.domain.usecase.payment.CreateOrderUseCase
 import com.example.vendora.utils.wrapper.Result
 import com.example.vendora.utils.wrapper.order_builder.CreateOrder
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,8 @@ class PaymentResultViewModel @Inject constructor(
 
     private var _uiState = MutableStateFlow(PaymentResultUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val auth = FirebaseAuth.getInstance()
 
     val TAG = "PaymentResultViewModel"
 
@@ -56,9 +59,10 @@ class PaymentResultViewModel @Inject constructor(
 
     fun createOrder(result: OrderPaymentResult) {
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d(TAG,auth.currentUser?.email.toString())
             val order = CreateOrder()
             val requestBody =
-                order.email(userPreferences.getUserEmail() ?: "zeyadmamoun952@gmail.com")
+                order.email(auth.currentUser?.email ?: "zeyadmamoun952@gmail.com")
                     .financialStatus("paid")
                     .currency(result.currency)
                     .lineItems(createLineItems(result.items))

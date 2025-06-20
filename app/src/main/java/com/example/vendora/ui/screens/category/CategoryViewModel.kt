@@ -9,6 +9,7 @@ import com.example.vendora.domain.repo_interfaces.CategoryRepository
 import com.example.vendora.domain.usecase.category.GetCategoriesUseCase
 import com.example.vendora.utils.wrapper.ProductCategoryBlock
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

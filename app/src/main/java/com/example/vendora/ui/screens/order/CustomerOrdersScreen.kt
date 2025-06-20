@@ -42,7 +42,6 @@ import coil3.request.ImageRequest
 import com.example.vendora.R
 import com.example.vendora.domain.model.order.Order
 import com.example.vendora.ui.screens.brandDetails.OnError
-import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.utils.wrapper.Result
 import com.example.vendora.utils.wrapper.formatTimestamp
 
@@ -62,7 +61,7 @@ fun CustomerOrders(
         topBar = {
             OrdersScreenTopBar(
                 navigateUp = navigateUp,
-                deleteAllOrders = {}
+//                deleteAllOrders = {}
             )
         }
     ) { innerPadding ->
@@ -112,7 +111,7 @@ fun OnSuccess(
 @Composable
 fun OrdersScreenTopBar(
     navigateUp: () -> Unit,
-    deleteAllOrders: () -> Unit
+//    deleteAllOrders: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     TopAppBar(
@@ -125,14 +124,14 @@ fun OrdersScreenTopBar(
                 )
             }
         },
-        actions = {
-            IconButton(onClick = deleteAllOrders) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "delete all orders"
-                )
-            }
-        },
+//        actions = {
+//            IconButton(onClick = deleteAllOrders) {
+//                Icon(
+//                    imageVector = Icons.Filled.Delete,
+//                    contentDescription = "delete all orders"
+//                )
+//            }
+//        },
         title = { Text("Transaction History") }
     )
 }

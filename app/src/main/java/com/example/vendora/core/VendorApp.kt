@@ -60,6 +60,7 @@ fun VendorApp() {
                     navigateToBrandDetails = { brandId ->
                         navController.navigate(BrandDetails(id = brandId))
                     },
+                    navigateToLogin = { navController.navigate(SignIn)},
                     paddingValues = innerPadding
                 )
             }
@@ -70,6 +71,7 @@ fun VendorApp() {
                         navController.navigate(ProductInfo(productId))
                     },
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToLogin = { navController.navigate(SignIn) },
                     navigateToFavorite = {}
                 )
             }
@@ -80,6 +82,7 @@ fun VendorApp() {
                     navigateToFavorite = {},
                     navigateToOrders = { navController.navigate(CustomerOrders) },
                     navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
+                    navigateToLogin = { navController.navigate(SignIn) }
                 )
             }
 
@@ -89,8 +92,8 @@ fun VendorApp() {
                 }
             }
 
-            composable<ScreenRoute.CartScreen>{
-                CartScreen(paddingValues = innerPadding , navController)
+            composable<ScreenRoute.CartScreen> {
+                CartScreen(paddingValues = innerPadding, navController)
             }
 
             composable<ScreenRoute.CheckoutScreenRoute> { navBackStackEntry ->
@@ -125,7 +128,7 @@ fun VendorApp() {
                     navController.navigate(
                         PaymentResult(id = order_Id, token = first_token)
                     ) {
-                        popUpTo(ScreenRoute.CartScreen){
+                        popUpTo(ScreenRoute.CartScreen) {
                             inclusive = true
                         }
                     }
