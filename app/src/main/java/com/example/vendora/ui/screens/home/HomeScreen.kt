@@ -74,7 +74,6 @@ import com.example.vendora.ui.ui_model.GiftCardAd
 import com.example.vendora.ui.ui_model.couponList
 import com.example.vendora.utils.wrapper.Result
 
-
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),

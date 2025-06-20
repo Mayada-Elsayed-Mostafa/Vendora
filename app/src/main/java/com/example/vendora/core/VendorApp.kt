@@ -77,48 +77,66 @@ fun VendorApp() {
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToFavorite = {},
                     navigateToOrders = { navController.navigate(CustomerOrders) },
-                    navigateToSettings = {navController.navigate(ScreenRoute.SettingsScreen)},
+                    navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
                 )
             }
 
-            composable<ScreenRoute.CartScreen>{
-                CartScreen(paddingValues = innerPadding , navController)
+            composable<ScreenRoute.CartScreen> {
+                CartScreen(paddingValues = innerPadding, navController)
             }
 
-            composable<ScreenRoute.CheckoutScreenRoute>{ navBackStackEntry ->
+            composable<ScreenRoute.CheckoutScreenRoute> { navBackStackEntry ->
                 val token = navBackStackEntry.toRoute<ScreenRoute.CheckoutScreenRoute>().token
-                CheckoutScreen(token,navController)
+                CheckoutScreen(token, navController)
             }
 
-            composable<ScreenRoute.PaymentScreenRoute>{ navBackStackEntry ->
-                val price:Double =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().price
-                val token:String =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().token
-                val orderId:Int =navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().orderId
-                PaymentScreen( token = token,totalPrice = price ,orderId=orderId, navController = navController)
+            composable<ScreenRoute.PaymentScreenRoute> { navBackStackEntry ->
+                val price: Double =
+                    navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().price
+                val token: String =
+                    navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().token
+                val orderId: Int =
+                    navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().orderId
+                PaymentScreen(
+                    token = token,
+                    totalPrice = price,
+                    orderId = orderId,
+                    navController = navController
+                )
             }
 
             composable<ScreenRoute.VisaScreenRoute> { navBackStackEntry ->
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
                 val firstToken = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().firstToken
                 val orderId = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().orderId
-                VisaScreen(token = token, firstToken = firstToken, orderId = orderId) { order_Id, first_token, _ ->
+                VisaScreen(
+                    token = token,
+                    firstToken = firstToken,
+                    orderId = orderId
+                ) { order_Id, first_token, _ ->
                     navController.navigate(
                         PaymentResult(id = order_Id, token = first_token)
-                    )
+                    ) {
+                        popUpTo(ScreenRoute.CartScreen){
+                            inclusive = true
+                        }
+                    }
                 }
             }
 
-            composable<BrandDetails>{ navBackStackEntry ->
+            composable<BrandDetails> { navBackStackEntry ->
                 val brandDetails: BrandDetails = navBackStackEntry.toRoute()
                 BrandDetailsScreen(
                     id = brandDetails.id,
                     navigateUp = { navController.navigateUp() },
-                    navigateToProduct = { productId -> navController.navigate(ProductInfo(productId))}
+                    navigateToProduct = { productId -> navController.navigate(ProductInfo(productId)) }
                 )
             }
 
             composable<SignIn> {
-                SignInScreen(onNavigateToSignUp = { navController.navigate(SignUp) }, onNavigateToHome = { navController.navigate(Home)})
+                SignInScreen(
+                    onNavigateToSignUp = { navController.navigate(SignUp) },
+                    onNavigateToHome = { navController.navigate(Home) })
             }
 
             composable<SignUp> {
@@ -132,16 +150,16 @@ fun VendorApp() {
                 )
             }
 
-            composable<ScreenRoute.AddAddressScreen>{
+            composable<ScreenRoute.AddAddressScreen> {
                 AddAddressScreen(navController)
             }
 
-            composable<ScreenRoute.AddressScreen>{
+            composable<ScreenRoute.AddressScreen> {
                 AddressScreen(navController)
             }
 
-            composable<ScreenRoute.DiscountScreen>{
-                DiscountScreen{selectedCode ->
+            composable<ScreenRoute.DiscountScreen> {
+                DiscountScreen { selectedCode ->
                     println(selectedCode)
                     if (selectedCode != null) {
                         navController.previousBackStackEntry
@@ -173,11 +191,12 @@ fun VendorApp() {
                 val paymentResult: PaymentResult = navBackStackEntry.toRoute()
                 PaymentResultScreen(
                     orderId = paymentResult.id,
-                    token = paymentResult.token
+                    token = paymentResult.token,
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<ScreenRoute.SettingsScreen>{
+            composable<ScreenRoute.SettingsScreen> {
                 SettingsScreen(navController)
             }
         }

@@ -1,11 +1,11 @@
 package com.example.vendora.ui.screens.order
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,6 +44,7 @@ import com.example.vendora.utils.wrapper.Result
 @Composable
 fun PaymentResultScreen(
     viewModel: PaymentResultViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit,
     orderId: Int,
     token: String,
 ) {
@@ -58,7 +59,7 @@ fun PaymentResultScreen(
             TopAppBar(
                 navigationIcon = {
                     IconButton(
-                        onClick = {  }
+                        onClick = onNavigateBack
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
@@ -84,10 +85,15 @@ fun PaymentResultScreen(
                 OnSuccess(
                     paddingValues = innerPadding,
                     result = (state.value.result as Result.Success).data,
-                    creationResult = state.value.orderCreationResult
+                    creationResult = state.value.orderCreationResult,
+                    onNavigateBack = onNavigateBack
                 )
             }
         }
+    }
+
+    BackHandler {
+        onNavigateBack()
     }
 
 }
@@ -119,7 +125,8 @@ fun OnLoading() {
 fun OnSuccess(
     paddingValues: PaddingValues,
     result: OrderPaymentResult,
-    creationResult: Result<SingleOrderResponse>
+    creationResult: Result<SingleOrderResponse>,
+    onNavigateBack: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -151,7 +158,7 @@ fun OnSuccess(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = {},
+            onClick = onNavigateBack,
             enabled = creationResult !is Result.Loading
         ) {
             if (creationResult is Result.Loading){
