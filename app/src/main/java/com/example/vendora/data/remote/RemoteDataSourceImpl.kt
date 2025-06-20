@@ -19,6 +19,10 @@ import com.example.vendora.domain.model.payment.PaymentKeyResponse
 import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
+import com.example.vendora.domain.model.order.OrderPaymentResult
+import com.example.vendora.domain.model.order.OrderWrapper
+import com.example.vendora.domain.model.order.SingleOrderResponse
+import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.model.product.Products
 import com.example.vendora.domain.model.product.SingleProduct
 import com.example.vendora.type.CartInput
@@ -29,6 +33,7 @@ import javax.inject.Inject
 class RemoteDataSourceImpl @Inject constructor(
     private val service: ShopifyService,
     private val payMobService: PaymobService,
+    private val orderService: OrderService,
     private val currencyApiService: CurrencyApiService,
     private val apolloClient: ApolloClient,
 ) : RemoteDataSource {
@@ -71,6 +76,18 @@ class RemoteDataSourceImpl @Inject constructor(
         return payMobService.createOrder(request)
     }
 
+    override suspend fun createShopifyOrder(token: String, orderWrapper: OrderWrapper): SingleOrderResponse {
+        return orderService.createOrder(token,orderWrapper)
+    }
+
+    override suspend fun getOrderPaymentResult(id: Int, token: String): OrderPaymentResult {
+        return payMobService.getOrderPaymentProcessResult(
+            id = id,
+            token = token
+        )
+    }
+
+
     override suspend fun getPaymentKey(request: PaymentKeyRequest): PaymentKeyResponse {
         return payMobService.getPaymentKey(request)
     }
@@ -85,6 +102,14 @@ class RemoteDataSourceImpl @Inject constructor(
 
     override suspend fun searchProducts(token: String, query: String): Products {
         return service.searchProducts(token, query)
+    }
+
+    override suspend fun getOrdersByEmail(token: String, email: String): UserOrdersResponse {
+        return orderService.getOrdersByEmail(token,email)
+    }
+
+    override suspend fun getOrderById(token: String, orderId: Long): SingleOrderResponse {
+        return orderService.getOrderById(token,orderId)
     }
 
     override suspend fun createCart(): CartCreateMutation.Data {

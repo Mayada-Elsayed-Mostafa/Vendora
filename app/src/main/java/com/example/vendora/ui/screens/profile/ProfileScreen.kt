@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,14 +40,12 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
-import kotlinx.coroutines.launch
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
 
 @Composable
 fun ProfileScreen(
     navigateToCart: () -> Unit,
     navigateToSettings: () -> Unit,
+    navigateToFavorite: () -> Unit,
     navigateToOrders: () -> Unit
 ) {
     Scaffold(
@@ -60,33 +57,39 @@ fun ProfileScreen(
         },
     ) { innerPadding ->
         println(innerPadding)
-        OnSuccess(modifier = Modifier.padding(innerPadding))
+        OnSuccess(
+            modifier = Modifier.padding(innerPadding),
+            navigateToOrders = navigateToOrders
+        )
     }
 }
 
 @Composable
-fun OnSuccess(modifier: Modifier = Modifier,cartViewModel: CartViewModel= hiltViewModel()) {
-    val coroutineScope = rememberCoroutineScope()
+fun OnSuccess(
+    modifier: Modifier = Modifier,
+    cartViewModel: CartViewModel = hiltViewModel(),
+    navigateToOrders: () -> Unit
+) {
     Column(
         modifier = modifier
     ) {
         ProfileAvatarSection()
-        Divider(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp))
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        )
         Spacer(modifier = Modifier.height(4.dp))
         //address item
         OptionItem(
             icon = R.drawable.pin,
             title = "Address"
-        ) {
-
-        }
+        ) {}
         //orders item
         OptionItem(
             icon = R.drawable.order,
             title = "Orders"
-        ) { }
+        ) { navigateToOrders() }
         //wishlist item
         OptionItem(
             icon = R.drawable.wishlist,
@@ -227,7 +230,7 @@ fun OptionItem(
         Spacer(modifier = Modifier.weight(1f))
 
         Icon(
-            imageVector = Icons.Filled.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(24.dp)

@@ -74,6 +74,7 @@ dependencies {
 
     //Jetpack DataStore
     implementation(libs.androidx.datastore.preferences)
+    implementation("androidx.datastore:datastore-preferences-core:1.1.7")
 
     //Lottie
     implementation(libs.lottie.compose.v630)
@@ -117,4 +118,7 @@ dependencies {
 
     //Serialization for NavArgs
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+
+    //kotlinx Datetime
+    implementation(libs.kotlinx.datetime)
 }
