@@ -170,7 +170,7 @@ fun OnSuccess(
 }
 
 @Composable
-fun OnError(getProducts: () -> Unit) {
+fun OnError(getProducts: () -> Unit = {}) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,

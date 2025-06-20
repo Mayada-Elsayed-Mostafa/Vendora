@@ -85,9 +85,6 @@ fun HomeScreen(
 ) {
     val brands = viewModel.brands.collectAsStateWithLifecycle()
 
-    val searchResults = viewModel.searchResults.collectAsStateWithLifecycle()
-    val searchQuery = viewModel.searchQuery.collectAsStateWithLifecycle()
-
     LaunchedEffect(Unit) {
         viewModel.fetchBrands()
     }
@@ -107,73 +104,6 @@ fun HomeScreen(
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                     HomeHeader(navigateToCart = navigateToCart)
                 }
-
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    ProductsSearchBar(
-                        onInputQuery = { query -> viewModel.updateSearchQuery(query) }
-                    )
-                }
-
-                if (searchQuery.value.isNotEmpty()) {
-                    when (val results = searchResults.value) {
-                        is Result.Loading -> {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                LottieLoader(
-                                    resId = R.raw.search_loading,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(200.dp)
-                                        .padding(vertical = 16.dp)
-                                )
-                            }
-                        }
-
-                        is Result.Failure -> {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    LottieLoader(
-                                        resId = R.raw.search_error,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(200.dp)
-                                            .padding(vertical = 16.dp)
-                                    )
-                                    Text(
-                                        "Failed to load search results",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                        }
-
-                        is Result.Success -> {
-                            val products = results.data
-                            if (products.isEmpty()) {
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        LottieLoader(
-                                            resId = R.raw.no_results,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(200.dp)
-                                                .padding(vertical = 16.dp)
-                                        )
-                                    }
-                                }
-                            } else {
-                                items(products, key = { it.id }) { product ->
-                                    ProductCard(product = product)
-                                }
-                            }
-                        }
-                    }
-                } else {
                     item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                         GiftCardAd(couponList)
                     }
@@ -192,7 +122,6 @@ fun HomeScreen(
                                 .clickable { navigateToBrandDetails(brand.id) }
                         )
                     }
-                }
             }
         }
     }
@@ -247,39 +176,6 @@ fun HomeHeader(navigateToCart: () -> Unit) {
             )
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProductsSearchBar(
-    onInputQuery: (String) -> Unit
-) {
-    var searchQuery by remember { mutableStateOf("") }
-    val expanded by remember { mutableStateOf(false) }
-
-    SearchBar(
-        modifier = Modifier.padding(top = 0.dp),
-        colors = SearchBarDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-            )
-        },
-        placeholder = { Text("search for product") },
-        shadowElevation = 4.dp,
-        query = searchQuery,
-        onQueryChange = {
-            searchQuery = it
-            onInputQuery(it)
-        },
-        active = expanded,
-        onActiveChange = {},
-        onSearch = {},
-        shape = MaterialTheme.shapes.medium,
-    ) {}
 }
 
 @Composable
@@ -450,19 +346,4 @@ fun ProductCard(product: Product) {
             }
         }
     }
-}
-
-@Composable
-fun LottieLoader(
-    resId: Int,
-    modifier: Modifier = Modifier
-) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(resId))
-    val progress by animateLottieCompositionAsState(composition)
-
-    LottieAnimation(
-        composition = composition,
-        progress = { progress },
-        modifier = modifier
-    )
 }
