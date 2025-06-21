@@ -108,6 +108,24 @@ class CartRepositoryImpl @Inject constructor( private val remoteDataSource: Remo
         }
     }
 
+    override fun removeAllLinesFromCart(
+        cartId: String,
+        lineId: List<String>
+    ): Flow<Result<CartLinesRemoveMutation.Cart>> = flow{
+        emit(Result.Loading)
+        try {
+            val response = remoteDataSource.removeFromCart(cartId, lineId)
+            val cart = response.cartLinesRemove?.cart
+            if (cart != null) {
+                emit(Result.Success(cart))
+            } else {
+                emit(Result.Failure(Exception("Failed to remove from cart")))
+            }
+        } catch (e: Exception) {
+            emit(Result.Failure(e))
+        }
+    }
+
     override fun getCart(cartId: String): Flow<Result<GetCartQuery.Cart>> = flow {
         emit(Result.Loading)
         try {
@@ -133,6 +151,13 @@ class CartRepositoryImpl @Inject constructor( private val remoteDataSource: Remo
        localDataSource.putString("cart_Id",cartId)
     }
 
+    override fun saveString(key: String, value: String) {
+        localDataSource.putString(key,value)
+    }
+
+    override fun getString(key: String, defaultValue: String): String {
+        return localDataSource.getString(key,defaultValue)
+    }
 
 
 }

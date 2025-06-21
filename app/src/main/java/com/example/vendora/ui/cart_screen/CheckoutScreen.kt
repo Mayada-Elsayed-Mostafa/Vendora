@@ -153,7 +153,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,
 
             Result.Loading -> {
                 if (uiState.isLoading ){
-                    OnLoading()
+                    CustomLoading()
                 }
             }
             is Result.Success -> {

@@ -64,6 +64,7 @@ import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.ui.cart_screen.CustomAppBar
+import com.example.vendora.ui.cart_screen.CustomEmpty
 import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.utils.wrapper.Result
 
@@ -106,27 +107,32 @@ fun AddressScreen(navController: NavHostController,viewModel: AddressViewModel =
                 is Result.Loading -> CircularProgressIndicator()
                 is Result.Success -> {
                     val addresses = (addressState as Result.Success<List<AddressEntity>>).data
-                    LazyColumn {
-                        items(addresses) { address ->
+                    if(addresses.isEmpty()){
+                        CustomEmpty("Add New Address")
+                    }else{
+                        LazyColumn {
+                            items(addresses) { address ->
 
-                            AddressItem(
-                                address = address,
-                                onClickDefault = {
-                                    viewModel.insertAddress(address.copy(isDefault = true))
-                                },
-                                navToUpdateAddress={
-                                    /*nav to update*/
-                                    navController.navigate(ScreenRoute.AddAddressScreen)
-                                },
-                                onDeleteClick = {
-                                    viewModel.deleteAddress(address.id)
-                                }
-                            )
-                            Divider(Modifier.padding(vertical = 8.dp))
+                                AddressItem(
+                                    address = address,
+                                    onClickDefault = {
+                                        viewModel.insertAddress(address.copy(isDefault = true))
+                                    },
+                                    navToUpdateAddress={
+                                        /*nav to update*/
+                                        navController.navigate(ScreenRoute.AddAddressScreen)
+                                    },
+                                    onDeleteClick = {
+                                        viewModel.deleteAddress(address.id)
+                                    }
+                                )
+                                Divider(Modifier.padding(vertical = 8.dp))
+                            }
+
+
                         }
-
-
                     }
+
                 }
                 is Result.Failure -> {
                     Text("Failed to load addresses")

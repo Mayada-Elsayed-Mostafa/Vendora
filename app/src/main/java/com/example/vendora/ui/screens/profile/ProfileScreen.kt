@@ -47,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
@@ -97,7 +98,6 @@ fun OnSuccess(
     viewModel: ProfileViewModel,
     navigateToLogin: () -> Unit
 ) {
-
     var showDialog by remember { mutableStateOf(false) }
     val dialogAttributes = remember {
         mutableStateOf(
@@ -171,13 +171,6 @@ fun OnSuccess(
             } else {
                 //TODO add navigation to favorites
             }
-        }
-
-        OptionItem(
-            icon = R.drawable.cart,
-            title = "Create Cart"
-        ) {
-            cartViewModel.createCart()
         }
         // logout item
         if (!userInfo.isGuest) {

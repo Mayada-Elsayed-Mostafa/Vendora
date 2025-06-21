@@ -55,6 +55,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.CartCreateMutation
 import com.example.vendora.GetCartQuery
 import com.example.vendora.R
@@ -95,7 +100,8 @@ fun CartScreen(
         viewModel.getTokenForAuthentication()
         currencyViewModel.getCurrency()
         currencyViewModel.getRates()
-        cartViewModel.loadCart(uiState.cartId?:"")
+       // cartViewModel.loadCart(uiState.cartId?:"")
+        cartViewModel.checkOrCreateCart()
     }
 
     val currency by currencyViewModel.selectedCurrency.collectAsState()
@@ -118,7 +124,7 @@ fun CartScreen(
 
             Result.Loading -> {
                 if (uiState.isLoading ){
-                    OnLoading()
+                    CustomLoading()
                 }
             }
 
@@ -384,9 +390,32 @@ fun CustomEmpty(title:String ="Your cart is empty!" ) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Your cart is empty!",
+                text = title,
                 style = MaterialTheme.typography.titleMedium
             )
         }
+    }
+}
+
+@Composable
+fun CustomLoading() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_animation))
+        val progress by animateLottieCompositionAsState(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+        )
+
+        LottieAnimation(
+            composition = composition,
+            modifier = Modifier
+                .fillMaxSize(),
+            progress = { progress },
+        )
     }
 }

@@ -59,6 +59,7 @@ import coil3.request.crossfade
 import com.example.vendora.R
 import com.example.vendora.domain.model.brands.SmartCollection
 import com.example.vendora.domain.model.product.Product
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.ui.ui_model.DialogAttributes
@@ -71,6 +72,7 @@ import com.example.vendora.utils.wrapper.isGuestMode
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    cardViewModel: CartViewModel= hiltViewModel(),
     navigateToCart: () -> Unit,
     navigateToFavorites: () -> Unit,
     navigateToBrandDetails: (brandId: Long) -> Unit,
@@ -83,6 +85,7 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.fetchBrands()
+        cardViewModel.checkOrCreateCart()
     }
 
     if (showGuestModeDialog.value) {
