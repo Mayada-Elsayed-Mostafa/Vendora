@@ -67,14 +67,19 @@ import com.example.vendora.ui.cart_screen.CustomAppBar
 import com.example.vendora.ui.cart_screen.CustomEmpty
 import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
 fun AddressScreen(navController: NavHostController,viewModel: AddressViewModel = hiltViewModel()) {
     val addressState by viewModel.address.collectAsState()
     val message by viewModel.message.collectAsState()
+    val email = FirebaseAuth.getInstance().currentUser?.email
     LaunchedEffect(Unit) {
-        viewModel.getAllAddresses()
+        if(email !=null){
+            viewModel.getAllAddressesByEmail(email)
+        }
+
     }
 
 

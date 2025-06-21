@@ -53,6 +53,7 @@ import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -67,10 +68,14 @@ fun AddAddressScreen(navController: NavHostController,viewModel: AddressViewMode
 
     val context = LocalContext.current
     val message by viewModel.message.collectAsState()
+    val email = FirebaseAuth.getInstance().currentUser?.email
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
+            if (email != null) {
+                viewModel.getAllAddressesByEmail(email)
+            }
         }
     }
 
@@ -80,14 +85,18 @@ fun AddAddressScreen(navController: NavHostController,viewModel: AddressViewMode
     var phoneError by remember { mutableStateOf<String?>(null) }
 
     Column (modifier = Modifier
-        .fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)
+        .fillMaxSize()
+        .windowInsetsPadding(WindowInsets.statusBars)
         .padding(16.dp)) {
 
         CustomAppBar("Add New Address") {navController.popBackStack() }
         Spacer(modifier = Modifier.height(16.dp))
 
         when(val result = provinces){
-            is Result.Failure -> OnError()
+            is Result.Failure -> {
+                println("error"+result)
+                OnError()
+            }
             is Result.Loading -> OnLoading()
             is Result.Success -> {
 
@@ -140,7 +149,10 @@ fun AddAddressScreen(navController: NavHostController,viewModel: AddressViewMode
                 country = "Egypt",
                 isDefault = isDefault,
                 address = address,
-                phone = phone
+                phone = phone,
+                email = email?:"",
+                lat = 30.03,
+                lng = 31.23
             )
             viewModel.insertAddress(address)
             navController.popBackStack()

@@ -17,8 +17,12 @@ class LocalDataSourceImpl @Inject constructor(private val addressDao: AddressDao
         return addressDao.deleteAddress(addressId)
     }
 
-    override suspend fun clearDefaultAddress() {
-        return addressDao.clearDefaultAddress()
+    override suspend fun clearDefaultAddress(email: String) {
+        return addressDao.clearDefaultAddress(email)
+    }
+
+    override suspend fun getAddressesByEmail(email: String): List<AddressEntity> {
+        return addressDao.getAddressesByEmail(email)
     }
 
     override fun putString(key: String, value: String) {

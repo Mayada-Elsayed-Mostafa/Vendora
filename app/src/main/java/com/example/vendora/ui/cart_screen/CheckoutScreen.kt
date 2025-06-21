@@ -74,6 +74,7 @@ import com.example.vendora.ui.screens.currency.CurrencyViewModel
 import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.ui.screens.discount.viewModel.DiscountViewModel
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -88,10 +89,14 @@ fun CheckoutScreen(token:String,navController: NavHostController,
 
     val uiState by cartViewModel.uiState.collectAsState()
     val cartItem by cartViewModel.cartItems.collectAsState()
-
+    val email = FirebaseAuth.getInstance().currentUser?.email
     LaunchedEffect(Unit) {
-        addressViewModel.getAllAddresses()
-        cartViewModel.loadCart(uiState.cartId ?:"card Id not Found")
+        if(email != null){
+            addressViewModel.getAllAddressesByEmail(email)
+        }
+
+        //cartViewModel.loadCart(uiState.cartId ?:"card Id not Found")
+        cartViewModel.checkOrCreateCart()
     }
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()

@@ -7,10 +7,12 @@ import com.example.vendora.domain.model.address.CountryResponse
 import com.example.vendora.domain.model.address.Province
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.usecase.addresses.DeleteAddressUseCase
+import com.example.vendora.domain.usecase.addresses.GetAllAddressesByEmailUseCase
 import com.example.vendora.domain.usecase.addresses.GetAllAddressesUseCase
 import com.example.vendora.domain.usecase.addresses.GetCountryByIdUseCase
 import com.example.vendora.domain.usecase.addresses.InsertAddressUseCase
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +27,8 @@ class AddressViewModel @Inject constructor(
     private val getAllAddressesUseCase: GetAllAddressesUseCase,
     private val insertAddressUseCase: InsertAddressUseCase,
     private val deleteAddressUseCase: DeleteAddressUseCase,
-    private val getCountryByIdUseCase: GetCountryByIdUseCase
+    private val getCountryByIdUseCase: GetCountryByIdUseCase,
+    private val getAllAddressesByEmailUseCase: GetAllAddressesByEmailUseCase
 ) : ViewModel() {
 
     private val _address = MutableStateFlow<Result<List<AddressEntity>>>(Result.Loading)
@@ -43,10 +46,10 @@ class AddressViewModel @Inject constructor(
     private val _selectedProvince = MutableStateFlow<String?>(null)
     val selectedProvince = _selectedProvince.asStateFlow()
 
+    val email = FirebaseAuth.getInstance().currentUser?.email
 
 
     init {
-        getAllAddresses()
         getCountry()
     }
     fun getAllAddresses() {
@@ -56,10 +59,21 @@ class AddressViewModel @Inject constructor(
         }
     }
 
+    fun getAllAddressesByEmail(email: String) {
+
+        viewModelScope.launch {
+            _address.value = getAllAddressesByEmailUseCase(email)
+            updateDefaultAddress()
+        }
+    }
+
     fun insertAddress(addressEntity: AddressEntity) {
         viewModelScope.launch {
             insertAddressUseCase(addressEntity)
-            getAllAddresses()
+            if (email !=null){
+                 getAllAddressesByEmail(email)
+            }
+
             _message.value = "Address added successfully"
         }
     }
@@ -68,7 +82,9 @@ class AddressViewModel @Inject constructor(
     fun deleteAddress(addressId: Int) {
         viewModelScope.launch {
             deleteAddressUseCase(addressId)
-            getAllAddresses()
+            if (email !=null){
+                getAllAddressesByEmail(email)
+            }
             _message.value = "Address deleted"
         }
     }

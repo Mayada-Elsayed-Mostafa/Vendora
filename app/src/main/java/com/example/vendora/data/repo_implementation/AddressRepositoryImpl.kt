@@ -7,6 +7,7 @@ import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.domain.model.address.CountryResponse
 import com.example.vendora.domain.repo_interfaces.AddressRepository
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -16,9 +17,13 @@ class AddressRepositoryImpl @Inject constructor(private val addressDao: AddressD
         return Result.Success(addressDao.getAllAddresses())
     }
 
+    override suspend fun getAllAddressesByEmail(email:String): Result<List<AddressEntity>> {
+        return Result.Success(addressDao.getAddressesByEmail(email))
+    }
+
     override suspend fun insertAddress(addressEntity: AddressEntity): Long {
         if (addressEntity.isDefault){
-            addressDao.clearDefaultAddress()
+            addressDao.clearDefaultAddress(addressEntity.email)
         }
         return addressDao.insertAddress(addressEntity)
     }

@@ -12,6 +12,7 @@ interface AddressRepository {
 
     suspend fun deleteAddress(addressId: Int): Int
 
+    suspend fun getAllAddressesByEmail(email:String): Result<List<AddressEntity>>
 
     ///Country
     fun getCountryById(countryId: Long): Flow<Result<CountryResponse>>
