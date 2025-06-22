@@ -60,3 +60,6 @@ data class PaymentResult(
     val id: Int,
     val token: String
 )
+
+@Serializable
+object Favorites

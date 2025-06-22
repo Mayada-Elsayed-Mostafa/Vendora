@@ -1,6 +1,5 @@
 package com.example.vendora.ui.screens.productInfo
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,8 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,14 +49,18 @@ import com.example.vendora.domain.model.product.Image
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.domain.model.product.findVariantIdByColorAndSize
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
+import com.example.vendora.ui.screens.favorites.FavoritesViewModel
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
-fun ProductInfoScreen(productId: Long, viewModel: ProductInfoViewModel = hiltViewModel()) {
+fun ProductInfoScreen(
+    productId: Long,
+    viewModel: ProductInfoViewModel = hiltViewModel(),
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
+) {
     val productResult by viewModel.product.collectAsState()
 
     LaunchedEffect(productId) {
-        Log.d("InfoScreen",productId.toString())
         viewModel.loadProduct(productId)
     }
 
@@ -77,7 +80,11 @@ fun ProductInfoScreen(productId: Long, viewModel: ProductInfoViewModel = hiltVie
                             .verticalScroll(rememberScrollState())
                             .padding(8.dp)
                     ) {
-                        ProductInfoSection(viewModel, product)
+                        ProductInfoSection(
+                            viewModel = viewModel,
+                            favoritesViewModel = favoritesViewModel,
+                            product
+                        )
                     }
                 }
             }
@@ -149,9 +156,14 @@ fun ProductImagesCarousel(imagesList: List<Image>) {
 }
 
 @Composable
-fun ProductInfoSection(viewModel: ProductInfoViewModel, product: Product) {
+fun ProductInfoSection(
+    viewModel: ProductInfoViewModel,
+    favoritesViewModel: FavoritesViewModel,
+    product: Product
+) {
+
     Column(modifier = Modifier.padding(16.dp)) {
-        ProductInfoHeaderSection(viewModel, product)
+        ProductInfoHeaderSection(product, favoritesViewModel)
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         ProductInfoBodySection(viewModel, product)
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -160,8 +172,13 @@ fun ProductInfoSection(viewModel: ProductInfoViewModel, product: Product) {
 }
 
 @Composable
-fun ProductInfoHeaderSection(viewModel: ProductInfoViewModel, product: Product) {
-    val isFavorite by viewModel.isFavorite
+fun ProductInfoHeaderSection(
+    product: Product,
+    favoritesViewModel: FavoritesViewModel
+) {
+
+    val favorites by favoritesViewModel.favorites.collectAsState()
+    val isFavorite = favorites.any { it.id == product.id }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -173,11 +190,17 @@ fun ProductInfoHeaderSection(viewModel: ProductInfoViewModel, product: Product) 
                 modifier = Modifier.weight(1f),
                 fontSize = 20.sp
             )
-            IconButton(onClick = { viewModel.toggleFavorite() }) {
+            IconButton(onClick = {
+                if (isFavorite) {
+                    favoritesViewModel.removeFromFavorites(product.id)
+                } else {
+                    favoritesViewModel.addToFavorites(product)
+                }
+            }) {
                 Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Favorite",
-                    tint = if (isFavorite) Color.Red else Color.Gray
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Favorite Icon",
+                    tint = Color.Red
                 )
             }
         }
@@ -332,7 +355,7 @@ fun ProductInfoFooterSection(product: Product,viewModel: ProductInfoViewModel= h
         ) {
             if (uiState.isAddingToCart) {
                 CircularProgressIndicator(modifier = Modifier.size(16.dp))
-            }else{
+            } else {
                 Icon(
                     imageVector = Icons.Filled.ShoppingCart,
                     contentDescription = "Add to cart",

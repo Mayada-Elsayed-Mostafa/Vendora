@@ -79,6 +79,12 @@ dependencies {
     //Lottie
     implementation(libs.lottie.compose.v630)
 
+    // Firebase Firestore + Coroutines
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(platform(libs.firebase.bom))
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

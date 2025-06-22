@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.example.vendora.core.navigation.BottomNavBar
 import com.example.vendora.core.navigation.BrandDetails
 import com.example.vendora.core.navigation.Category
+import com.example.vendora.core.navigation.Favorites
 import com.example.vendora.core.navigation.CustomerOrders
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
@@ -28,6 +29,7 @@ import com.example.vendora.ui.screens.address.view.AddressScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.discount.view.DiscountScreen
+import com.example.vendora.ui.screens.favorites.FavoritesScreen
 import com.example.vendora.ui.screens.home.HomeScreen
 import com.example.vendora.ui.screens.order.CustomerOrders
 import com.example.vendora.ui.screens.order.OrderDetailsScreen
@@ -48,19 +50,18 @@ fun VendorApp() {
         topBar = {},
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
-        println(innerPadding)
         NavHost(
             navController = navController,
-            startDestination = Home,
+            startDestination = SignUp,
         ) {
             composable<Home> {
                 HomeScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
-                    navigateToFavorites = {},
+                    navigateToFavorites = { navController.navigate(Favorites) },
                     navigateToBrandDetails = { brandId ->
                         navController.navigate(BrandDetails(id = brandId))
                     },
-                    navigateToLogin = { navController.navigate(SignIn)},
+                    navigateToLogin = { navController.navigate(SignIn) },
                     paddingValues = innerPadding
                 )
             }
@@ -79,9 +80,9 @@ fun VendorApp() {
             composable<Me> {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
+                    navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
                     navigateToFavorite = {},
                     navigateToOrders = { navController.navigate(CustomerOrders) },
-                    navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
                     navigateToLogin = { navController.navigate(SignIn) }
                 )
             }
@@ -171,7 +172,6 @@ fun VendorApp() {
 
             composable<ScreenRoute.DiscountScreen> {
                 DiscountScreen { selectedCode ->
-                    println(selectedCode)
                     if (selectedCode != null) {
                         navController.previousBackStackEntry
                             ?.savedStateHandle
@@ -208,7 +208,18 @@ fun VendorApp() {
             }
 
             composable<ScreenRoute.SettingsScreen> {
-                SettingsScreen(navController)
+                composable<ScreenRoute.SettingsScreen> {
+                    SettingsScreen(navController)
+                }
+
+                composable<Favorites> {
+                    FavoritesScreen(
+                        onProductClick = { product ->
+                            navController.navigate(ProductInfo(product.id))
+                        }
+                    )
+                }
+
             }
         }
     }
