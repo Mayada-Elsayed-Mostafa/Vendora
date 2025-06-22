@@ -48,3 +48,6 @@ object SignUp
 
 @Serializable
 data class ProductInfo(val id: Long)
+
+@Serializable
+object Favorites

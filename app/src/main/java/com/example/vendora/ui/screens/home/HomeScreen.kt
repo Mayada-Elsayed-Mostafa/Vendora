@@ -105,7 +105,7 @@ fun HomeScreen(
                     .padding(top = 8.dp, start = 12.dp, end = 12.dp)
             ) {
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                    HomeHeader(navigateToCart = navigateToCart)
+                    HomeHeader(navigateToCart = navigateToCart, navigateToFav = navigateToFavorites)
                 }
 
                 item(span = { GridItemSpan(maxLineSpan) }) {
@@ -199,7 +199,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeHeader(navigateToCart: () -> Unit) {
+fun HomeHeader(navigateToCart: () -> Unit, navigateToFav: () -> Unit) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -233,7 +233,7 @@ fun HomeHeader(navigateToCart: () -> Unit) {
         }
         Spacer(modifier = Modifier.weight(1f))
 
-        IconButton(onClick = { /* do something */ }) {
+        IconButton(onClick = { navigateToFav() }) {
             Icon(
                 imageVector = Icons.Outlined.Favorite,
                 contentDescription = "Favorite"

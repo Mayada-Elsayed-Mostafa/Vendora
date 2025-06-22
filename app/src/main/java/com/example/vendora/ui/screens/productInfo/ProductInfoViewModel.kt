@@ -1,6 +1,7 @@
 package com.example.vendora.ui.screens.productInfo
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +27,7 @@ class ProductInfoViewModel @Inject constructor(
     private val _selectedSize = mutableStateOf("")
     val selectedSize: State<String> = _selectedSize
 
-    private val _quantity = mutableStateOf(1)
+    private val _quantity = mutableIntStateOf(1)
     val quantity: State<Int> = _quantity
 
     private val _isFavorite = mutableStateOf(false)
@@ -55,10 +56,6 @@ class ProductInfoViewModel @Inject constructor(
 
     fun decreaseQuantity() {
         if (_quantity.value > 1) _quantity.value -= 1
-    }
-
-    fun toggleFavorite() {
-        _isFavorite.value = !_isFavorite.value
     }
 
     fun loadProduct(productId: Long) {
