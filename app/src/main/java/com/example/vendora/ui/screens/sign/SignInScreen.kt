@@ -2,18 +2,25 @@ package com.example.vendora.ui.screens.sign
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
@@ -27,19 +34,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vendora.R
 
 @Composable
-fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: () -> Unit, onNavigateToHome: () -> Unit) {
-
+fun SignInScreen(
+    viewModel: SignInViewModel = viewModel(),
+    onNavigateToSignUp: () -> Unit,
+    onNavigateToHome: () -> Unit
+) {
     val signInState by viewModel.signInState.collectAsState()
 
     var email by remember { mutableStateOf("") }
@@ -69,79 +82,120 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: (
         }
     }
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(bottom = 48.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.signup_img),
-            contentDescription = "Sign In Image",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .padding(top = 16.dp)
+        Spacer(modifier = Modifier.height(72.dp))
+
+        Text(
+            text = stringResource(R.string.hello_welcome_back),
+            color = Color.Black,
+            fontSize = 32.sp,
+            modifier = Modifier.padding(start = 24.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        )
+        Spacer(modifier = Modifier.height(72.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Box(modifier = Modifier.fillMaxSize()) {
 
-        Button(
-            onClick = {
-                viewModel.clearMessages()
-                viewModel.signInUser(email.trim(), password)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            enabled = !signInState.isLoading
-        ) {
-            if (signInState.isLoading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(20.dp)
-                )
-            } else {
-                Text("Sign In")
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .padding(horizontal = 12.dp)
+                    .offset(y = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Black),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {}
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(horizontal = 8.dp)
+                    .offset(y = 12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(8.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.sign_in),
+                        fontSize = 24.sp,
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        textAlign = TextAlign.Start
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text(stringResource(R.string.email), color = Color.Gray) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text(stringResource(R.string.password), color = Color.Gray) },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            viewModel.clearMessages()
+                            viewModel.signInUser(email.trim(), password)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !signInState.isLoading,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Black,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        if (signInState.isLoading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        } else {
+                            Text(stringResource(R.string.sign_in))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(R.string.don_t_have_an_account), color = Color.Gray)
+                        TextButton(onClick = onNavigateToSignUp) {
+                            Text(stringResource(R.string.sign_up), color = Color.Black)
+                        }
+                    }
+                }
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(onClick = { onNavigateToSignUp() }) {
-            Text("You haven't an account? Sign Up")
         }
     }
 
     SnackbarHost(
         hostState = snackbarHostState,
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     )
 
     if (showDialog.value) {
@@ -155,17 +209,16 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: (
                     showDialog.value = false
                     viewModel.clearMessages()
                 }) {
-                    Text("OK")
+                    Text(stringResource(R.string.try_again), color = Color.Black)
                 }
             },
-            title = { Text("Error") },
-            text = { Text(dialogMessage.value) }
+            title = { Text(stringResource(R.string.oops), color = Color.Black) },
+            text = { Text(dialogMessage.value, color = Color.Black) },
+            containerColor = Color.White
         )
     }
 
-    // this is added if guest wanted to authenticate so it cant return inside the app again.
     val context = LocalContext.current
-
     BackHandler {
         (context as? Activity)?.finish()
     }
