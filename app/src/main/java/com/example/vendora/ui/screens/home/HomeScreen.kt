@@ -114,7 +114,8 @@ fun HomeScreen(
                         username = username.value,
                         navigateToCart = navigateToCart,
                         isGuestMode = viewModel.isGuestMode(),
-                        showDialog = showGuestModeDialog
+                        showDialog = showGuestModeDialog,
+                        navigateToFavorite = navigateToFavorites
                     )
                 }
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
@@ -144,6 +145,7 @@ fun HomeScreen(
 fun HomeHeader(
     username: String,
     navigateToCart: () -> Unit,
+    navigateToFavorite: () -> Unit,
     isGuestMode: Boolean,
     showDialog: MutableState<Boolean>
 ) {
@@ -184,7 +186,7 @@ fun HomeHeader(
             if (isGuestMode) {
                 showDialog.value = true
             } else {
-                //TODO call navigation to favorites
+                navigateToFavorite()
             }
         }) {
             Icon(

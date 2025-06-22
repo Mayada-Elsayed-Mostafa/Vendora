@@ -1,11 +1,9 @@
 package com.example.vendora.ui.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.domain.model.brands.BrandsResponse
 import com.example.vendora.domain.usecase.brands.GetBrandsUseCase
-import com.example.vendora.domain.usecase.search.SearchProductsUseCase
 import com.example.vendora.utils.wrapper.Result
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel

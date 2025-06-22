@@ -9,8 +9,8 @@ import androidx.navigation.toRoute
 import com.example.vendora.core.navigation.BottomNavBar
 import com.example.vendora.core.navigation.BrandDetails
 import com.example.vendora.core.navigation.Category
-import com.example.vendora.core.navigation.Favorites
 import com.example.vendora.core.navigation.CustomerOrders
+import com.example.vendora.core.navigation.Favorites
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
 import com.example.vendora.core.navigation.OrderDetails
@@ -208,18 +208,15 @@ fun VendorApp() {
             }
 
             composable<ScreenRoute.SettingsScreen> {
-                composable<ScreenRoute.SettingsScreen> {
-                    SettingsScreen(navController)
-                }
+                SettingsScreen(navController)
+            }
 
-                composable<Favorites> {
-                    FavoritesScreen(
-                        onProductClick = { product ->
-                            navController.navigate(ProductInfo(product.id))
-                        }
-                    )
-                }
-
+            composable<Favorites> {
+                FavoritesScreen(
+                    onProductClick = { product ->
+                        navController.navigate(ProductInfo(product.id))
+                    }
+                )
             }
         }
     }

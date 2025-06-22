@@ -127,21 +127,6 @@ fun OnSuccess(
                 .padding(horizontal = 24.dp)
         )
         Spacer(modifier = Modifier.height(4.dp))
-        //address item
-        OptionItem(
-            icon = R.drawable.pin,
-            title = "Address"
-        ) {
-            if (userInfo.isGuest) {
-                dialogAttributes.value = DialogAttributes(
-                    onDismiss = { showDialog = false },
-                    onAccept = { navigateToLogin() }
-                )
-                showDialog = true
-            } else {
-                //TODO add navigation to Address
-            }
-        }
         //orders item
         OptionItem(
             icon = R.drawable.order,

@@ -11,6 +11,7 @@ import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.usecase.order.CreateShopifyOrderUserCase
 import com.example.vendora.domain.usecase.order.GetOrderPaymentResultUseCase
 import com.example.vendora.domain.usecase.payment.CreateOrderUseCase
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.utils.wrapper.Result
 import com.example.vendora.utils.wrapper.order_builder.CreateOrder
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,7 +31,6 @@ import javax.inject.Inject
 class PaymentResultViewModel @Inject constructor(
     private val createShopifyOrderUserCase: CreateShopifyOrderUserCase,
     private val paymentResultUseCase: GetOrderPaymentResultUseCase,
-    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private var _uiState = MutableStateFlow(PaymentResultUiState())
@@ -57,25 +58,27 @@ class PaymentResultViewModel @Inject constructor(
         }
     }
 
-    fun createOrder(result: OrderPaymentResult) {
-        viewModelScope.launch(Dispatchers.IO) {
-            Log.d(TAG,auth.currentUser?.email.toString())
-            val order = CreateOrder()
-            val requestBody =
-                order.email(auth.currentUser?.email ?: "zeyadmamoun952@gmail.com")
-                    .financialStatus("paid")
-                    .currency(result.currency)
-                    .lineItems(createLineItems(result.items))
-                    .build()
+    suspend fun createOrder(result: OrderPaymentResult) {
+        Log.d(TAG, auth.currentUser?.email.toString())
+        val order = CreateOrder()
+        val requestBody =
+            order.email(auth.currentUser?.email ?: "zeyadmamoun952@gmail.com")
+                .financialStatus("paid")
+                .currency(result.currency)
+                .lineItems(createLineItems(result.items))
+                .build()
 
-            createShopifyOrderUserCase.invoke(requestBody).collect{ creationResult ->
-                Log.d(TAG,creationResult.toString())
+        createShopifyOrderUserCase.invoke(requestBody).collect { creationResult ->
+            Log.d(TAG, creationResult.toString())
+            if(creationResult is Result.Success){
                 _uiState.update {
                     it.copy(
                         orderCreationResult = creationResult
                     )
                 }
             }
+            Log.d("Cart","finished collection")
+            return@collect
         }
     }
 

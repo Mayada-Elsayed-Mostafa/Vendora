@@ -25,7 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,6 +36,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
 import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.order.SingleOrderResponse
+import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.utils.wrapper.Result
 
@@ -44,6 +44,7 @@ import com.example.vendora.utils.wrapper.Result
 @Composable
 fun PaymentResultScreen(
     viewModel: PaymentResultViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     orderId: Int,
     token: String,
@@ -51,7 +52,7 @@ fun PaymentResultScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.getOrderResult(orderId,token)
+        viewModel.getOrderResult(orderId, token)
     }
 
     Scaffold(
@@ -59,7 +60,12 @@ fun PaymentResultScreen(
             TopAppBar(
                 navigationIcon = {
                     IconButton(
-                        onClick = onNavigateBack
+                        onClick = {
+                            if (state.value.orderCreationResult is Result.Success) {
+                                cartViewModel.clearCart()
+                            }
+                            onNavigateBack()
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
@@ -72,13 +78,14 @@ fun PaymentResultScreen(
         }
     ) { innerPadding ->
 
-        when(state.value.result){
-            is Result.Failure -> OnError{}
+        when (state.value.result) {
+            is Result.Failure -> OnError {}
             Result.Loading -> OnLoading()
             is Result.Success -> {
 
                 val result = (state.value.result as Result.Success).data
                 LaunchedEffect(Unit) {
+                    cartViewModel.checkOrCreateCart()
                     viewModel.createOrder(result)
                 }
 
@@ -86,7 +93,8 @@ fun PaymentResultScreen(
                     paddingValues = innerPadding,
                     result = (state.value.result as Result.Success).data,
                     creationResult = state.value.orderCreationResult,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    cartViewModel = cartViewModel
                 )
             }
         }
@@ -126,7 +134,8 @@ fun OnSuccess(
     paddingValues: PaddingValues,
     result: OrderPaymentResult,
     creationResult: Result<SingleOrderResponse>,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    cartViewModel: CartViewModel
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -135,8 +144,10 @@ fun OnSuccess(
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        val animation = if (result.payment_status == "PAID") R.raw.payment_success else R.raw.payment_failed
-        val message = if (result.payment_status == "PAID") "payment successful" else "payment failed"
+        val animation =
+            if (result.payment_status == "PAID") R.raw.payment_success else R.raw.payment_failed
+        val message =
+            if (result.payment_status == "PAID") "payment successful" else "payment failed"
 
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animation))
         val progress by animateLottieCompositionAsState(
@@ -154,14 +165,16 @@ fun OnSuccess(
         Text(
             text = message,
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = onNavigateBack,
+            onClick = {
+                cartViewModel.clearCart()
+                onNavigateBack()
+            },
             enabled = creationResult !is Result.Loading
         ) {
-            if (creationResult is Result.Loading){
+            if (creationResult is Result.Loading) {
                 CircularProgressIndicator()
             } else {
                 Text("Return to home")
