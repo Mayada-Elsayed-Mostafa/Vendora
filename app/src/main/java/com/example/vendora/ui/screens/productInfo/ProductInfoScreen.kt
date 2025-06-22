@@ -47,6 +47,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.vendora.domain.model.product.Image
 import com.example.vendora.domain.model.product.Product
+import com.example.vendora.domain.model.product.findVariantIdByColorAndSize
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.screens.favorites.FavoritesViewModel
 import com.example.vendora.utils.wrapper.Result
@@ -319,8 +320,11 @@ fun ProductInfoBodySection(viewModel: ProductInfoViewModel, product: Product) {
 }
 
 @Composable
-fun ProductInfoFooterSection(product: Product, cartViewModel: CartViewModel = hiltViewModel()) {
+fun ProductInfoFooterSection(product: Product,viewModel: ProductInfoViewModel= hiltViewModel() ,cartViewModel: CartViewModel= hiltViewModel()) {
     val uiState by cartViewModel.uiState.collectAsState()
+    val quantity by viewModel.quantity
+    val selectedSize by viewModel.selectedSize
+    val selectedColor by viewModel.selectedColor
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -339,11 +343,13 @@ fun ProductInfoFooterSection(product: Product, cartViewModel: CartViewModel = hi
         Button(
             enabled = !uiState.isAddingToCart,
             onClick = {
-                /* Handle adding to card */
-                println("Clicked ${product.variants[0].admin_graphql_api_id}")
+            /* Handle adding to card */
                 println("Clicked ${product.variants}")
-                cartViewModel.addToCart(product.variants[0].admin_graphql_api_id)
-            }, modifier = Modifier
+                println("Clicked ${product.id} ${selectedColor } && $selectedSize")
+                cartViewModel.addToCart(product.findVariantIdByColorAndSize(selectedColor,selectedSize)?: product.variants[0].admin_graphql_api_id,quantity)
+            }
+
+            , modifier = Modifier
                 .padding(start = 16.dp)
                 .weight(1f)
         ) {

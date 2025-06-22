@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -15,9 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +26,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,20 +42,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
-import kotlinx.coroutines.launch
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
+import com.example.vendora.ui.ui_model.DialogAttributes
+import com.example.vendora.ui.ui_model.GuestModeDialog
 
 @Composable
 fun ProfileScreen(
+    viewModel: ProfileViewModel = viewModel(),
     navigateToCart: () -> Unit,
     navigateToSettings: () -> Unit,
-    navigateToOrders: () -> Unit
+    navigateToFavorite: () -> Unit,
+    navigateToOrders: () -> Unit,
+    navigateToLogin: () -> Unit
 ) {
+
+    val userInfo = viewModel.userInfo.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.collectUserState()
+        Log.d("Profile",userInfo.value.email)
+        Log.d("Profile",userInfo.value.isGuest.toString())
+    }
+
     Scaffold(
         topBar = {
             ProfileAppBar(
@@ -60,53 +79,123 @@ fun ProfileScreen(
         },
     ) { innerPadding ->
         println(innerPadding)
-        OnSuccess(modifier = Modifier.padding(innerPadding))
+        OnSuccess(
+            modifier = Modifier.padding(innerPadding),
+            navigateToOrders = navigateToOrders,
+            userInfo = userInfo.value,
+            viewModel = viewModel,
+            navigateToLogin = navigateToLogin
+        )
     }
 }
 
 @Composable
-fun OnSuccess(modifier: Modifier = Modifier,cartViewModel: CartViewModel= hiltViewModel()) {
-    val coroutineScope = rememberCoroutineScope()
+fun OnSuccess(
+    modifier: Modifier = Modifier,
+    cartViewModel: CartViewModel = hiltViewModel(),
+    navigateToOrders: () -> Unit,
+    userInfo: UserInfo,
+    viewModel: ProfileViewModel,
+    navigateToLogin: () -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val dialogAttributes = remember {
+        mutableStateOf(
+            DialogAttributes(
+                onDismiss = { showDialog = false },
+                onAccept = { navigateToLogin() }
+            )
+        )
+    }
+
+    if (showDialog) {
+        GuestModeDialog(
+            attributes = dialogAttributes.value
+        )
+    }
+
     Column(
         modifier = modifier
     ) {
-        ProfileAvatarSection()
-        Divider(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp))
+        ProfileAvatarSection(
+            email = userInfo.email,
+            username = userInfo.fullName
+        )
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        )
         Spacer(modifier = Modifier.height(4.dp))
         //address item
         OptionItem(
             icon = R.drawable.pin,
             title = "Address"
         ) {
-
+            if (userInfo.isGuest) {
+                dialogAttributes.value = DialogAttributes(
+                    onDismiss = { showDialog = false },
+                    onAccept = { navigateToLogin() }
+                )
+                showDialog = true
+            } else {
+                //TODO add navigation to Address
+            }
         }
         //orders item
         OptionItem(
             icon = R.drawable.order,
             title = "Orders"
-        ) { }
+        ) {
+            if (userInfo.isGuest) {
+                dialogAttributes.value = DialogAttributes(
+                    onDismiss = { showDialog = false },
+                    onAccept = { navigateToLogin() }
+                )
+                showDialog = true
+            } else {
+                navigateToOrders()
+            }
+        }
         //wishlist item
         OptionItem(
             icon = R.drawable.wishlist,
             title = "Wishlist"
-        ) { }
-        //
-        OptionItem(
-            icon = R.drawable.cart,
-            title = "Create Cart"
         ) {
-            cartViewModel.createCart()
+            if (userInfo.isGuest) {
+                dialogAttributes.value = DialogAttributes(
+                    onDismiss = { showDialog = false },
+                    onAccept = { navigateToLogin() }
+                )
+                showDialog = true
+            } else {
+                //TODO add navigation to favorites
+            }
         }
         // logout item
-        OptionItem(
-            icon = R.drawable.logout,
-            color = Color.Red,
-            title = "Logout"
-        ) { }
+        if (!userInfo.isGuest) {
+            OptionItem(
+                icon = R.drawable.logout,
+                color = Color.Red,
+                title = "Logout"
+            ) {
+                dialogAttributes.value = DialogAttributes(
+                    guestModeMessage = "you are about to logout?",
+                    acceptTitle = "logout",
+                    dismissTitle = "cancel",
+                    onDismiss = { showDialog = false },
+                    onAccept = {
+                        viewModel.logoutUser()
+                        showDialog = false
+                        navigateToLogin()
+                    }
+                )
+                showDialog = true
+            }
+        }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -158,7 +247,10 @@ fun ProfileAppBar(
 }
 
 @Composable
-fun ProfileAvatarSection() {
+fun ProfileAvatarSection(
+    username: String,
+    email: String
+) {
     val context = LocalContext.current
 
     Column(
@@ -168,7 +260,7 @@ fun ProfileAvatarSection() {
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(vertical = 16.dp)
-    ){
+    ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(R.drawable.user)
@@ -182,12 +274,12 @@ fun ProfileAvatarSection() {
         )
 
         Text(
-            "Username name",
+            username,
             style = MaterialTheme.typography.headlineSmall
         )
 
         Text(
-            "+201002176725",
+            email,
             style = MaterialTheme.typography.titleSmall
         )
 
@@ -227,7 +319,7 @@ fun OptionItem(
         Spacer(modifier = Modifier.weight(1f))
 
         Icon(
-            imageVector = Icons.Filled.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(24.dp)
@@ -245,11 +337,11 @@ private fun ProfileAppBarPreview() {
     )
 }
 
-@Preview
-@Composable
-private fun ProfileAvatarSectionPreview() {
-    ProfileAvatarSection()
-}
+//@Preview
+//@Composable
+//private fun ProfileAvatarSectionPreview() {
+//    ProfileAvatarSection()
+//}
 
 @Preview
 @Composable

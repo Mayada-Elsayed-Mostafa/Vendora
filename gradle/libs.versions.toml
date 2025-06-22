@@ -21,6 +21,7 @@ firebaseDatabase = "21.0.0"
 retrofit = "3.0.0"
 firebaseAuthKtx = "23.2.1"
 roomRuntimeAndroid = "2.7.1"
+kotlinxDatetime = "0.6.2"
 
 
 [libraries]
@@ -53,7 +54,7 @@ lottie-compose-v630 = { module = "com.airbnb.android:lottie-compose", version.re
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
-
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

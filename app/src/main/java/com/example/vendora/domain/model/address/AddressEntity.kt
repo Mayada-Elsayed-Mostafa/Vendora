@@ -12,6 +12,9 @@ data class AddressEntity (
     val address: String,
     val type: String,
     val phone: String,
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
+    val email: String,
+    val lat: Double = 0.0,
+    val lng: Double = 0.0
 )
 

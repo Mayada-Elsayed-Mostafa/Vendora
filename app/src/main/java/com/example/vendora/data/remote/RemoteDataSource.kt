@@ -5,12 +5,17 @@ import com.example.vendora.CartLinesAddMutation
 import com.example.vendora.CartLinesRemoveMutation
 import com.example.vendora.CartLinesUpdateMutation
 import com.example.vendora.GetCartQuery
+import com.example.vendora.domain.model.address.CountryResponse
 import com.example.vendora.domain.model.brands.BrandsResponse
 import com.example.vendora.domain.model.category.CategoryResponse
 import com.example.vendora.domain.model.currency.CurrencyResponse
 import com.example.vendora.domain.model.customer.CreatedCustomerResponse
 import com.example.vendora.domain.model.customer.CustomerRequest
 import com.example.vendora.domain.model.discount.DiscountCode
+import com.example.vendora.domain.model.order.OrderPaymentResult
+import com.example.vendora.domain.model.order.OrderWrapper
+import com.example.vendora.domain.model.order.SingleOrderResponse
+import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
 import com.example.vendora.domain.model.payment.OrderResponse
@@ -37,7 +42,6 @@ interface RemoteDataSource {
 
     suspend fun getProductById(token: String, productId: Long): SingleProduct
 
-
     ///PayMob
     suspend fun getAuthToken(apiKey: String): AuthTokenResponse
 
@@ -54,6 +58,15 @@ interface RemoteDataSource {
     //Search
     suspend fun searchProducts(token: String, query: String): Products
 
+    //Orders
+    suspend fun getOrdersByEmail(token: String,email: String): UserOrdersResponse
+
+    suspend fun getOrderById(token: String,orderId: Long): SingleOrderResponse
+
+    suspend fun createShopifyOrder(token: String,orderWrapper: OrderWrapper): SingleOrderResponse
+
+    suspend fun getOrderPaymentResult(id: Int,token: String): OrderPaymentResult
+
 
 
     /// cart Methods
@@ -67,4 +80,7 @@ interface RemoteDataSource {
     suspend fun removeFromCart(cartId: String, lineIds: List<String>) : CartLinesRemoveMutation.Data
 
     suspend fun getCart(cartId: String): GetCartQuery.Data
+
+    //address
+    suspend fun getCountryById(token: String, countryId: Long): CountryResponse
 }

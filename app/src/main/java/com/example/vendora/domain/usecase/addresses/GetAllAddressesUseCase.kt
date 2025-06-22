@@ -10,3 +10,9 @@ class GetAllAddressesUseCase @Inject constructor(private val addressRepository: 
         return addressRepository.getAllAddresses()
     }
 }
+
+class GetAllAddressesByEmailUseCase @Inject constructor(private val addressRepository: AddressRepository) {
+    suspend operator fun invoke(email:String):Result<List<AddressEntity>>{
+        return addressRepository.getAllAddressesByEmail(email)
+    }
+}

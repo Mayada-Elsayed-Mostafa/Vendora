@@ -13,6 +13,7 @@ import com.example.vendora.utils.wrapper.Result
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,6 +80,10 @@ class SignUpViewModel @Inject constructor(
                             if (verifyTask.isSuccessful) {
                                 _signUpState.value = SignUpState(
                                     successMessage = "Account created! Please verify your email before logging in."
+                                )
+                                updateFirebaseUserProfile(
+                                    "$firstName $lastName",
+                                    viewModelScope
                                 )
                                 auth.signOut()
 

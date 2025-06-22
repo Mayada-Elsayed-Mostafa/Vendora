@@ -20,3 +20,28 @@ data class Product(
     val variants: List<Variant> = emptyList(),
     val vendor: String = ""
 )
+
+fun Product.findVariantIdByColorAndSize(
+    selectedColor: String? = null,
+    selectedSize: String? = null
+): String? {
+
+    val colorOptionIndex = options.indexOfFirst { it.name.equals("color", ignoreCase = true) }
+    val sizeOptionIndex = options.indexOfFirst { it.name.equals("size", ignoreCase = true) }
+
+    return variants.firstOrNull { variant ->
+
+        (selectedColor == null || colorOptionIndex == -1 || when (colorOptionIndex) {
+            0 -> variant.option1 == selectedColor
+            1 -> variant.option2 == selectedColor
+            2 -> variant.option3.toString() == selectedColor
+            else -> true
+        }) &&
+                (selectedSize == null || sizeOptionIndex == -1 || when (sizeOptionIndex) {
+                    0 -> variant.option1 == selectedSize
+                    1 -> variant.option2 == selectedSize
+                    2 -> variant.option3.toString() == selectedSize
+                    else -> true
+                })
+    }?.admin_graphql_api_id
+}

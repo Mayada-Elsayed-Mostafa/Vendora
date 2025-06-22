@@ -20,8 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -52,24 +50,38 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.ui.screens.brandDetails.OnError
-import com.example.vendora.ui.screens.brandDetails.OnLoading
+import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.ui.screens.brandDetails.ProductCard
+import com.example.vendora.ui.ui_model.DialogAttributes
+import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.ui.ui_model.subCategories
 import com.example.vendora.ui.ui_model.tabs
 import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun CategoryScreen(
     viewModel: CategoryViewModel = hiltViewModel(),
     navigateToProductInfo: (Long) -> Unit,
     navigateToCart: () -> Unit,
-    navigateToFavorite: () -> Unit
+    navigateToFavorite: () -> Unit,
+    navigateToLogin: () -> Unit
 ) {
 
     val state = viewModel.uiState.collectAsStateWithLifecycle()
+    val showGuestModeDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.collectCategories()
+    }
+
+    if (showGuestModeDialog.value) {
+        GuestModeDialog(
+            attributes = DialogAttributes(
+                onDismiss = { showGuestModeDialog.value = false },
+                onAccept = { navigateToLogin() }
+            )
+        )
     }
 
     Scaffold(
@@ -80,8 +92,20 @@ fun CategoryScreen(
             CategoryAppBar(
                 result = emptyList(),
                 onSearchQueryChange = { query -> println(query) },
-                navigateToCart = navigateToCart,
-                navigateToFavorite = navigateToFavorite
+                navigateToCart = {
+                    if (viewModel.isGuestMode()){
+                        showGuestModeDialog.value = true
+                    } else {
+                        navigateToCart()
+                    }
+                },
+                navigateToFavorite = {
+                    if (viewModel.isGuestMode()){
+                        showGuestModeDialog.value = true
+                    } else {
+                        navigateToCart()
+                    }
+                }
             )
         },
         floatingActionButton = {

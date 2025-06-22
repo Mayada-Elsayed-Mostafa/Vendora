@@ -11,10 +11,11 @@ import com.example.vendora.domain.repo_interfaces.CartRepository
 import com.example.vendora.domain.usecase.cart.AddToCartUseCase
 import com.example.vendora.domain.usecase.cart.CreateCartUseCase
 import com.example.vendora.domain.usecase.cart.GetCartUseCase
+import com.example.vendora.domain.usecase.cart.RemoveAllLinesFromCartUseCase
 import com.example.vendora.domain.usecase.cart.RemoveFromCartUseCase
 import com.example.vendora.domain.usecase.cart.UpdateCartLineUseCase
-import com.example.vendora.ui.cart_screen.CartItem
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +32,8 @@ class CartViewModel @Inject constructor(
     private val updateCartLineUseCase: UpdateCartLineUseCase,
     private val removeFromCartUseCase: RemoveFromCartUseCase,
     private val getCartUseCase: GetCartUseCase,
-    private val repository: CartRepository
+    private val repository: CartRepository,
+    private val removeAllLinesFromCartUseCase: RemoveAllLinesFromCartUseCase,
 ):ViewModel(){
 
     private var _uiState = MutableStateFlow(CartUiState())
@@ -40,9 +42,70 @@ class CartViewModel @Inject constructor(
     private var _cartItems = MutableStateFlow<Result<GetCartQuery.Cart>>(Result.Loading)
     val cartItems = _cartItems.asStateFlow()
 
+    private val auth = FirebaseAuth.getInstance()
+
     init {
         _uiState.update { it.copy(cartId = repository.getCartId()) }
 
+        //_uiState.value.cartId?.let { loadCart(it) }
+
+    }
+
+
+
+    fun checkOrCreateCart(){
+        val email = auth.currentUser?.email
+        if (email != null){
+            val existingCardId = repository.getString(email,"")
+            println("existingCardId : $existingCardId")
+            if (existingCardId.isNotEmpty()){
+                _uiState.update { it.copy(cartId = existingCardId) }
+                loadCart(existingCardId)
+            }else{
+                println("email : $email")
+                createCartAndSave(email)
+            }
+        }else{
+            _uiState.update { it.copy(errorMessage = "User not logged in") }
+            println(_uiState.value.errorMessage)
+        }
+    }
+
+    private fun createCartAndSave(email: String){
+        viewModelScope.launch {
+            createCartUseCase.invoke()
+                .flowOn(Dispatchers.IO)
+                .collect{ result ->
+                    when(result){
+                        is Result.Failure -> {
+                            _uiState.update {
+                                it.copy(
+                                    createCartResult = result,
+                                    errorMessage = result.exception.message ?: "Failed to create cart"
+                                )
+                            }
+                        }
+                       is Result.Loading -> {
+                           _uiState.update { it.copy(createCartResult = result) }
+                       }
+                        is Result.Success -> {
+                            val cardId = result.data.id
+                            repository.saveString(email,cardId)
+
+                            _uiState.update {
+                                it.copy(
+                                    createCartResult = result,
+                                    cartId = result.data.id
+                                )
+                            }
+
+                            loadCart(result.data.id)
+
+                        }
+                    }
+
+                }
+        }
     }
 
     fun createCart(){
@@ -84,11 +147,12 @@ class CartViewModel @Inject constructor(
 
 
     fun addToCart(variantId:String,quantity: Int = 1){
-        val cartId = _uiState.value.cartId
-        if (cartId==null){
-            createCartAndAddProduct(variantId, quantity)
-            return
-        }
+
+
+        val cartId = repository.getString(auth.currentUser?.email?:"","")
+
+
+        println("addToCart Id :$cartId")
 
         _uiState.update {
             it.copy(
@@ -196,7 +260,7 @@ class CartViewModel @Inject constructor(
                                     errorMessage = null
                                 )
                             }
-                            loadCart(cartId)
+                            //loadCart(cartId)
                         }
                         is Result.Failure -> {
                             _uiState.update {
@@ -289,7 +353,6 @@ class CartViewModel @Inject constructor(
                                     errorMessage = null
                                 )
                             }
-
                             _cartItems.value = Result.Success(result.data)
 
                         }
@@ -315,6 +378,54 @@ class CartViewModel @Inject constructor(
         }
     }
 
+    fun clearCart() {
+        val cartId = _uiState.value.cartId ?: return
+
+        val currentCart = cartItems.value
+        if (currentCart !is Result.Success) return
+
+        val lineIds = currentCart.data.lines.edges.map { it.node.id }
+
+        if (lineIds.isEmpty()) return
+
+        _uiState.update { it.copy(isUpdatingCart = true, errorMessage = null) }
+
+        viewModelScope.launch {
+            removeAllLinesFromCartUseCase(cartId, lineIds)
+                .flowOn(Dispatchers.IO)
+                .collect { result ->
+                    when (result) {
+                        is Result.Success -> {
+                            _uiState.update {
+                                it.copy(
+                                    removeFromCartResult = result,
+                                    isUpdatingCart = false,
+                                    totalQuantity = result.data.totalQuantity,
+                                    totalAmount = result.data.cost.totalAmount.amount.toString(),
+                                    currencyCode = result.data.cost.totalAmount.currencyCode.toString(),
+                                    errorMessage = null
+                                )
+                            }
+                            loadCart(cartId)
+                        }
+                        is Result.Failure -> {
+                            _uiState.update {
+                                it.copy(
+                                    removeFromCartResult = result,
+                                    isUpdatingCart = false,
+                                    errorMessage = result.exception.message ?: "Failed to clear cart"
+                                )
+                            }
+                        }
+                        is Result.Loading -> {
+                            _uiState.update {
+                                it.copy(removeFromCartResult = result)
+                            }
+                        }
+                    }
+                }
+        }
+    }
 
 
 
@@ -336,4 +447,3 @@ data class CartUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
-

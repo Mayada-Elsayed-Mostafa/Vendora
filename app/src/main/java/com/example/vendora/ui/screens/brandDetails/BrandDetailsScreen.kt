@@ -50,6 +50,7 @@ import coil3.request.ImageRequest
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.ui.screens.order.OnLoading
 
 @Composable
 fun BrandDetailsScreen(
@@ -170,7 +171,7 @@ fun OnSuccess(
 }
 
 @Composable
-fun OnError(getProducts: () -> Unit) {
+fun OnError(getProducts: () -> Unit = {}) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,

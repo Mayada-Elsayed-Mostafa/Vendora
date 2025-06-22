@@ -3,11 +3,16 @@ package com.example.vendora.ui.screens.address.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.domain.model.address.AddressEntity
+import com.example.vendora.domain.model.address.CountryResponse
+import com.example.vendora.domain.model.address.Province
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.usecase.addresses.DeleteAddressUseCase
+import com.example.vendora.domain.usecase.addresses.GetAllAddressesByEmailUseCase
 import com.example.vendora.domain.usecase.addresses.GetAllAddressesUseCase
+import com.example.vendora.domain.usecase.addresses.GetCountryByIdUseCase
 import com.example.vendora.domain.usecase.addresses.InsertAddressUseCase
 import com.example.vendora.utils.wrapper.Result
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +26,9 @@ import javax.inject.Inject
 class AddressViewModel @Inject constructor(
     private val getAllAddressesUseCase: GetAllAddressesUseCase,
     private val insertAddressUseCase: InsertAddressUseCase,
-    private val deleteAddressUseCase: DeleteAddressUseCase
+    private val deleteAddressUseCase: DeleteAddressUseCase,
+    private val getCountryByIdUseCase: GetCountryByIdUseCase,
+    private val getAllAddressesByEmailUseCase: GetAllAddressesByEmailUseCase
 ) : ViewModel() {
 
     private val _address = MutableStateFlow<Result<List<AddressEntity>>>(Result.Loading)
@@ -33,8 +40,17 @@ class AddressViewModel @Inject constructor(
     private val _defaultAddress = MutableStateFlow<AddressEntity?>(null)
     val defaultAddress: StateFlow<AddressEntity?> = _defaultAddress
 
+    private val _provinces = MutableStateFlow<Result<CountryResponse>>(Result.Loading)
+     val provinces = _provinces.asStateFlow()
+
+    private val _selectedProvince = MutableStateFlow<String?>(null)
+    val selectedProvince = _selectedProvince.asStateFlow()
+
+    val email = FirebaseAuth.getInstance().currentUser?.email
+
+
     init {
-        getAllAddresses()
+        getCountry()
     }
     fun getAllAddresses() {
         viewModelScope.launch {
@@ -43,10 +59,21 @@ class AddressViewModel @Inject constructor(
         }
     }
 
+    fun getAllAddressesByEmail(email: String) {
+
+        viewModelScope.launch {
+            _address.value = getAllAddressesByEmailUseCase(email)
+            updateDefaultAddress()
+        }
+    }
+
     fun insertAddress(addressEntity: AddressEntity) {
         viewModelScope.launch {
             insertAddressUseCase(addressEntity)
-            getAllAddresses()
+            if (email !=null){
+                 getAllAddressesByEmail(email)
+            }
+
             _message.value = "Address added successfully"
         }
     }
@@ -55,7 +82,9 @@ class AddressViewModel @Inject constructor(
     fun deleteAddress(addressId: Int) {
         viewModelScope.launch {
             deleteAddressUseCase(addressId)
-            getAllAddresses()
+            if (email !=null){
+                getAllAddressesByEmail(email)
+            }
             _message.value = "Address deleted"
         }
     }
@@ -68,5 +97,26 @@ class AddressViewModel @Inject constructor(
     fun clearMessage() {
         _message.value = null
     }
+
+
+    fun getCountry(){
+        viewModelScope.launch {
+            getCountryByIdUseCase.invoke(countryId = 719296200935)
+                .flowOn(Dispatchers.IO)
+                .collect{
+                    _provinces.value = it
+                }
+        }
+    }
+
+    fun changeSelectedProvince(provinceName: String) {
+        _selectedProvince.value = provinceName
+    }
+
+    fun isValidPhoneNumber(phone: String): Boolean {
+        val regex = Regex("^01[0125]\\d{8}$")
+        return regex.matches(phone)
+    }
+
 
 }

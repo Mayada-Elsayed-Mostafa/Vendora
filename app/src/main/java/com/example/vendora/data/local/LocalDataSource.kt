@@ -10,7 +10,9 @@ interface LocalDataSource {
 
     suspend fun deleteAddress(addressId: Int): Int
 
-    suspend fun clearDefaultAddress()
+    suspend fun clearDefaultAddress(email: String)
+
+    suspend fun getAddressesByEmail(email: String): List<AddressEntity>
 
     //Currency
 

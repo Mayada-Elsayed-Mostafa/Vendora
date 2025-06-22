@@ -18,6 +18,8 @@ interface CartRepository {
 
     fun removeFromCart(cartId: String,lineId: String): Flow<Result<CartLinesRemoveMutation.Cart>>
 
+    fun removeAllLinesFromCart(cartId: String,lineId: List<String>): Flow<Result<CartLinesRemoveMutation.Cart>>
+
     fun getCart(cartId: String): Flow<Result<GetCartQuery.Cart>>
 
 
@@ -25,4 +27,8 @@ interface CartRepository {
     fun getCartId():String
 
     fun saveCartId(cartId: String)
+
+    fun saveString(key: String, value: String)
+
+    fun getString(key: String, defaultValue: String): String
 }

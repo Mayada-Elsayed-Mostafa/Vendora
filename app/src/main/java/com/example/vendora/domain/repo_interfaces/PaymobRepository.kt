@@ -1,5 +1,6 @@
 package com.example.vendora.domain.repo_interfaces
 
+import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
 import com.example.vendora.domain.model.payment.OrderResponse
@@ -14,4 +15,6 @@ interface PaymobRepository {
     fun createOrder (orderRequest: OrderRequest): Flow<Result<OrderResponse>>
 
     fun getPaymentKey (paymentKeyRequest: PaymentKeyRequest) : Flow<Result<PaymentKeyResponse>>
+
+    fun getOrderPaymentResult(id: Int,token: String): Flow<Result<OrderPaymentResult>>
 }

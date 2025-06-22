@@ -1,6 +1,7 @@
 package com.example.vendora.data.repo_implementation
 
 import com.example.vendora.data.remote.RemoteDataSource
+import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.OrderRequest
 import com.example.vendora.domain.model.payment.OrderResponse
@@ -41,6 +42,16 @@ class PaymobRepositoryImpl @Inject constructor(
         emit(Result.Loading)
         try {
             val response = remoteSource.getPaymentKey(paymentKeyRequest)
+            emit(Result.Success(response))
+        } catch (e: Exception) {
+            emit(Result.Failure(e))
+        }
+    }
+
+    override fun getOrderPaymentResult(id: Int, token: String): Flow<Result<OrderPaymentResult>> = flow {
+        emit(Result.Loading)
+        try {
+            val response = remoteSource.getOrderPaymentResult(id,token)
             emit(Result.Success(response))
         } catch (e: Exception) {
             emit(Result.Failure(e))

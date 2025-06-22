@@ -48,3 +48,12 @@ class GetCartUseCase @Inject constructor(
         return repository.getCart(cartId)
     }
 }
+
+
+class RemoveAllLinesFromCartUseCase @Inject constructor(
+    private val repository: CartRepository
+) {
+    operator fun invoke(cartId: String, linesId: List<String>): Flow<Result<CartLinesRemoveMutation.Cart>> {
+        return repository.removeAllLinesFromCart(cartId, linesId)
+    }
+}

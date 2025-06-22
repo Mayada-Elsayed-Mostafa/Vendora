@@ -1,5 +1,7 @@
 package com.example.vendora.ui.screens.sign
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -158,5 +161,12 @@ fun SignInScreen(viewModel: SignInViewModel = viewModel(), onNavigateToSignUp: (
             title = { Text("Error") },
             text = { Text(dialogMessage.value) }
         )
+    }
+
+    // this is added if guest wanted to authenticate so it cant return inside the app again.
+    val context = LocalContext.current
+
+    BackHandler {
+        (context as? Activity)?.finish()
     }
 }

@@ -10,8 +10,11 @@ import com.example.vendora.core.navigation.BottomNavBar
 import com.example.vendora.core.navigation.BrandDetails
 import com.example.vendora.core.navigation.Category
 import com.example.vendora.core.navigation.Favorites
+import com.example.vendora.core.navigation.CustomerOrders
 import com.example.vendora.core.navigation.Home
 import com.example.vendora.core.navigation.Me
+import com.example.vendora.core.navigation.OrderDetails
+import com.example.vendora.core.navigation.PaymentResult
 import com.example.vendora.core.navigation.ProductInfo
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.Search
@@ -28,6 +31,9 @@ import com.example.vendora.ui.screens.category.CategoryScreen
 import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.favorites.FavoritesScreen
 import com.example.vendora.ui.screens.home.HomeScreen
+import com.example.vendora.ui.screens.order.CustomerOrders
+import com.example.vendora.ui.screens.order.OrderDetailsScreen
+import com.example.vendora.ui.screens.order.PaymentResultScreen
 import com.example.vendora.ui.screens.productInfo.ProductInfoScreen
 import com.example.vendora.ui.screens.profile.ProfileScreen
 import com.example.vendora.ui.screens.search.SearchScreen
@@ -44,7 +50,6 @@ fun VendorApp() {
         topBar = {},
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
-        println(innerPadding)
         NavHost(
             navController = navController,
             startDestination = SignUp,
@@ -56,6 +61,7 @@ fun VendorApp() {
                     navigateToBrandDetails = { brandId ->
                         navController.navigate(BrandDetails(id = brandId))
                     },
+                    navigateToLogin = { navController.navigate(SignIn) },
                     paddingValues = innerPadding
                 )
             }
@@ -66,7 +72,8 @@ fun VendorApp() {
                         navController.navigate(ProductInfo(productId))
                     },
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
-                    navigateToFavorite = { navController.navigate(Favorites) }
+                    navigateToLogin = { navController.navigate(SignIn) },
+                    navigateToFavorite = {}
                 )
             }
 
@@ -74,7 +81,9 @@ fun VendorApp() {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
-                    navigateToOrders = {}
+                    navigateToFavorite = {},
+                    navigateToOrders = { navController.navigate(CustomerOrders) },
+                    navigateToLogin = { navController.navigate(SignIn) }
                 )
             }
 
@@ -116,11 +125,13 @@ fun VendorApp() {
                     token = token,
                     firstToken = firstToken,
                     orderId = orderId
-                ) { orderID, firstToken, isSuccess ->
-                    if (isSuccess) {
-                        navController.navigate(ScreenRoute.DiscountScreen)
-                    } else {
-                        navController.navigate(Home)
+                ) { order_Id, first_token, _ ->
+                    navController.navigate(
+                        PaymentResult(id = order_Id, token = first_token)
+                    ) {
+                        popUpTo(ScreenRoute.CartScreen) {
+                            inclusive = true
+                        }
                     }
                 }
             }
@@ -160,8 +171,7 @@ fun VendorApp() {
             }
 
             composable<ScreenRoute.DiscountScreen> {
-                DiscountScreen() { selectedCode ->
-                    println(selectedCode)
+                DiscountScreen { selectedCode ->
                     if (selectedCode != null) {
                         navController.previousBackStackEntry
                             ?.savedStateHandle
@@ -171,18 +181,46 @@ fun VendorApp() {
                 }
             }
 
-            composable<ScreenRoute.SettingsScreen> {
-                SettingsScreen(navController)
-            }
-
-            composable<Favorites> {
-                FavoritesScreen(
-                    onProductClick = { product ->
-                        navController.navigate(ProductInfo(product.id))
+            composable<CustomerOrders> {
+                CustomerOrders(
+                    navigateUp = { navController.navigateUp() },
+                    navigateToOrderDetails = { id ->
+                        navController.navigate(OrderDetails(id = id))
                     }
                 )
             }
 
+            composable<OrderDetails> { navBackStackEntry ->
+                val orderDetails: OrderDetails = navBackStackEntry.toRoute()
+                OrderDetailsScreen(
+                    orderId = orderDetails.id,
+                    navigateUp = { navController.navigateUp() }
+                )
+            }
+
+            composable<PaymentResult> { navBackStackEntry ->
+                val paymentResult: PaymentResult = navBackStackEntry.toRoute()
+                PaymentResultScreen(
+                    orderId = paymentResult.id,
+                    token = paymentResult.token,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<ScreenRoute.SettingsScreen> {
+                composable<ScreenRoute.SettingsScreen> {
+                    SettingsScreen(navController)
+                }
+
+                composable<Favorites> {
+                    FavoritesScreen(
+                        onProductClick = { product ->
+                            navController.navigate(ProductInfo(product.id))
+                        }
+                    )
+                }
+
+            }
         }
     }
 }
