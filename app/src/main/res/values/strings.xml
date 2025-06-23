@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Vendora</string>
+    <string name="vendora">Vendora</string>
+    <string name="oops">Oops 🤦‍♂️</string>
+    <string name="try_again">Try again</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="hello_welcome_back">Hello,\n\nWelcome Back 🥰</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="phone">Phone</string>
+    <string name="last_name">Last Name</string>
+    <string name="first_name">First Name</string>
+    <string name="lets_create_account">Lets create account</string>
 </resources>
