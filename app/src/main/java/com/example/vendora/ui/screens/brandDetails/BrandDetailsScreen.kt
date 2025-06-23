@@ -2,7 +2,9 @@ package com.example.vendora.ui.screens.brandDetails
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -17,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,10 +31,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,17 +49,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
-import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.ui.screens.order.OnLoading
+import com.example.vendora.utils.wrapper.Result
+import kotlin.math.roundToInt
 
 @Composable
 fun BrandDetailsScreen(
@@ -61,9 +74,24 @@ fun BrandDetailsScreen(
 ) {
 
     val products = viewModel.uiState.collectAsStateWithLifecycle()
+    val showPriceFilterDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.getProductsByBrandId(id)
+    }
+
+    if (showPriceFilterDialog.value) {
+        PriceSlider(
+            resetFilter = { viewModel.resetProducts() },
+            onSliderChange = { maxPrice ->
+                viewModel.filterProductsByPrice(maxPrice)
+                showPriceFilterDialog.value = false
+            },
+            onDismiss = {
+                viewModel.resetProducts()
+                showPriceFilterDialog.value = false
+            }
+        )
     }
 
     Column(
@@ -78,6 +106,7 @@ fun BrandDetailsScreen(
                 viewModel.filterProducts(query)
             },
             navigateUp = navigateUp,
+            priceFilter = showPriceFilterDialog
         )
 
         when (products.value.products) {
@@ -100,11 +129,81 @@ fun BrandDetailsScreen(
     }
 }
 
+@Composable
+fun PriceSlider(
+    resetFilter: () -> Unit,
+    onSliderChange: (Float) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    Dialog(
+        onDismissRequest = resetFilter,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = true,
+        ),
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.wrapContentHeight()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    "Filter by price",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(Modifier.height(16.dp))
+                Slider(
+                    value = sliderPosition,
+                    valueRange = 0f..500f,
+                    onValueChange = { sliderPosition = it }
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    sliderPosition.roundToInt().toString(),
+                )
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                    ) {
+                        Text(
+                            "reset",
+                            color = if (isSystemInDarkTheme()) Color.White else Color.Black
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            onSliderChange(sliderPosition)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+                        )
+                    ) {
+                        Text("apply")
+                    }
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopScreenSearchBar(
     onInputQuery: (query: String) -> Unit,
     navigateUp: () -> Unit,
+    priceFilter: MutableState<Boolean>
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val expanded by remember { mutableStateOf(false) }
@@ -140,7 +239,9 @@ fun TopScreenSearchBar(
         trailingIcon = {
             Row {
                 IconButton(
-                    onClick = {}
+                    onClick = {
+                        priceFilter.value = !priceFilter.value
+                    }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.filter),
@@ -165,7 +266,7 @@ fun OnSuccess(
             items = products,
             key = { item -> item.id }
         ) { product ->
-            ProductCard(product,navigateToProduct)
+            ProductCard(product, navigateToProduct)
         }
     }
 }
@@ -252,15 +353,4 @@ fun ProductCard(
             )
         }
     }
-}
-
-@Preview
-@Composable
-private fun TopScreenSearchBarPreview() {
-    TopScreenSearchBar(
-        onInputQuery = { query ->
-            println(query)
-        },
-        navigateUp = {},
-    )
 }
