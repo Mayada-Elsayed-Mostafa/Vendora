@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -54,39 +55,19 @@ fun SearchScreen(
     onProductClicked: (Long) -> Unit
 ) {
     val searchResults = viewModel.searchResults.collectAsStateWithLifecycle()
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 100.dp)
-    ) {
-        item {
-            ProductsSearchBar(
-                onInputQuery = { viewModel.updateSearchQuery(it) }
-            )
-        }
-
-        when (val result = searchResults.value) {
-            is Result.Loading -> {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillParentMaxSize()
-                            .padding(vertical = 16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        LottieLoader(
-                            resId = R.raw.search_loading,
-                            modifier = Modifier
-                                .width(300.dp)
-                                .height(300.dp)
-                        )
-                    }
-                }
+    Scaffold { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            item {
+                ProductsSearchBar(
+                    onInputQuery = { viewModel.updateSearchQuery(it) }
+                )
             }
-
-            is Result.Success -> {
-                if (result.data.isEmpty()) {
+            when (val result = searchResults.value) {
+                is Result.Loading -> {
                     item {
                         Box(
                             modifier = Modifier
@@ -95,45 +76,68 @@ fun SearchScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             LottieLoader(
-                                resId = R.raw.no_results,
+                                resId = R.raw.search_loading,
                                 modifier = Modifier
                                     .width(300.dp)
                                     .height(300.dp)
                             )
                         }
                     }
-                } else {
-                    item {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 0.dp, max = 10000.dp)
-                                .padding(8.dp),
-                            userScrollEnabled = false
-                        ) {
-                            items(result.data, key = { it.id }) { product ->
-                                ProductCard(product = product, navigateToProduct = onProductClicked)
+                }
+
+                is Result.Success -> {
+                    if (result.data.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxSize()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                LottieLoader(
+                                    resId = R.raw.no_results,
+                                    modifier = Modifier
+                                        .width(300.dp)
+                                        .height(300.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        item {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 0.dp, max = 10000.dp)
+                                    .padding(8.dp),
+                                userScrollEnabled = false
+                            ) {
+                                items(result.data, key = { it.id }) { product ->
+                                    ProductCard(
+                                        product = product,
+                                        navigateToProduct = onProductClicked
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            is Result.Failure -> {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillParentMaxSize()
-                            .padding(vertical = 16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        LottieLoader(
-                            resId = R.raw.search_error,
+                is Result.Failure -> {
+                    item {
+                        Box(
                             modifier = Modifier
-                                .width(300.dp)
-                                .height(300.dp)
-                        )
+                                .fillParentMaxSize()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LottieLoader(
+                                resId = R.raw.search_error,
+                                modifier = Modifier
+                                    .width(300.dp)
+                                    .height(300.dp)
+                            )
+                        }
                     }
                 }
             }
