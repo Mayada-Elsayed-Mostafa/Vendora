@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,43 +65,45 @@ fun ProductInfoScreen(
         viewModel.loadProduct(productId)
     }
 
-    when (productResult) {
-        is Result.Success -> {
-            val product = (productResult as Result.Success<Product>).data
+    Scaffold { innerPadding ->
+        when (productResult) {
+            is Result.Success -> {
+                val product = (productResult as Result.Success<Product>).data
 
-            Column {
-                ProductImagesCarousel(product.images)
-
-                Card(
-                    modifier = Modifier
-                        .padding(12.dp)
-                ) {
-                    Column(
+                Column {
+                    ProductImagesCarousel(product.images)
+                    Card(
                         modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                            .padding(8.dp)
+                            .padding(innerPadding)
                     ) {
-                        ProductInfoSection(
-                            viewModel = viewModel,
-                            favoritesViewModel = favoritesViewModel,
-                            product
-                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .verticalScroll(rememberScrollState())
+                                .padding(8.dp)
+                        ) {
+                            ProductInfoSection(
+                                viewModel = viewModel,
+                                favoritesViewModel = favoritesViewModel,
+                                product
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        is Result.Failure -> {
-            val exception = (productResult as Result.Failure).exception
-            Text("Error loading product: ${exception.message}")
-        }
-
-        Result.Loading -> {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Loading product info...")
+            is Result.Failure -> {
+                val exception = (productResult as Result.Failure).exception
+                Text("Error loading product: ${exception.message}")
             }
-        }
 
+            Result.Loading -> {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("Loading product info...")
+                }
+            }
+
+        }
     }
 }
 
@@ -320,7 +323,11 @@ fun ProductInfoBodySection(viewModel: ProductInfoViewModel, product: Product) {
 }
 
 @Composable
-fun ProductInfoFooterSection(product: Product,viewModel: ProductInfoViewModel= hiltViewModel() ,cartViewModel: CartViewModel= hiltViewModel()) {
+fun ProductInfoFooterSection(
+    product: Product,
+    viewModel: ProductInfoViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel()
+) {
     val uiState by cartViewModel.uiState.collectAsState()
     val quantity by viewModel.quantity
     val selectedSize by viewModel.selectedSize
@@ -343,13 +350,16 @@ fun ProductInfoFooterSection(product: Product,viewModel: ProductInfoViewModel= h
         Button(
             enabled = !uiState.isAddingToCart,
             onClick = {
-            /* Handle adding to card */
+                /* Handle adding to card */
                 println("Clicked ${product.variants}")
-                println("Clicked ${product.id} ${selectedColor } && $selectedSize")
-                cartViewModel.addToCart(product.findVariantIdByColorAndSize(selectedColor,selectedSize)?: product.variants[0].admin_graphql_api_id,quantity)
-            }
-
-            , modifier = Modifier
+                println("Clicked ${product.id} ${selectedColor} && $selectedSize")
+                cartViewModel.addToCart(
+                    product.findVariantIdByColorAndSize(
+                        selectedColor,
+                        selectedSize
+                    ) ?: product.variants[0].admin_graphql_api_id, quantity
+                )
+            }, modifier = Modifier
                 .padding(start = 16.dp)
                 .weight(1f)
         ) {
