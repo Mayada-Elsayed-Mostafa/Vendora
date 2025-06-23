@@ -20,11 +20,13 @@ import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.core.navigation.Search
 import com.example.vendora.core.navigation.SignIn
 import com.example.vendora.core.navigation.SignUp
+import com.example.vendora.core.navigation.SplashScreen
 import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.cart_screen.CheckoutScreen
 import com.example.vendora.ui.cart_screen.PaymentScreen
 import com.example.vendora.ui.payment_methods.CashOnDeliveryScreen
 import com.example.vendora.ui.payment_methods.VisaScreen
+import com.example.vendora.ui.screens.SplashScreen
 import com.example.vendora.ui.screens.address.view.AddAddressScreen
 import com.example.vendora.ui.screens.address.view.AddressScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
@@ -53,8 +55,23 @@ fun VendorApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = SignIn,
+            startDestination = SplashScreen,
         ) {
+            composable<SplashScreen> {
+                SplashScreen(
+                    onNavigateToHome = {
+                        navController.navigate(Home) {
+                            popUpTo(SplashScreen) { inclusive = true }
+                        }
+                    },
+                    onNavigateToSignIn = {
+                        navController.navigate(SignIn) {
+                            popUpTo(SplashScreen) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             composable<Home> {
                 HomeScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
@@ -74,7 +91,7 @@ fun VendorApp() {
                     },
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToLogin = { navController.navigate(SignIn) },
-                    navigateToFavorite = {navController.navigate(Favorites)}
+                    navigateToFavorite = { navController.navigate(Favorites) }
                 )
             }
 
@@ -82,7 +99,7 @@ fun VendorApp() {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
-                    navigateToFavorite = {navController.navigate(Favorites)},
+                    navigateToFavorite = { navController.navigate(Favorites) },
                     navigateToOrders = { navController.navigate(CustomerOrders) },
                     navigateToLogin = { navController.navigate(SignIn) }
                 )
@@ -223,13 +240,15 @@ fun VendorApp() {
 
             composable<ScreenRoute.CashDeliveryScreen> { navBackStackEntry ->
 
-                val token: String = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().firstToken
+                val token: String =
+                    navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().firstToken
                 val type: String = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().type
-                val orderId: Int = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().orderId
+                val orderId: Int =
+                    navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().orderId
                 CashOnDeliveryScreen(
                     token = token,
                     orderId = orderId,
-                    type= type
+                    type = type
                 )
             }
         }

@@ -63,3 +63,6 @@ data class PaymentResult(
 
 @Serializable
 object Favorites
+
+@Serializable
+object SplashScreen
