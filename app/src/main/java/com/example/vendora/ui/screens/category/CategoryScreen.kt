@@ -50,8 +50,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.ui.screens.brandDetails.OnError
-import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.ui.screens.brandDetails.ProductCard
+import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.ui.ui_model.subCategories
@@ -93,17 +93,17 @@ fun CategoryScreen(
                 result = emptyList(),
                 onSearchQueryChange = { query -> println(query) },
                 navigateToCart = {
-                    if (viewModel.isGuestMode()){
+                    if (viewModel.isGuestMode()) {
                         showGuestModeDialog.value = true
                     } else {
                         navigateToCart()
                     }
                 },
                 navigateToFavorite = {
-                    if (viewModel.isGuestMode()){
+                    if (viewModel.isGuestMode()) {
                         showGuestModeDialog.value = true
                     } else {
-                        navigateToCart()
+                        navigateToFavorite()
                     }
                 }
             )
@@ -163,7 +163,7 @@ fun OnSuccess(
 fun CategoryAppBar(
     result: List<String>,
     onSearchQueryChange: (String) -> Unit,
-    navigateToCart:() -> Unit,
+    navigateToCart: () -> Unit,
     navigateToFavorite: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -182,7 +182,9 @@ fun CategoryAppBar(
         placeholder = { Text("search for product") },
         trailingIcon = {
             Row {
-                IconButton(onClick = { /* do something */ }) {
+                IconButton(onClick = {
+                    navigateToFavorite()
+                }) {
                     Icon(
                         painter = painterResource(R.drawable.favorite),
                         contentDescription = "Favorite",
@@ -253,7 +255,7 @@ fun ProductsGrid(
             items = products,
             key = { item: Product -> item.id }
         ) {
-            ProductCard(it,navigateToProductInfo)
+            ProductCard(it, navigateToProductInfo)
         }
     }
 }
@@ -294,14 +296,14 @@ fun SubCategoryFAB(
         FloatingActionButton(
             onClick = {
                 expanded = !expanded
-                if (!expanded){
+                if (!expanded) {
                     onSubCategoryClicked("")
                 }
             },
             contentColor = contentColor,
             containerColor = containerColor
         ) {
-            if (expanded){
+            if (expanded) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = null

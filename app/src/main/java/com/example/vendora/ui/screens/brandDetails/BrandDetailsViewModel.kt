@@ -57,10 +57,30 @@ class BrandDetailsViewModel @Inject constructor(private val useCase: GetProducts
         }
         Log.d("BrandScreen", _uiState.value.filteredProducts.size.toString())
     }
+
+    fun filterProductsByPrice(maxPrice: Float){
+        _uiState.update {
+            val filteredProducts = _uiState.value.filteredProducts
+            it.copy(
+                filteredProducts = filteredProducts
+                    .filter { product ->
+                        product.variants[0].price.toFloat() < maxPrice
+                    }
+            )
+        }
+    }
+
+    fun resetProducts(){
+        _uiState.update {
+            it.copy(
+                filteredProducts = (it.products as Result.Success).data
+            )
+        }
+    }
 }
 
 data class BrandDetailsUIState(
     val searchQuery: String = "",
     val products: Result<List<Product>> = Result.Loading,
-    val filteredProducts: List<Product> = emptyList()
+    var filteredProducts: List<Product> = emptyList()
 )

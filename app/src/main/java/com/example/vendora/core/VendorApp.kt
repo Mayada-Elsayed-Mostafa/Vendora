@@ -53,7 +53,7 @@ fun VendorApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = SignUp,
+            startDestination = SignIn,
         ) {
             composable<Home> {
                 HomeScreen(
@@ -74,7 +74,7 @@ fun VendorApp() {
                     },
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToLogin = { navController.navigate(SignIn) },
-                    navigateToFavorite = {}
+                    navigateToFavorite = {navController.navigate(Favorites)}
                 )
             }
 
@@ -82,7 +82,7 @@ fun VendorApp() {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
-                    navigateToFavorite = {},
+                    navigateToFavorite = {navController.navigate(Favorites)},
                     navigateToOrders = { navController.navigate(CustomerOrders) },
                     navigateToLogin = { navController.navigate(SignIn) }
                 )
