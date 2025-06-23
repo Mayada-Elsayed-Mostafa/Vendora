@@ -53,7 +53,7 @@ fun VendorApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Home,
+            startDestination = SignUp,
         ) {
             composable<Home> {
                 HomeScreen(
