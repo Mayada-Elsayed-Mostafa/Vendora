@@ -38,12 +38,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.payment.AuthTokenResponse
 import com.example.vendora.domain.model.payment.BillingData
@@ -95,7 +98,7 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
         CustomAppBar("Checkout Screen : $totalPrice EGP"){navController.popBackStack()}
 
 
-        PaymentMethodItem ("Visa", navToPaymentMethod = {
+        PaymentMethodItem ("Visa", R.drawable.visa,navToPaymentMethod = {
             if (paymentKeyState is Result.Success){
                 val paymentToken = (paymentKeyState as Result.Success<PaymentKeyResponse>).data.token
                 println("final token : $paymentToken")
@@ -108,16 +111,19 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
             }
         })
         Divider()
-        PaymentMethodItem ("PayPal", navToPaymentMethod = {/**/})
+        PaymentMethodItem ("Wallet", R.drawable.wallet,navToPaymentMethod = {/**/})
+
         Divider()
-        PaymentMethodItem ("Vodafone Cash", navToPaymentMethod = {/**/})
+        PaymentMethodItem ("Cash on delivery", R.drawable.cash_on_delivery,navToPaymentMethod = {
+            navController.navigate(ScreenRoute.CashDeliveryScreen(firstToken =token, orderId = orderId , type = "Cash"))
+        })
 
     }
 }
 
 
 @Composable
-fun PaymentMethodItem (title:String ,navToPaymentMethod:()->Unit ) {
+fun PaymentMethodItem (title:String ,icon: Int,navToPaymentMethod:()->Unit ) {
 
     Card(
         modifier = Modifier
@@ -153,9 +159,10 @@ fun PaymentMethodItem (title:String ,navToPaymentMethod:()->Unit ) {
                     verticalAlignment = Alignment.CenterVertically
                 ){
                     Icon(
-                        imageVector = Icons.Default.Home,
+
+                        painter = painterResource(icon),
                         contentDescription = "adddress",
-                        tint = MaterialTheme.colorScheme.surfaceContainer,
+                        tint = Color.Unspecified,
                         modifier = Modifier.size(28.dp)
                     )
                 }

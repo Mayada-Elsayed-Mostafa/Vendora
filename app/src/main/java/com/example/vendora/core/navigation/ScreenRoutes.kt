@@ -36,4 +36,11 @@ sealed class ScreenRoute(
 
     @Serializable
     object SettingsScreen : ScreenRoute("SettingsScreen")
+
+    @Serializable
+    data class CashDeliveryScreen(
+        val orderId: Int,
+        val firstToken: String,
+        val type: String,
+    ) : ScreenRoute("CashDeliveryScreen")
 }

@@ -23,6 +23,7 @@ import com.example.vendora.core.navigation.SignUp
 import com.example.vendora.ui.cart_screen.CartScreen
 import com.example.vendora.ui.cart_screen.CheckoutScreen
 import com.example.vendora.ui.cart_screen.PaymentScreen
+import com.example.vendora.ui.payment_methods.CashOnDeliveryScreen
 import com.example.vendora.ui.payment_methods.VisaScreen
 import com.example.vendora.ui.screens.address.view.AddAddressScreen
 import com.example.vendora.ui.screens.address.view.AddressScreen
@@ -52,7 +53,7 @@ fun VendorApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = SignUp,
+            startDestination = Home,
         ) {
             composable<Home> {
                 HomeScreen(
@@ -216,6 +217,19 @@ fun VendorApp() {
                     onProductClick = { product ->
                         navController.navigate(ProductInfo(product.id))
                     }
+                )
+            }
+
+
+            composable<ScreenRoute.CashDeliveryScreen> { navBackStackEntry ->
+
+                val token: String = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().firstToken
+                val type: String = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().type
+                val orderId: Int = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().orderId
+                CashOnDeliveryScreen(
+                    token = token,
+                    orderId = orderId,
+                    type= type
                 )
             }
         }
