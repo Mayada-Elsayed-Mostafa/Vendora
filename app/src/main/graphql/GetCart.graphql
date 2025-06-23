@@ -20,6 +20,8 @@ query GetCart($id: ID!) {
                         ... on ProductVariant {
                             id
                             title
+                            quantityAvailable
+                            availableForSale
                             price {
                                 amount
                                 currencyCode

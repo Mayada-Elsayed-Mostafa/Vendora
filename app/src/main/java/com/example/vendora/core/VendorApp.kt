@@ -91,7 +91,7 @@ fun VendorApp() {
                     },
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToLogin = { navController.navigate(SignIn) },
-                    navigateToFavorite = { navController.navigate(Favorites) }
+                    navigateToFavorite = {navController.navigate(Favorites)}
                 )
             }
 
@@ -99,7 +99,7 @@ fun VendorApp() {
                 ProfileScreen(
                     navigateToCart = { navController.navigate(ScreenRoute.CartScreen) },
                     navigateToSettings = { navController.navigate(ScreenRoute.SettingsScreen) },
-                    navigateToFavorite = { navController.navigate(Favorites) },
+                    navigateToFavorite = {navController.navigate(Favorites)},
                     navigateToOrders = { navController.navigate(CustomerOrders) },
                     navigateToLogin = { navController.navigate(SignIn) }
                 )

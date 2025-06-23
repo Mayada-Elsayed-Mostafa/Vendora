@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,11 +47,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
@@ -138,6 +141,7 @@ fun CartScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(result.data.lines.edges) { item ->
+
                             CartItem(
                                 item = item,
                                 currency=currency,
@@ -192,6 +196,7 @@ fun CartScreen(
 fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : (Int)->Unit, onDelete : ()->Unit, getChangeRate: Double) {
     val context = LocalContext.current
     var quantity by remember { mutableStateOf(item.node.quantity) }
+    val availableQuantity = item.node.merchandise.onProductVariant?.quantityAvailable
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -199,10 +204,11 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(130.dp)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         )
         {
             AsyncImage(
@@ -211,23 +217,26 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                     .build(),
                 contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
-                    .size(90.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF35383f))
+                    .weight(2f)
+                    .background(Color(0xFF35383f)),
+                contentScale = ContentScale.Crop
+
             )
 
 
-            Spacer(modifier = Modifier.width(16.dp))
+
 
             Column(
-                modifier = Modifier.weight(2f)
+                modifier = Modifier.weight(3f).padding(horizontal = 8.dp)
             )
             {
                 Text(
                     text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, fontSize = 14.sp),
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 2
+                    maxLines = 3
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -254,6 +263,7 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
 
             //count and delete
             Column (
+                modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.SpaceBetween
             ){
@@ -279,39 +289,56 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 )
                 {
-                    IconButton(onClick = {
-                        if (quantity >1){
-                            quantity--
-                            onCountChange(quantity)
-                        }else {
-                            onDelete()
+                    if (quantity >1){
+                        IconButton(onClick = {
+                            if (quantity >1){
+                                quantity--
+                                onCountChange(quantity)
+                            }
+                        },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.minus),
+                                contentDescription = "Decrease",
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
-                    },
-                        modifier = Modifier.size(32.dp)
-                    ) {
+                    }else{
                         Icon(
                             painter = painterResource(R.drawable.minus),
                             contentDescription = "Decrease",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.Gray
                         )
                     }
+
 
                     Text(
                         text = "${quantity}",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
                     )
-
-                    IconButton(onClick = {
-                        onCountChange(++quantity)
-                    },
-                        modifier = Modifier.size(32.dp)
-                    ) {
+                    if (quantity < (availableQuantity ?: 6)){
+                        IconButton(onClick = {
+                            onCountChange(++quantity)
+                        },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.plus1),
+                                contentDescription = "Increase",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }else{
                         Icon(
                             painter = painterResource(R.drawable.plus1),
                             contentDescription = "Increase",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.Gray
                         )
                     }
+
 
                 }
             }
