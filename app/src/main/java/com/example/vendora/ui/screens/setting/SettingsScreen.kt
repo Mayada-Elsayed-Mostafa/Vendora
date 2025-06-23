@@ -196,7 +196,7 @@ fun CurrencyItem(
     val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
 
     LaunchedEffect(Unit) {
-        currencyViewModel.getCurrency()
+        //currencyViewModel.getCurrency()
         currencyViewModel.getRates()
     }
 
