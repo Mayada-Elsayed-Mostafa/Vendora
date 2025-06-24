@@ -2,6 +2,7 @@ package com.example.vendora.ui.screens.sign
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,18 +39,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vendora.R
 
 @Composable
 fun SignInScreen(
-    viewModel: SignInViewModel = viewModel(),
+    viewModel: SignInViewModel = hiltViewModel(),
     onNavigateToSignUp: () -> Unit,
     onNavigateToHome: () -> Unit
 ) {
@@ -87,17 +90,15 @@ fun SignInScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Spacer(modifier = Modifier.height(72.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = stringResource(R.string.hello_welcome_back),
-            color = Color.Black,
-            fontSize = 32.sp,
-            modifier = Modifier.padding(start = 24.dp)
+        Image(
+            painter = painterResource(id = R.drawable.vendora),
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(250.dp)
+                .align(Alignment.CenterHorizontally)
         )
-
-
-        Spacer(modifier = Modifier.height(72.dp))
 
         Box(modifier = Modifier.fillMaxSize()) {
 
@@ -122,7 +123,7 @@ fun SignInScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = stringResource(R.string.sign_in),
+                        text = stringResource(R.string.hello_welcome_back),
                         fontSize = 24.sp,
                         color = Color.Black,
                         modifier = Modifier

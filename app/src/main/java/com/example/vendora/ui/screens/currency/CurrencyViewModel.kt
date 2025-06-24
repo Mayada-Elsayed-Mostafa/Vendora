@@ -1,5 +1,7 @@
 package com.example.vendora.ui.screens.currency
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -46,7 +48,7 @@ class CurrencyViewModel @Inject constructor(
     init {
         getRates()
         getSelectedCurrency()
-        getRateValue(_selectedCurrency.value)
+        getRateValue()
     }
 
     fun getCurrency(baseCurrency:String = "EGP"){
@@ -89,8 +91,8 @@ class CurrencyViewModel @Inject constructor(
          return _selectedCurrency.value
      }
 
-    fun getRateValue(code: String) : Double{
-        _getChangeRate.value = getCurrencyUseCase.invoke(code,"EGP")
+    fun getRateValue() : Double{
+        _getChangeRate.value = getCurrencyUseCase.invoke(_selectedCurrency.value,"EGP")
         return _getChangeRate.value
     }
 }
@@ -99,6 +101,15 @@ class CurrencyViewModel @Inject constructor(
 
 fun Double.convertToCurrency(toCurrency: Double ): Double {
     return String.format("%.2f", this * toCurrency).toDouble()
+}
+
+fun Double.changeCurrency(context: Context):String {
+     val prefs = context.getSharedPreferences("vendora", Context.MODE_PRIVATE)
+
+     val currency = prefs.getString("selected_currency","EGP")
+     val rate =  prefs.getString(currency,"1.0")
+
+    return String.format("%.2f", this * rate.toString().toDouble()) + " $currency"
 }
 
 

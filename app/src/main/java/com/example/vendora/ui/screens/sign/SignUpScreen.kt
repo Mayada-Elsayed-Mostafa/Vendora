@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.sign
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,9 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -86,15 +89,16 @@ fun SignUpScreen(
             .padding(bottom = 48.dp)
     ) {
 
-        Spacer(modifier = Modifier.height(72.dp))
-        Text(
-            text = stringResource(R.string.lets_create_account),
-            color = Color.Black,
-            fontSize = 32.sp,
-            modifier = Modifier.padding(start = 24.dp)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.vendora),
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(250.dp)
+                .align(Alignment.CenterHorizontally)
         )
 
-        Spacer(modifier = Modifier.height(72.dp))
         Box(modifier = Modifier.fillMaxSize()) {
 
             Card(
@@ -117,6 +121,15 @@ fun SignUpScreen(
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Column {
+                    Text(
+                        text = stringResource(R.string.lets_create_account),
+                        fontSize = 20.sp,
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                        textAlign = TextAlign.Start
+                    )
                     OutlinedTextField(
                         value = firstName,
                         onValueChange = { firstName = it },

@@ -2,12 +2,15 @@ package com.example.vendora.ui.screens.sign
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.data.local.UserPreferences
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SignInState(
     val isLoading: Boolean = false,
@@ -16,7 +19,10 @@ data class SignInState(
     val errorMessage: String? = null
 )
 
-class SignInViewModel : ViewModel() {
+@HiltViewModel
+class SignInViewModel @Inject constructor(
+    private val userPreferences: UserPreferences
+) : ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -41,12 +47,16 @@ class SignInViewModel : ViewModel() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val user = auth.currentUser
+
                         if (user != null && user.isEmailVerified) {
-                            _signInState.value =
-                                SignInState(
+                            viewModelScope.launch {
+                                userPreferences.saveUser(user.uid, user.displayName ?: "",user.email ?: "")
+                                userPreferences.saveLoginState(true)
+                                _signInState.value = SignInState(
                                     isSuccess = true,
                                     successMessage = "Signed in successfully!"
                                 )
+                            }
                         } else {
                             auth.signOut()
                             _signInState.value =

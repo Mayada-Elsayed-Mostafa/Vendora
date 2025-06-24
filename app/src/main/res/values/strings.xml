@@ -8,7 +8,7 @@
     <string name="sign_in">Sign In</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
-    <string name="hello_welcome_back">Hello,\n\nWelcome Back 🥰</string>
+    <string name="hello_welcome_back">Hello,\nWelcome Back</string>
     <string name="already_have_an_account">Already have an account?</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="phone">Phone</string>

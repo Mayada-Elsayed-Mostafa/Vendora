@@ -43,18 +43,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.R
-import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
+    viewModel: ProfileViewModel = hiltViewModel(),
     navigateToCart: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToFavorite: () -> Unit,
@@ -66,8 +64,8 @@ fun ProfileScreen(
 
     LaunchedEffect(Unit) {
         viewModel.collectUserState()
-        Log.d("Profile",userInfo.value.email)
-        Log.d("Profile",userInfo.value.isGuest.toString())
+        Log.d("Profile", userInfo.value.email)
+        Log.d("Profile", userInfo.value.isGuest.toString())
     }
 
     Scaffold(

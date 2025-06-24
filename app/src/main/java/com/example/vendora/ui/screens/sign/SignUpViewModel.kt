@@ -13,7 +13,6 @@ import com.example.vendora.utils.wrapper.Result
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -137,9 +136,11 @@ class SignUpViewModel @Inject constructor(
                     if (result is Result.Success) {
                         val createdCustomer = result.data.customer
                         val customerId = createdCustomer.id.toString()
+                        val customerName =
+                            createdCustomer.first_name + " " + createdCustomer.last_name
                         val customerEmail = createdCustomer.email
 
-                        userPreferences.saveUser(customerId, customerEmail)
+                        userPreferences.saveUser(customerId, customerName, customerEmail)
                         Log.d("TAG", "User saved in DataStore: $customerId, $customerEmail")
                     }
                 }

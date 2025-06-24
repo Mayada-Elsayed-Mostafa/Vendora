@@ -71,6 +71,7 @@ import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.screens.currency.CurrencyViewModel
+import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.ui.screens.discount.viewModel.DiscountViewModel
 import com.example.vendora.utils.wrapper.Result
@@ -78,12 +79,13 @@ import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun CheckoutScreen(token:String,navController: NavHostController,
-                   paymobviewModel: PaymobViewModel= hiltViewModel(),
-                   discountViewModel: DiscountViewModel = hiltViewModel(),
-                   addressViewModel: AddressViewModel = hiltViewModel(),
-                   cartViewModel: CartViewModel= hiltViewModel(),
-                   currencyViewModel: CurrencyViewModel = hiltViewModel(),
+fun CheckoutScreen(
+    token:String,
+    navController: NavHostController,
+    discountViewModel: DiscountViewModel = hiltViewModel(),
+    addressViewModel: AddressViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel= hiltViewModel(),
+    currencyViewModel: CurrencyViewModel = hiltViewModel(),
 ) {
 
 
@@ -173,7 +175,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(card){ item ->
-                        CheckoutItem(item)
+                        CheckoutItem(item,getChangeRate, currency)
                     }
 
                     item{
@@ -216,7 +218,7 @@ fun CheckoutScreen(token:String,navController: NavHostController,
 
 
 @Composable
-fun CheckoutItem (item: GetCartQuery.Edge ) {
+fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: String ) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -225,8 +227,7 @@ fun CheckoutItem (item: GetCartQuery.Edge ) {
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
+                .fillMaxSize()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         )
@@ -273,7 +274,8 @@ fun CheckoutItem (item: GetCartQuery.Edge ) {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${item.node.merchandise.onProductVariant?.price?.amount}",
+                    text = "${item.node.merchandise.onProductVariant?.price?.amount.toString().toDoubleOrNull()
+                        ?.changeCurrency(context)} ",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
 
