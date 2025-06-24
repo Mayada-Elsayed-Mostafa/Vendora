@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.discount.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,10 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -50,10 +47,15 @@ import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
 import com.example.vendora.ui.screens.discount.viewModel.DiscountViewModel
 import com.example.vendora.utils.wrapper.Result
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalContext
 
 
 @Composable
-fun DiscountScreen(viewModel: DiscountViewModel = hiltViewModel(),back: (selectedCode: String) -> Unit) {
+fun CouponScreen(viewModel: DiscountViewModel = hiltViewModel(),back:()->Unit) {
+
     val discountCode by viewModel.discountCodes.collectAsState()
     var selectedCode by remember { mutableStateOf<String?>(null) }
     LaunchedEffect (Unit){
@@ -70,32 +72,18 @@ fun DiscountScreen(viewModel: DiscountViewModel = hiltViewModel(),back: (selecte
                     .windowInsetsPadding(WindowInsets.statusBars)
                     .padding(vertical = 16.dp, horizontal = 16.dp)
             ) {
-                CustomAppBar("Discount Code") { }
+                CustomAppBar("Discount Code") {back() }
                 LazyColumn {
                     items(state.data){item ->
-                        DiscountItem(
+                        CouponItem(
                             code = item.code,
                             selected = selectedCode == item.code,
-
-                            ) {
-                            selectedCode = item.code
-                            selectedCode?.let { back(it) }
-                        }
+                            onSelect = { selectedCode = item.code}
+                            )
                         Divider()
                     }
                 }
-                /*Spacer(Modifier.height(48.dp))
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onBackground) ,
-                    onClick = {
-                    *//* Selected Code *//*
-                        selectedCode?.let { back(it) }
 
-                    }
-                ){
-                    Text("Apply",style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),)
-                }*/
             }
 
         }
@@ -104,13 +92,19 @@ fun DiscountScreen(viewModel: DiscountViewModel = hiltViewModel(),back: (selecte
 }
 
 @Composable
-fun DiscountItem(
+fun CouponItem(
     code: String,
     selected:Boolean,
-    onSelect:()->Unit
+    onSelect:()->Unit,
 ) {
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     Card (
-        modifier = Modifier.fillMaxWidth().padding(8.dp).clickable { onSelect() },
+        modifier = Modifier.fillMaxWidth().padding(8.dp).clickable {
+            onSelect()
+            clipboardManager.setText(AnnotatedString(code))
+            Toast.makeText(context, "Copied: $code", Toast.LENGTH_SHORT).show()
+                                                                   },
         colors =CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(16.dp)
     ){
@@ -120,7 +114,7 @@ fun DiscountItem(
             verticalAlignment = Alignment.CenterVertically
         ){
             Icon(
-               // imageVector = Icons.Default.Star,
+                // imageVector = Icons.Default.Star,
                 painter = painterResource(R.drawable.offer),
                 contentDescription = null,
                 modifier = Modifier
@@ -148,7 +142,7 @@ fun DiscountItem(
                 selected=selected,
                 onClick = onSelect,
                 colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.onSurface)
-                )
+            )
         }
     }
 }

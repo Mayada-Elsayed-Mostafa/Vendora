@@ -83,6 +83,7 @@ fun HomeScreen(
     navigateToFavorites: () -> Unit,
     navigateToBrandDetails: (brandId: Long) -> Unit,
     navigateToLogin: () -> Unit,
+    navigateToCoupon: () -> Unit,
     paddingValues: PaddingValues = PaddingValues()
 ) {
     val brands = viewModel.brands.collectAsStateWithLifecycle()
@@ -129,7 +130,7 @@ fun HomeScreen(
                     )
                 }
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                    GiftCardAd(couponList)
+                    GiftCardAd(couponList,navigateToCoupon)
                 }
 
                 item(span = { GridItemSpan(maxCurrentLineSpan) }) {
@@ -223,7 +224,7 @@ fun HomeHeader(
 }
 
 @Composable
-fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
+fun GiftCardAd(giftCardsList: List<GiftCardAd>,navigateToCoupon: () -> Unit) {
     // here we can replace the number with amount of gift card coming from api.
     val pagerState = rememberPagerState(pageCount = { giftCardsList.size })
     val context = LocalContext.current
@@ -240,6 +241,7 @@ fun GiftCardAd(giftCardsList: List<GiftCardAd>) {
                     .padding(vertical = 12.dp)
                     .height(IntrinsicSize.Min)
                     .clip(shape = RoundedCornerShape(24.dp))
+                    .clickable { navigateToCoupon() }
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,

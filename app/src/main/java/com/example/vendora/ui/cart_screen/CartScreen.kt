@@ -169,7 +169,7 @@ fun CartScreen(
                         }
 
                         is Result.Failure -> Text("Auth failed")
-                        Result.Loading -> CircularProgressIndicator()
+                        Result.Loading -> {}
                     }
                 }
             }

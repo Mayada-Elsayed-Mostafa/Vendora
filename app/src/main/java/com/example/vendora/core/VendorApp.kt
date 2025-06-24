@@ -31,6 +31,7 @@ import com.example.vendora.ui.screens.address.view.AddAddressScreen
 import com.example.vendora.ui.screens.address.view.AddressScreen
 import com.example.vendora.ui.screens.brandDetails.BrandDetailsScreen
 import com.example.vendora.ui.screens.category.CategoryScreen
+import com.example.vendora.ui.screens.discount.view.CouponScreen
 import com.example.vendora.ui.screens.discount.view.DiscountScreen
 import com.example.vendora.ui.screens.favorites.FavoritesScreen
 import com.example.vendora.ui.screens.home.HomeScreen
@@ -80,6 +81,7 @@ fun VendorApp() {
                         navController.navigate(BrandDetails(id = brandId))
                     },
                     navigateToLogin = { navController.navigate(SignIn) },
+                    navigateToCoupon = {navController.navigate(ScreenRoute.CouponScreen)},
                     paddingValues = innerPadding
                 )
             }
@@ -252,6 +254,14 @@ fun VendorApp() {
                     onNavigateBack = { navController.popBackStack(Home,false) }
                 )
             }
+
+
+            composable<ScreenRoute.CouponScreen> {
+                CouponScreen(){
+                    navController.popBackStack()
+                }
+            }
+
         }
     }
 }

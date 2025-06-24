@@ -1,7 +1,9 @@
 package com.example.vendora.ui.cart_screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,9 +51,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +66,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.vendora.GetCartQuery
+import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.domain.model.payment.OrderList
@@ -180,7 +187,7 @@ fun CheckoutScreen(
 
                     item{
                         PromoCodeItem(
-                            selectedDiscountCode?: "Select Discount Code",
+                            selectedDiscountCode?: "",
                             totalPrice =  totalPrice.convertToCurrency(getChangeRate),
                             currency = currency,
                             navToDiscount = {
@@ -253,9 +260,9 @@ fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: Str
             {
                 Text(
                     text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold,fontSize = 14.sp),
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 2
+                    maxLines = 3
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -386,7 +393,7 @@ fun CustomAppBar( title: String, back:()-> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
-
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -398,11 +405,23 @@ fun CustomAppBar( title: String, back:()-> Unit) {
                 .size(28.dp)
                 .clickable { back() }
         )
-        Spacer(Modifier.width(16.dp))
+       // Spacer(Modifier.width(16.dp))
 
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
+        )
+
+        Image(
+            painter = painterResource(if (isSystemInDarkTheme()) R.drawable.vendora_dark else R.drawable.vendora),
+            contentDescription = "App logo",
+            contentScale = ContentScale.Inside,
+            modifier = Modifier
+                .size(64.dp)
+                .graphicsLayer(
+                    scaleX = 1.5f,
+                    scaleY = 1.5f
+                )
         )
 
 
@@ -413,13 +432,14 @@ fun CustomAppBar( title: String, back:()-> Unit) {
 
 
 @Composable
-fun PaymentBottom(title:String,
-                  items: List<GetCartQuery.Edge>,
-                  totalPrice: Int,
-                  token:String,
-                  currency: String="EGP",
-                  paymobviewModel: PaymobViewModel= hiltViewModel(),
-                  navTo:(orderId: Int)->Unit
+fun PaymentBottom(
+    title:String,
+    items: List<GetCartQuery.Edge>,
+    totalPrice: Int,
+    token:String,
+    currency: String="EGP",
+    paymobviewModel: PaymobViewModel= hiltViewModel(),
+    navTo:(orderId: Int)->Unit
 ) {
 
     val orderList : List<OrderList> = items.map { item ->
@@ -456,7 +476,7 @@ fun PaymentBottom(title:String,
                 println("Error :"+orderState)
                 Text("Failed:")
             }
-            Result.Loading -> { CircularProgressIndicator() }
+            Result.Loading -> {  }
             is Result.Success -> {
                 orderId = (orderState as Result.Success<OrderResponse>).data.id
                 println("orderId: $orderId")
@@ -611,16 +631,53 @@ fun PromoCodeItem(
                 Divider()
 
                 if (discountApplied) {
+                    val discountValue = totalPrice - (finalPrice?:0.0)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Total : ${totalPrice} $currency",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        ){
+                        Text(
+                            text = "Amount :",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = "${totalPrice}",
+                            style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.LineThrough),
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Discount applied : ${finalPrice} $currency",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    Row  (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ){
+                        Text(
+                            text = "Promo :",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = "-${discountValue}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider()
+                    Row  (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ){
+                        Text(
+                            text = "Total :",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = "${finalPrice} $currency",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
 
                 } else {
                     Spacer(modifier = Modifier.height(8.dp))

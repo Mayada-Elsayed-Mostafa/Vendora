@@ -43,4 +43,7 @@ sealed class ScreenRoute(
         val firstToken: String,
         val type: String,
     ) : ScreenRoute("CashDeliveryScreen")
+
+    @Serializable
+    object CouponScreen : ScreenRoute("CouponScreen")
 }
