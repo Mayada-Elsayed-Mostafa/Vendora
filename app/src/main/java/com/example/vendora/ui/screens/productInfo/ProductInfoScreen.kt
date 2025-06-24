@@ -33,8 +33,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,13 +60,17 @@ import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.ui.screens.favorites.FavoritesViewModel
 import com.example.vendora.ui.screens.search.LottieLoader
+import com.example.vendora.ui.ui_model.DialogAttributes
+import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.utils.wrapper.Result
+import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun ProductInfoScreen(
     productId: Long,
     viewModel: ProductInfoViewModel = hiltViewModel(),
-    favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
+    navigateToLogin: () -> Unit
 ) {
     val productResult by viewModel.product.collectAsState()
 
@@ -90,7 +97,8 @@ fun ProductInfoScreen(
                             ProductInfoSection(
                                 viewModel = viewModel,
                                 favoritesViewModel = favoritesViewModel,
-                                product
+                                product = product,
+                                navigateToLogin = navigateToLogin
                             )
                         }
                     }
@@ -188,11 +196,27 @@ fun ProductImagesCarousel(imagesList: List<Image>) {
 fun ProductInfoSection(
     viewModel: ProductInfoViewModel,
     favoritesViewModel: FavoritesViewModel,
-    product: Product
+    product: Product,
+    navigateToLogin: () -> Unit
 ) {
 
+    val showGuestModeDialog = remember { mutableStateOf(false) }
+
+    if (showGuestModeDialog.value) {
+        GuestModeDialog(
+            attributes = DialogAttributes(
+                onDismiss = { showGuestModeDialog.value = false },
+                onAccept = { navigateToLogin() }
+            )
+        )
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
-        ProductInfoHeaderSection(product, favoritesViewModel)
+        ProductInfoHeaderSection(
+            product, favoritesViewModel,
+            viewModel.isGuestMode(),
+            showGuestModeDialog,
+        )
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         ProductInfoBodySection(viewModel, product)
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -203,7 +227,9 @@ fun ProductInfoSection(
 @Composable
 fun ProductInfoHeaderSection(
     product: Product,
-    favoritesViewModel: FavoritesViewModel
+    favoritesViewModel: FavoritesViewModel,
+    isGuestMode: Boolean,
+    showDialog: MutableState<Boolean>
 ) {
 
     val favorites by favoritesViewModel.favorites.collectAsState()
@@ -220,10 +246,14 @@ fun ProductInfoHeaderSection(
                 fontSize = 20.sp
             )
             IconButton(onClick = {
-                if (isFavorite) {
-                    favoritesViewModel.removeFromFavorites(product.id)
+                if (isGuestMode) {
+                    showDialog.value = true
                 } else {
-                    favoritesViewModel.addToFavorites(product)
+                    if (isFavorite) {
+                        favoritesViewModel.removeFromFavorites(product.id)
+                    } else {
+                        favoritesViewModel.addToFavorites(product)
+                    }
                 }
             }) {
                 Icon(

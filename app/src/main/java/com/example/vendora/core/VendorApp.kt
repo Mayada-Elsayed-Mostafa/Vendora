@@ -81,7 +81,7 @@ fun VendorApp() {
                         navController.navigate(BrandDetails(id = brandId))
                     },
                     navigateToLogin = { navController.navigate(SignIn) },
-                    navigateToCoupon = {navController.navigate(ScreenRoute.CouponScreen)},
+                    navigateToCoupon = { navController.navigate(ScreenRoute.CouponScreen) },
                     paddingValues = innerPadding
                 )
             }
@@ -178,7 +178,8 @@ fun VendorApp() {
             composable<ProductInfo> { navBackStackEntry ->
                 val productInfo: ProductInfo = navBackStackEntry.toRoute()
                 ProductInfoScreen(
-                    productId = productInfo.id
+                    productId = productInfo.id,
+                    navigateToLogin = { navController.navigate(SignIn) }
                 )
             }
 
@@ -251,13 +252,13 @@ fun VendorApp() {
                     token = token,
                     orderId = orderId,
                     type = type,
-                    onNavigateBack = { navController.popBackStack(Home,false) }
+                    onNavigateBack = { navController.popBackStack(Home, false) }
                 )
             }
 
 
             composable<ScreenRoute.CouponScreen> {
-                CouponScreen(){
+                CouponScreen() {
                     navController.popBackStack()
                 }
             }
