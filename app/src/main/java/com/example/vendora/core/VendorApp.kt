@@ -168,11 +168,14 @@ fun VendorApp() {
             composable<SignIn> {
                 SignInScreen(
                     onNavigateToSignUp = { navController.navigate(SignUp) },
-                    onNavigateToHome = { navController.navigate(Home) })
+                    onNavigateToHome = { navController.navigate(Home) },
+                    onContinueAsGuest = { navController.navigate(Home) })
             }
 
             composable<SignUp> {
-                SignUpScreen(onNavigateToSignIn = { navController.navigate(SignIn) })
+                SignUpScreen(
+                    onNavigateToSignIn = { navController.navigate(SignIn) },
+                    onContinueAsGuest = { navController.navigate(Home) })
             }
 
             composable<ProductInfo> { navBackStackEntry ->

@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -23,6 +25,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -47,14 +50,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vendora.R
 
 @Composable
 fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel(),
     onNavigateToSignUp: () -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit,
+    onContinueAsGuest: () -> Unit
 ) {
     val signInState by viewModel.signInState.collectAsState()
 
@@ -89,8 +92,32 @@ fun SignInScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .navigationBarsPadding()
+            .statusBarsPadding()
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, end = 16.dp)
+        ) {
+            OutlinedButton(
+                onClick = onContinueAsGuest,
+                modifier = Modifier
+                    .align(Alignment.TopEnd),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Gray),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    horizontal = 8.dp,
+                    vertical = 4.dp
+                ),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.Gray
+                )
+            ) {
+                Text("Continue as Guest", fontSize = 14.sp)
+            }
+        }
 
         Image(
             painter = painterResource(id = R.drawable.vendora),
