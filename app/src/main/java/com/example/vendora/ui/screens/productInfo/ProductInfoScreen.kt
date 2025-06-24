@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -46,11 +49,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.example.vendora.R
 import com.example.vendora.domain.model.product.Image
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.domain.model.product.findVariantIdByColorAndSize
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.screens.favorites.FavoritesViewModel
+import com.example.vendora.ui.screens.search.LottieLoader
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
@@ -75,12 +80,11 @@ fun ProductInfoScreen(
                     Card(
                         modifier = Modifier
                             .padding(innerPadding)
+                            .statusBarsPadding()
                     ) {
                         Column(
                             modifier = Modifier
-                                .padding(innerPadding)
                                 .verticalScroll(rememberScrollState())
-                                .padding(8.dp)
                         ) {
                             ProductInfoSection(
                                 viewModel = viewModel,
@@ -93,13 +97,32 @@ fun ProductInfoScreen(
             }
 
             is Result.Failure -> {
-                val exception = (productResult as Result.Failure).exception
-                Text("Error loading product: ${exception.message}")
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LottieLoader(
+                        resId = R.raw.search_error,
+                        modifier = Modifier
+                            .width(300.dp)
+                            .height(300.dp)
+                    )
+                }
             }
 
             Result.Loading -> {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text("Loading product info...")
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LottieLoader(
+                        resId = R.raw.loading_animation,
+                        modifier = Modifier
+                            .width(300.dp)
+                            .height(300.dp)
+                    )
                 }
             }
 
@@ -114,7 +137,9 @@ fun ProductImagesCarousel(imagesList: List<Image>) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
     ) {
         HorizontalPager(
             state = pagerState,

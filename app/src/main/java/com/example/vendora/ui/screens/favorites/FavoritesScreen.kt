@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -40,11 +41,22 @@ fun FavoritesScreen(
     val favorites by viewModel.favorites.collectAsState()
 
     if (favorites.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            contentAlignment = Alignment.Center
+        ) {
             Text("No favorite products yet.")
         }
     } else {
-        LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(bottom = 16.dp)
+        ) {
             items(favorites) { product ->
                 FavoriteProductCard(
                     product = product,
@@ -67,7 +79,7 @@ fun FavoriteProductCard(
 ) {
     Card(
         modifier = Modifier
-            .padding(4.dp)
+            .padding(start = 16.dp, end = 8.dp, bottom = 8.dp)
             .fillMaxWidth()
             .clickable { onProductClick() },
         shape = RoundedCornerShape(8.dp)
