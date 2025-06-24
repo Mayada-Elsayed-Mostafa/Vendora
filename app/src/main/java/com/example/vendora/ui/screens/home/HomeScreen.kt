@@ -1,7 +1,10 @@
 package com.example.vendora.ui.screens.home
 
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,8 +48,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,6 +61,7 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.size.Scale
 import com.example.vendora.R
 import com.example.vendora.domain.model.brands.SmartCollection
 import com.example.vendora.domain.model.product.Product
@@ -72,7 +78,7 @@ import com.example.vendora.utils.wrapper.isGuestMode
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    cardViewModel: CartViewModel= hiltViewModel(),
+    cardViewModel: CartViewModel = hiltViewModel(),
     navigateToCart: () -> Unit,
     navigateToFavorites: () -> Unit,
     navigateToBrandDetails: (brandId: Long) -> Unit,
@@ -98,7 +104,11 @@ fun HomeScreen(
     }
 
     when (brands.value) {
-        is Result.Failure -> OnError { viewModel.fetchBrands() }
+        is Result.Failure -> OnError {
+            viewModel.fetchBrands()
+            Log.d("HomeScreen", (brands.value as Result.Failure).exception.toString())
+        }
+
         is Result.Loading -> OnLoading()
         is Result.Success -> {
             LazyVerticalGrid(
@@ -149,21 +159,21 @@ fun HomeHeader(
     isGuestMode: Boolean,
     showDialog: MutableState<Boolean>
 ) {
-    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(R.drawable.user)
-                .crossfade(true)
-                .build(),
-            contentDescription = "user avatar",
+        Image(
+            painter = painterResource(if (isSystemInDarkTheme()) R.drawable.vendora_dark else R.drawable.vendora),
+            contentDescription = "App logo",
+            contentScale = ContentScale.Inside,
             modifier = Modifier
-                .clip(CircleShape)
-                .size(48.dp)
+                .size(64.dp)
+                .graphicsLayer(
+                    scaleX = 1.5f,
+                    scaleY = 1.5f
+                )
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(
@@ -190,8 +200,9 @@ fun HomeHeader(
             }
         }) {
             Icon(
-                imageVector = Icons.Outlined.Favorite,
-                contentDescription = "Favorite"
+                painterResource(R.drawable.favorite),
+                contentDescription = "Favorite",
+                modifier = Modifier.size(24.dp)
             )
         }
 
@@ -203,8 +214,9 @@ fun HomeHeader(
             }
         }) {
             Icon(
-                imageVector = Icons.Filled.ShoppingCart,
-                contentDescription = "Favorite"
+                painterResource(R.drawable.cart),
+                contentDescription = "Cart",
+                modifier = Modifier.size(24.dp)
             )
         }
     }

@@ -34,7 +34,7 @@ fun SplashScreen(
 
 
     LaunchedEffect(Unit) {
-        delay(2000)
+        delay(1500)
         val userId = userPreferences.getUserId()
         isLoggedIn = userPreferences.isUserLoggedIn()
         hasCheckedLogin = true

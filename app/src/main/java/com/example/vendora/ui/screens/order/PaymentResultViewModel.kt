@@ -3,15 +3,12 @@ package com.example.vendora.ui.screens.order
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.order.Item
 import com.example.vendora.domain.model.order.LineItemBuild
 import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.usecase.order.CreateShopifyOrderUserCase
 import com.example.vendora.domain.usecase.order.GetOrderPaymentResultUseCase
-import com.example.vendora.domain.usecase.payment.CreateOrderUseCase
-import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.utils.wrapper.Result
 import com.example.vendora.utils.wrapper.order_builder.CreateOrder
 import com.google.firebase.auth.FirebaseAuth
@@ -19,9 +16,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -58,26 +52,27 @@ class PaymentResultViewModel @Inject constructor(
         }
     }
 
-    suspend fun createOrder(result: OrderPaymentResult) {
+    suspend fun createOrder(result: OrderPaymentResult, finStatus: String = "paid") {
         Log.d(TAG, auth.currentUser?.email.toString())
         val order = CreateOrder()
         val requestBody =
             order.email(auth.currentUser?.email ?: "zeyadmamoun952@gmail.com")
-                .financialStatus("paid")
+                .financialStatus(if (finStatus == "Cash") "pending" else "paid")
                 .currency(result.currency)
                 .lineItems(createLineItems(result.items))
                 .build()
 
+        Log.d("CashOnDelivery",requestBody.toString())
+
         createShopifyOrderUserCase.invoke(requestBody).collect { creationResult ->
             Log.d(TAG, creationResult.toString())
-            if(creationResult is Result.Success){
+            if (creationResult is Result.Success) {
                 _uiState.update {
                     it.copy(
                         orderCreationResult = creationResult
                     )
                 }
             }
-            Log.d("Cart","finished collection")
             return@collect
         }
     }

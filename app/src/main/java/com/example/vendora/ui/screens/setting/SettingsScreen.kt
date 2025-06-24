@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.setting
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -108,6 +111,18 @@ fun SettingBody(modifier: Modifier, navController: NavHostController) {
                     .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Image(
+                    painter = painterResource(if (isSystemInDarkTheme()) R.drawable.vendora_dark else R.drawable.vendora),
+                    contentDescription = "App logo",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .graphicsLayer(
+                            scaleX = 2f,
+                            scaleY = 2f
+                        )
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Vendora",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
@@ -196,7 +211,7 @@ fun CurrencyItem(
     val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
 
     LaunchedEffect(Unit) {
-        //currencyViewModel.getCurrency()
+        currencyViewModel.getCurrency()
         currencyViewModel.getRates()
     }
 
