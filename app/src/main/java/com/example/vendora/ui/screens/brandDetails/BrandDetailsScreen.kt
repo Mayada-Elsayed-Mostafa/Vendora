@@ -64,6 +64,7 @@ import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.utils.wrapper.Result
 import kotlin.math.roundToInt
+import com.example.vendora.ui.screens.search.ProductCard
 
 @Composable
 fun BrandDetailsScreen(
@@ -297,60 +298,60 @@ fun OnLoading(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun ProductCard(
-    product: Product,
-    navigateToProduct: (Long) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    Card(
-        onClick = { navigateToProduct(product.id) },
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = MaterialTheme.shapes.medium,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(240.dp)
-            .padding(8.dp)
-    ) {
-        Column(
-            modifier
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(product.image.src)
-                    .build(),
-                contentScale = ContentScale.Crop,
-                contentDescription = product.title,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .weight(0.6f)
-                    .background(Color.Black)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                product.title.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 1,
-                modifier = Modifier
-                    .weight(0.1f)
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                "\$${product.variants[0].price}",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                maxLines = 1,
-                modifier = Modifier
-                    .weight(0.1f)
-                    .fillMaxWidth()
-            )
-        }
-    }
-}
+//@Composable
+//fun ProductCard(
+//    product: Product,
+//    navigateToProduct: (Long) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    val context = LocalContext.current
+//    Card(
+//        onClick = { navigateToProduct(product.id) },
+//        elevation = CardDefaults.cardElevation(4.dp),
+//        shape = MaterialTheme.shapes.medium,
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .height(240.dp)
+//            .padding(8.dp)
+//    ) {
+//        Column(
+//            modifier
+//                .fillMaxSize()
+//                .padding(8.dp)
+//        ) {
+//            AsyncImage(
+//                model = ImageRequest.Builder(context)
+//                    .data(product.image.src)
+//                    .build(),
+//                contentScale = ContentScale.Crop,
+//                contentDescription = product.title,
+//                modifier = Modifier
+//                    .clip(MaterialTheme.shapes.medium)
+//                    .weight(0.6f)
+//                    .background(Color.Black)
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            Text(
+//                product.title.uppercase(),
+//                style = MaterialTheme.typography.titleSmall,
+//                maxLines = 1,
+//                modifier = Modifier
+//                    .weight(0.1f)
+//                    .fillMaxWidth()
+//            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//            Text(
+//                "\$${product.variants[0].price}",
+//                style = MaterialTheme.typography.titleMedium.copy(
+//                    fontWeight = FontWeight.ExtraBold
+//                ),
+//                maxLines = 1,
+//                modifier = Modifier
+//                    .weight(0.1f)
+//                    .fillMaxWidth()
+//            )
+//        }
+//    }
+//}

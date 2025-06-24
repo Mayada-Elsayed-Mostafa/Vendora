@@ -50,6 +50,7 @@ import com.example.vendora.domain.model.product.Image
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.domain.model.product.findVariantIdByColorAndSize
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
+import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.ui.screens.favorites.FavoritesViewModel
 import com.example.vendora.utils.wrapper.Result
 
@@ -332,6 +333,7 @@ fun ProductInfoFooterSection(
     val quantity by viewModel.quantity
     val selectedSize by viewModel.selectedSize
     val selectedColor by viewModel.selectedColor
+    val context = LocalContext.current
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -341,7 +343,7 @@ fun ProductInfoFooterSection(
         Column {
             Text("Total Price", fontSize = 14.sp, color = Color.Gray)
             Text(
-                product.variants[0].price,
+                product.variants[0].price.toDouble().changeCurrency(context),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
