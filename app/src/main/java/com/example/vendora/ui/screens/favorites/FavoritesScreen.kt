@@ -1,6 +1,7 @@
 package com.example.vendora.ui.screens.favorites
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -26,12 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
+import com.example.vendora.ui.screens.currency.changeCurrency
+import com.example.vendora.ui.screens.search.LottieLoader
 
 @Composable
 fun FavoritesScreen(
@@ -47,7 +54,26 @@ fun FavoritesScreen(
                 .statusBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
-            Text("No favorite products yet.")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LottieLoader(
+                    resId = R.raw.favorite_animation,
+                    modifier = Modifier
+                        .width(250.dp)
+                        .height(250.dp)
+                )
+                Text(
+                    text = "No favorite products yet!",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color.Gray
+                )
+            }
         }
     } else {
         LazyVerticalGrid(
@@ -77,6 +103,7 @@ fun FavoriteProductCard(
     onFavoriteClick: () -> Unit,
     onProductClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .padding(start = 16.dp, end = 8.dp, bottom = 8.dp)
@@ -101,7 +128,7 @@ fun FavoriteProductCard(
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Toggle Favorite",
-                        tint = Color.Red
+                        tint = Color.Black
                     )
                 }
             }
@@ -113,7 +140,7 @@ fun FavoriteProductCard(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
             Text(
-                text = "400 EGP",
+                text = product.variants[0].price.toDouble().changeCurrency(context),
                 color = Color.Gray,
                 modifier = Modifier.padding(8.dp)
             )

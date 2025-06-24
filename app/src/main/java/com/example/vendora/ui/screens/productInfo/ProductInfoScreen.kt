@@ -259,7 +259,7 @@ fun ProductInfoHeaderSection(
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Favorite Icon",
-                    tint = Color.Red
+                    tint = Color.Black
                 )
             }
         }
