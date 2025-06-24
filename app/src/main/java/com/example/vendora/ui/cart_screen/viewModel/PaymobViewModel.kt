@@ -40,6 +40,7 @@ class PaymobViewModel @Inject constructor(
 
     fun getTokenForAuthentication (){
         viewModelScope.launch {
+            _getTokenState.value= Result.Loading
             getTokenUseCase()
                 .flowOn(Dispatchers.IO)
                 .collect{
@@ -50,6 +51,7 @@ class PaymobViewModel @Inject constructor(
 
     fun createOrder(orderRequest: OrderRequest){
         viewModelScope.launch {
+            _orderState.value = Result.Loading
             createOrderUseCase(orderRequest)
                 .flowOn(Dispatchers.IO)
                 .collect{

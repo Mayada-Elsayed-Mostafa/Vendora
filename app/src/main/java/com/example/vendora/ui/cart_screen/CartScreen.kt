@@ -58,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -103,7 +104,7 @@ fun CartScreen(
         viewModel.getTokenForAuthentication()
         currencyViewModel.getCurrency()
         currencyViewModel.getRates()
-       // cartViewModel.loadCart(uiState.cartId?:"")
+        // cartViewModel.loadCart(uiState.cartId?:"")
         cartViewModel.checkOrCreateCart()
     }
 
@@ -196,7 +197,7 @@ fun CartScreen(
 fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : (Int)->Unit, onDelete : ()->Unit, getChangeRate: Double) {
     val context = LocalContext.current
     var quantity by remember { mutableStateOf(item.node.quantity) }
-    val availableQuantity = item.node.merchandise.onProductVariant?.quantityAvailable
+    val availableQuantity = item.node.merchandise.onProductVariant?.quantityAvailable ?: 10
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -214,22 +215,22 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(item.node.merchandise.onProductVariant?.product?.images?.edges?.get(0)?.node?.url)
+                    .crossfade(true)
                     .build(),
                 contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .weight(2f)
+                    .weight(1f)
                     .background(Color(0xFF35383f)),
                 contentScale = ContentScale.Crop
 
             )
 
-
-
+            Spacer(modifier = Modifier.width(8.dp))
 
             Column(
-                modifier = Modifier.weight(3f).padding(horizontal = 8.dp)
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
             )
             {
                 Text(
@@ -248,10 +249,6 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                         style = MaterialTheme.typography.titleSmall,
                     )
 
-//                    Text(
-//                        text = " | Size = ${item.size}",
-//                        style = MaterialTheme.typography.titleSmall,
-//                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -263,9 +260,9 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
 
             //count and delete
             Column (
-                modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxHeight()
             ){
                 IconButton(
                     onClick = onDelete,
@@ -279,69 +276,63 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(50.dp))
 
                 Row (
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainer),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 )
                 {
-                    if (quantity >1){
-                        IconButton(onClick = {
-                            if (quantity >1){
+                    IconButton(
+                        onClick = {
+                            if (quantity > 1) {
                                 quantity--
                                 onCountChange(quantity)
                             }
                         },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.minus),
-                                contentDescription = "Decrease",
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }else{
+                        enabled = quantity > 1,
+                        modifier = Modifier.size(32.dp)
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.minus),
                             contentDescription = "Decrease",
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.Gray
+                            tint = if (quantity > 1) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
 
 
                     Text(
                         text = "${quantity}",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                        style = MaterialTheme.typography.titleSmall
                     )
-                    if (quantity < (availableQuantity ?: 6)){
-                        IconButton(onClick = {
-                            onCountChange(++quantity)
+
+                    IconButton(
+                        onClick = {
+                            if (quantity < availableQuantity) {
+                                quantity++
+                                onCountChange(quantity)
+                            }
                         },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.plus1),
-                                contentDescription = "Increase",
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }else{
+                        enabled = quantity < availableQuantity,
+                        modifier = Modifier.size(32.dp)
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.plus1),
                             contentDescription = "Increase",
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.Gray
+                            tint = if (quantity < availableQuantity) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
 
 
                 }
             }
+
+
         }
     }
 }
