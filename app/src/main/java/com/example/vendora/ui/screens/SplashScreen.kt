@@ -1,6 +1,7 @@
 package com.example.vendora.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +44,7 @@ fun SplashScreen(
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(id = R.drawable.vendora),
+                painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.vendora_dark else R.drawable.vendora),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(400.dp)

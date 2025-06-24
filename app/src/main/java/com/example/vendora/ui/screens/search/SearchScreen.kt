@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
+import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.utils.wrapper.Result
 
 @Composable
@@ -144,6 +146,7 @@ fun ProductCard(
     product: Product,
     navigateToProduct: (Long) -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .padding(4.dp)
@@ -173,7 +176,7 @@ fun ProductCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${product.variants.firstOrNull()?.price ?: "N/A"} EGP",
+                    text = "${product.variants.firstOrNull()?.price?.toDouble()?.changeCurrency(context)}",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }

@@ -52,6 +52,7 @@ import com.example.vendora.ui.screens.currency.CurrencyViewModel
 import com.example.vendora.ui.screens.profile.OnSuccess
 import com.example.vendora.ui.screens.profile.OptionItem
 import com.example.vendora.ui.screens.profile.ProfileAppBar
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SettingsScreen(navController: NavHostController) {
@@ -74,14 +75,18 @@ fun SettingsScreen(navController: NavHostController) {
 fun SettingBody(modifier: Modifier, navController: NavHostController) {
     val sheetState = rememberModalBottomSheetState()
     var isSheetOpen by remember { mutableStateOf(false) }
+    val user = FirebaseAuth.getInstance().currentUser
+
     Column(modifier = modifier) {
-        OptionItem(
-            icon = R.drawable.pin,
-            title = "Address"
-        ) {
-            navController.navigate(ScreenRoute.AddressScreen)
+        if (user != null){
+            OptionItem(
+                icon = R.drawable.pin,
+                title = "Address"
+            ) {
+                navController.navigate(ScreenRoute.AddressScreen)
+            }
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 16.dp))
         }
-        HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 16.dp))
 
         CurrencyItem(
             icon = R.drawable.sack_dollar,

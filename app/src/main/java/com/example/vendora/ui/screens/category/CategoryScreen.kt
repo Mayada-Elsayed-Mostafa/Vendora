@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.ui.screens.brandDetails.OnError
-import com.example.vendora.ui.screens.brandDetails.ProductCard
+import com.example.vendora.ui.screens.search.ProductCard
 import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
@@ -249,7 +249,7 @@ fun ProductsGrid(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = modifier
+        modifier = modifier.padding(8.dp)
     ) {
         items(
             items = products,
