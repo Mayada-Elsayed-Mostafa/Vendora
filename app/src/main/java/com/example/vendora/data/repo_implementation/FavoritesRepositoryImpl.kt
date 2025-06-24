@@ -26,8 +26,11 @@ class FavoritesRepositoryImpl(
     }
 
     override fun getFavoriteProducts(): Flow<List<Product>> = callbackFlow {
-        val userId = auth.currentUser?.uid ?: run {
-            close(Exception("User not logged in"))
+        val userId = auth.currentUser?.uid
+
+        if (userId == null) {
+            trySend(emptyList())
+            awaitClose {}
             return@callbackFlow
         }
 
@@ -37,7 +40,7 @@ class FavoritesRepositoryImpl(
 
         val listener = ref.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error)
+                trySend(emptyList())
                 return@addSnapshotListener
             }
 

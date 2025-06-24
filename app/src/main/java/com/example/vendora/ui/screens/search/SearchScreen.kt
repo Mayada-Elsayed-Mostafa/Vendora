@@ -55,62 +55,57 @@ fun SearchScreen(
     onProductClicked: (Long) -> Unit
 ) {
     val searchResults = viewModel.searchResults.collectAsStateWithLifecycle()
+
     Scaffold { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            item {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 ProductsSearchBar(
                     onInputQuery = { viewModel.updateSearchQuery(it) }
                 )
-            }
-            when (val result = searchResults.value) {
-                is Result.Loading -> {
-                    item {
+
+                when (val result = searchResults.value) {
+                    is Result.Loading -> {
                         Box(
                             modifier = Modifier
-                                .fillParentMaxSize()
-                                .padding(vertical = 16.dp),
+                                .fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             LottieLoader(
-                                resId = R.raw.search_loading,
+                                resId = R.raw.loading_animation,
                                 modifier = Modifier
                                     .width(300.dp)
                                     .height(300.dp)
                             )
                         }
                     }
-                }
 
-                is Result.Success -> {
-                    if (result.data.isEmpty()) {
-                        item {
+                    is Result.Success -> {
+                        if (result.data.isEmpty()) {
                             Box(
                                 modifier = Modifier
-                                    .fillParentMaxSize()
-                                    .padding(vertical = 16.dp),
+                                    .fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 LottieLoader(
-                                    resId = R.raw.no_results,
+                                    resId = R.raw.start_search,
                                     modifier = Modifier
                                         .width(300.dp)
                                         .height(300.dp)
                                 )
                             }
-                        }
-                    } else {
-                        item {
+                        } else {
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(2),
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 0.dp, max = 10000.dp)
+                                    .fillMaxSize()
                                     .padding(8.dp),
-                                userScrollEnabled = false
+                                userScrollEnabled = true
                             ) {
                                 items(result.data, key = { it.id }) { product ->
                                     ProductCard(
@@ -121,14 +116,11 @@ fun SearchScreen(
                             }
                         }
                     }
-                }
 
-                is Result.Failure -> {
-                    item {
+                    is Result.Failure -> {
                         Box(
                             modifier = Modifier
-                                .fillParentMaxSize()
-                                .padding(vertical = 16.dp),
+                                .fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             LottieLoader(
@@ -144,7 +136,6 @@ fun SearchScreen(
         }
     }
 }
-
 
 @Composable
 fun ProductCard(
@@ -188,14 +179,13 @@ fun ProductCard(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductsSearchBar(
     onInputQuery: (String) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var expanded = false
+    val expanded = false
 
     SearchBar(
         modifier = Modifier
@@ -234,7 +224,6 @@ fun ProductsSearchBar(
         shape = MaterialTheme.shapes.medium,
     ) {}
 }
-
 
 @Composable
 fun LottieLoader(
