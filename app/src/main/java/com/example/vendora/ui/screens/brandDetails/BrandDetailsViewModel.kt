@@ -26,7 +26,7 @@ class BrandDetailsViewModel @Inject constructor(private val useCase: GetProducts
     fun getProductsByBrandId(id: Long) {
         viewModelScope.launch {
             useCase.invoke(id)
-                .flowOn(Dispatchers.IO)
+                .flowOn(Dispatchers.Main)
                 .map { item ->
                     when (item) {
                         is Result.Success -> Result.Success(item.data.products)
@@ -55,7 +55,6 @@ class BrandDetailsViewModel @Inject constructor(private val useCase: GetProducts
                     }
             )
         }
-        Log.d("BrandScreen", _uiState.value.filteredProducts.size.toString())
     }
 
     fun filterProductsByPrice(maxPrice: Float){

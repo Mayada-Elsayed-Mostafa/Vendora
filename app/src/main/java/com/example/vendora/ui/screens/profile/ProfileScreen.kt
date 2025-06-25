@@ -49,6 +49,7 @@ import com.example.vendora.R
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
+import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun ProfileScreen(
@@ -61,6 +62,21 @@ fun ProfileScreen(
 ) {
 
     val userInfo = viewModel.userInfo.collectAsStateWithLifecycle()
+    var showDialog by remember { mutableStateOf(false) }
+    val dialogAttributes = remember {
+        mutableStateOf(
+            DialogAttributes(
+                onDismiss = { showDialog = false },
+                onAccept = { navigateToLogin() }
+            )
+        )
+    }
+
+    if (showDialog) {
+        GuestModeDialog(
+            attributes = dialogAttributes.value
+        )
+    }
 
     LaunchedEffect(Unit) {
         viewModel.collectUserState()
@@ -71,7 +87,13 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             ProfileAppBar(
-                navigateToCart = navigateToCart,
+                navigateToCart = {
+                    if (viewModel.isGuestMode()){
+                        showDialog = true
+                    } else {
+                        navigateToCart()
+                    }
+                },
                 navigateToSettings = navigateToSettings
             )
         },
@@ -82,7 +104,8 @@ fun ProfileScreen(
             navigateToOrders = navigateToOrders,
             userInfo = userInfo.value,
             viewModel = viewModel,
-            navigateToLogin = navigateToLogin
+            navigateToLogin = navigateToLogin,
+            navigateToFavorite = navigateToFavorite
         )
     }
 }
@@ -92,6 +115,7 @@ fun OnSuccess(
     modifier: Modifier = Modifier,
     cartViewModel: CartViewModel = hiltViewModel(),
     navigateToOrders: () -> Unit,
+    navigateToFavorite: () -> Unit,
     userInfo: UserInfo,
     viewModel: ProfileViewModel,
     navigateToLogin: () -> Unit
@@ -152,7 +176,7 @@ fun OnSuccess(
                 )
                 showDialog = true
             } else {
-                //TODO add navigation to favorites
+                navigateToFavorite()
             }
         }
         // logout item

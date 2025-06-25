@@ -156,10 +156,12 @@ dependencies {
     implementation ("com.jakewharton.timber:timber:5.0.1")
 
     // hamcrest
-    testImplementation ("org.hamcrest:hamcrest:2.2")
-    testImplementation ("org.hamcrest:hamcrest-library:2.2")
-    androidTestImplementation ("org.hamcrest:hamcrest:2.2")
-    androidTestImplementation ("org.hamcrest:hamcrest-library:2.2")
+//    testImplementation ("org.hamcrest:hamcrest:2.2")
+//    testImplementation ("org.hamcrest:hamcrest-library:2.2")
+//    androidTestImplementation ("org.hamcrest:hamcrest:2.2")
+//    androidTestImplementation ("org.hamcrest:hamcrest-library:2.2")
+    testImplementation("org.hamcrest:hamcrest-all:1.3")
+    androidTestImplementation("org.hamcrest:hamcrest-all:1.3")
 
 
     // AndroidX and Robolectric
@@ -181,4 +183,5 @@ dependencies {
     //MockK
     testImplementation( "io.mockk:mockk-android:1.13.17")
     testImplementation ("io.mockk:mockk-agent:1.13.17")
+    testImplementation("io.mockk:mockk:1.13.17")
 }
