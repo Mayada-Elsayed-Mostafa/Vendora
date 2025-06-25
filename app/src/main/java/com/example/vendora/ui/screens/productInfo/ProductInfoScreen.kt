@@ -398,7 +398,7 @@ fun ProductInfoFooterSection(
         Column {
             Text("Total Price", fontSize = 14.sp, color = Color.Gray)
             Text(
-                product.variants[0].price.toDouble().changeCurrency(context),
+                (product.variants[0].price.toDouble() * quantity).changeCurrency(context),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -407,9 +407,6 @@ fun ProductInfoFooterSection(
         Button(
             enabled = !uiState.isAddingToCart,
             onClick = {
-                /* Handle adding to card */
-                println("Clicked ${product.variants}")
-                println("Clicked ${product.id} ${selectedColor} && $selectedSize")
                 cartViewModel.addToCart(
                     product.findVariantIdByColorAndSize(
                         selectedColor,
