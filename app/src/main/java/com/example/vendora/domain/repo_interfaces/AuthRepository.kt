@@ -4,6 +4,14 @@ interface AuthRepository {
     fun signInWithEmailAndPassword(
         email: String,
         password: String,
-        onResult: (isSuccess: Boolean, isVerified: Boolean, error: String?) -> Unit
+        onResult: (
+            success: Boolean,
+            isVerified: Boolean,
+            userId: String?,
+            name: String?,
+            email: String?,
+            error: String?
+        ) -> Unit
     )
+
 }

@@ -8,16 +8,29 @@ import kotlinx.coroutines.launch
 class FakeAuthRepository : AuthRepository {
     var shouldSucceed = true
     var isVerified = true
+    var fakeUserId: String? = "test_user_id"
+    var fakeName: String? = "Test User"
+    var fakeEmail: String? = "test@example.com"
     var error: String? = null
 
     override fun signInWithEmailAndPassword(
         email: String,
         password: String,
-        onResult: (Boolean, Boolean, String?) -> Unit
+        onResult: (
+            success: Boolean,
+            isVerified: Boolean,
+            userId: String?,
+            name: String?,
+            emailAddress: String?,
+            error: String?
+        ) -> Unit
     ) {
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(10)
-            onResult(shouldSucceed, isVerified, error)
+        CoroutineScope(Dispatchers.Unconfined).launch {
+            if (shouldSucceed) {
+                onResult(true, isVerified, fakeUserId, fakeName, fakeEmail, null)
+            } else {
+                onResult(false, false, null, null, null, error ?: "Unknown error")
+            }
         }
     }
 }

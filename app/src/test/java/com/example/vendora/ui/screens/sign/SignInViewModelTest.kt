@@ -45,7 +45,7 @@ class SignInViewModelTest {
     fun `signInUser with successful sign in updates success state`() = runTest {
         fakeAuthRepository.shouldSucceed = true
         fakeAuthRepository.isVerified = true
-        viewModel.signInUser("mayada@example.com", "123456")
+        viewModel.signInUser("mayada@gmail.com", "123456")
         advanceUntilIdle()
         assertEquals(true, viewModel.signInState.value.isSuccess)
     }

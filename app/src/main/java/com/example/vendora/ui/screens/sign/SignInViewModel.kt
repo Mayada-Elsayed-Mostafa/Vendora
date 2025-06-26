@@ -39,9 +39,13 @@ class SignInViewModel @Inject constructor(
 
         _signInState.value = SignInState(isLoading = true)
 
-        authRepository.signInWithEmailAndPassword(email, password) { success, isVerified, error ->
+        authRepository.signInWithEmailAndPassword(
+            email,
+            password
+        ) { success, isVerified, userId, name, emailAddress, error ->
             viewModelScope.launch {
                 if (success && isVerified) {
+                    userPreferences.saveUser(userId ?: "", name ?: "", emailAddress ?: "")
                     userPreferences.saveLoginState(true)
                     _signInState.value = SignInState(
                         isSuccess = true,
@@ -52,6 +56,7 @@ class SignInViewModel @Inject constructor(
                 }
             }
         }
+
     }
 
     fun isValidEmail(email: String): Boolean {

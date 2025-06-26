@@ -10,22 +10,17 @@ class FirebaseAuthRepository @Inject constructor() : AuthRepository {
     override fun signInWithEmailAndPassword(
         email: String,
         password: String,
-        onResult: (Boolean, Boolean, String?) -> Unit
+        onResult: (success: Boolean, isVerified: Boolean, userId: String?, String?, String?, String?) -> Unit
     ) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    if (user != null && user.isEmailVerified) {
-                        onResult(true, true, null)
-                    } else {
-                        auth.signOut()
-                        onResult(false, false, "Please verify your email first.")
-                    }
+                    onResult(true, user?.isEmailVerified == true, user?.uid, user?.displayName, user?.email, null)
                 } else {
-                    val errorMessage = task.exception?.localizedMessage ?: "Unknown error"
-                    onResult(false, false, errorMessage)
+                    onResult(false, false, null, null, null, task.exception?.message)
                 }
             }
     }
+
 }

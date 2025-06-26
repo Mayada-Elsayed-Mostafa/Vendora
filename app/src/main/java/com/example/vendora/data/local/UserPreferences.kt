@@ -5,19 +5,21 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 private val Context.dataStore by preferencesDataStore("user_prefs")
 
-class UserPreferences(private val context: Context) {
-
+class UserPreferences @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     companion object {
         private val USER_ID = stringPreferencesKey("user_id")
         private val USER_NAME = stringPreferencesKey("user_name")
         private val USER_EMAIL = stringPreferencesKey("user_email")
         private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-
     }
 
     suspend fun saveLoginState(isLoggedIn: Boolean) {
@@ -27,10 +29,7 @@ class UserPreferences(private val context: Context) {
     }
 
     suspend fun isUserLoggedIn(): Boolean {
-        val isLoggedIn = context.dataStore.data.map { prefs ->
-            prefs[IS_LOGGED_IN]
-        }.first()
-        return isLoggedIn == true
+        return context.dataStore.data.map { prefs -> prefs[IS_LOGGED_IN] == true }.first()
     }
 
     suspend fun saveUser(id: String, name: String, email: String) {
@@ -41,22 +40,16 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getUserId(): String? {
-        return context.dataStore.data.map { prefs -> prefs[USER_ID] }.first()
-    }
+    suspend fun getUserId(): String? =
+        context.dataStore.data.map { prefs -> prefs[USER_ID] }.first()
 
-    suspend fun getUserName(): String? {
-        return context.dataStore.data.map { prefs -> prefs[USER_NAME] }.first()
-    }
+    suspend fun getUserName(): String? =
+        context.dataStore.data.map { prefs -> prefs[USER_NAME] }.first()
 
-    suspend fun getUserEmail(): String? {
-        return context.dataStore.data.map { prefs -> prefs[USER_EMAIL] }.first()
-    }
+    suspend fun getUserEmail(): String? =
+        context.dataStore.data.map { prefs -> prefs[USER_EMAIL] }.first()
 
     suspend fun clearUser() {
-        context.dataStore.edit { prefs ->
-            prefs.clear()
-        }
+        context.dataStore.edit { it.clear() }
     }
-
 }
