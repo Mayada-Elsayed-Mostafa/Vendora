@@ -69,7 +69,7 @@ fun VisaScreen(
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         CustomAppBar("VISA") {}
-        Spacer(Modifier.height(24.dp))
+
         Divider()
         AndroidView(
             factory = { webView },

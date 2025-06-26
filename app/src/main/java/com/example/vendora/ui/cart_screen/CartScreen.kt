@@ -207,7 +207,8 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
             modifier = Modifier
                 .fillMaxSize()
 
-                .padding(12.dp),
+                //.padding(12.dp)
+            ,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         )
@@ -219,29 +220,48 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                     .build(),
                 contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
-                    .size(100.dp)
+                    .padding(vertical = 8.dp, horizontal = 12.dp)
+                    .fillMaxHeight()
+                    .width(100.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .weight(1f)
+                    //.weight(1f)
                     .background(Color(0xFF35383f)),
                 contentScale = ContentScale.Crop
 
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
 
-            Column(
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
-            )
-            {
-                Text(
-                    text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, fontSize = 14.sp),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 3
-                )
+            Column (
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp).fillMaxSize(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.SpaceBetween
+            ){
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
+                    Text(
+                        text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 4,
+                        modifier = Modifier.weight(3f)
+                    )
 
-                Spacer(modifier = Modifier.height(4.dp))
-                // color and size
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(24.dp).weight(1f)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.trash),
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                }
+
                 Row( verticalAlignment = Alignment.CenterVertically)
                 {
                     Text(
@@ -250,87 +270,73 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                     )
 
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "${item.node.merchandise.onProductVariant?.price?.amount.toString().toDoubleOrNull()?.convertToCurrency(getChangeRate)} " + currency,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                )
-
-            }
-
-            //count and delete
-            Column (
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxHeight()
-            ){
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        painterResource(R.drawable.trash),
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(50.dp))
 
                 Row (
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(end = 4.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                )
-                {
-                    IconButton(
-                        onClick = {
-                            if (quantity > 1) {
-                                quantity--
-                                onCountChange(quantity)
-                            }
-                        },
-                        enabled = quantity > 1,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.minus),
-                            contentDescription = "Decrease",
-                            tint = if (quantity > 1) MaterialTheme.colorScheme.onSurface else Color.Gray,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-
-
+                ){
                     Text(
-                        text = "${quantity}",
-                        style = MaterialTheme.typography.titleSmall
+                        text = "${item.node.merchandise.onProductVariant?.price?.amount.toString().toDoubleOrNull()?.convertToCurrency(getChangeRate)} " + currency,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     )
+                    Row (
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    )
+                    {
+                        IconButton(
+                            onClick = {
+                                if (quantity > 1) {
+                                    quantity--
+                                    onCountChange(quantity)
+                                }
+                            },
+                            enabled = quantity > 1,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.minus),
+                                contentDescription = "Decrease",
+                                tint = if (quantity > 1) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
 
-                    IconButton(
-                        onClick = {
-                            if (quantity < availableQuantity) {
-                                quantity++
-                                onCountChange(quantity)
-                            }
-                        },
-                        enabled = quantity < availableQuantity,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.plus1),
-                            contentDescription = "Increase",
-                            tint = if (quantity < availableQuantity) MaterialTheme.colorScheme.onSurface else Color.Gray,
-                            modifier = Modifier.size(16.dp)
+
+                        Text(
+                            text = "${quantity}",
+                            style = MaterialTheme.typography.titleSmall
                         )
-                    }
 
+                        IconButton(
+                            onClick = {
+                                if (quantity < availableQuantity) {
+                                    quantity++
+                                    onCountChange(quantity)
+                                }
+                            },
+                            enabled = quantity < availableQuantity,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.plus1),
+                                contentDescription = "Increase",
+                                tint = if (quantity < availableQuantity) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+
+                    }
 
                 }
+
             }
+
 
 
         }

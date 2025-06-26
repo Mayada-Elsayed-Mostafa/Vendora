@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
+import com.example.vendora.ui.cart_screen.CustomAppBar
 import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.ui.screens.search.LottieLoader
 

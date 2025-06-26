@@ -16,7 +16,7 @@ sealed class ScreenRoute(
 
 
     @Serializable
-    data class PaymentScreenRoute(val price : Double = 10.0,val token:String,val orderId: Int) : ScreenRoute("Payment")
+    data class PaymentScreenRoute(val price : Double = 10.0,val token:String,val orderId: Int,val promoCode:String) : ScreenRoute("Payment")
 
     @Serializable
     data class VisaScreenRoute(

@@ -61,7 +61,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 @Composable
-fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewModel: AddressViewModel = hiltViewModel(), viewModel: PaymobViewModel= hiltViewModel(), navController: NavHostController) {
+fun PaymentScreen(token:String, totalPrice : Double, orderId: Int,discountCode:String ,addressViewModel: AddressViewModel = hiltViewModel(), viewModel: PaymobViewModel= hiltViewModel(), navController: NavHostController) {
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
     var billing_data = BillingData()
@@ -95,10 +95,10 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(16.dp),
     ) {
-        CustomAppBar("Checkout Screen : $totalPrice EGP"){navController.popBackStack()}
+        CustomAppBar("Payment Methods"){navController.popBackStack()}
 
 
-        PaymentMethodItem ("Visa", R.drawable.visa,navToPaymentMethod = {
+        PaymentMethodItem ("Online Card", R.drawable.visa,navToPaymentMethod = {
             if (paymentKeyState is Result.Success){
                 val paymentToken = (paymentKeyState as Result.Success<PaymentKeyResponse>).data.token
                 println("final token : $paymentToken")
@@ -110,8 +110,8 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
                 ))
             }
         })
-        Divider()
-        PaymentMethodItem ("Wallet", R.drawable.wallet,navToPaymentMethod = {/**/})
+/*        Divider()
+        PaymentMethodItem ("Wallet", R.drawable.wallet,navToPaymentMethod = {*//**//*})*/
 
         Divider()
         PaymentMethodItem ("Cash on delivery", R.drawable.cash_on_delivery,navToPaymentMethod = {

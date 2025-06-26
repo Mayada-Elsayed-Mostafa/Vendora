@@ -34,6 +34,7 @@ class CartViewModel @Inject constructor(
     private val getCartUseCase: GetCartUseCase,
     private val repository: CartRepository,
     private val removeAllLinesFromCartUseCase: RemoveAllLinesFromCartUseCase,
+    private val auth:FirebaseAuth
 ):ViewModel(){
 
     private var _uiState = MutableStateFlow(CartUiState())
@@ -42,7 +43,7 @@ class CartViewModel @Inject constructor(
     private var _cartItems = MutableStateFlow<Result<GetCartQuery.Cart>>(Result.Loading)
     val cartItems = _cartItems.asStateFlow()
 
-    private val auth = FirebaseAuth.getInstance()
+   // private val auth = FirebaseAuth.getInstance()
 
     init {
         _uiState.update { it.copy(cartId = repository.getCartId()) }
@@ -427,7 +428,9 @@ class CartViewModel @Inject constructor(
         }
     }
 
-
+    fun setCartIdForTest(cartId: String) {
+        _uiState.update { it.copy(cartId = cartId) }
+    }
 
 }
 

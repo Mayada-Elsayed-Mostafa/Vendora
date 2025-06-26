@@ -28,7 +28,8 @@ class AddressViewModel @Inject constructor(
     private val insertAddressUseCase: InsertAddressUseCase,
     private val deleteAddressUseCase: DeleteAddressUseCase,
     private val getCountryByIdUseCase: GetCountryByIdUseCase,
-    private val getAllAddressesByEmailUseCase: GetAllAddressesByEmailUseCase
+    private val getAllAddressesByEmailUseCase: GetAllAddressesByEmailUseCase,
+    private val auth:FirebaseAuth
 ) : ViewModel() {
 
     private val _address = MutableStateFlow<Result<List<AddressEntity>>>(Result.Loading)
@@ -46,7 +47,7 @@ class AddressViewModel @Inject constructor(
     private val _selectedProvince = MutableStateFlow<String?>(null)
     val selectedProvince = _selectedProvince.asStateFlow()
 
-    val email = FirebaseAuth.getInstance().currentUser?.email
+    val email = auth.currentUser?.email
 
 
     init {

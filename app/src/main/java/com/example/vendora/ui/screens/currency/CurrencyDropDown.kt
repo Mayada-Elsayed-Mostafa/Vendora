@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vendora.utils.wrapper.Result
@@ -36,7 +38,7 @@ fun CurrencyDropDown(currencyViewModel: CurrencyViewModel = hiltViewModel()) {
         .clickable { expanded = true }) {
 
         when (state) {
-            is Result.Loading -> CircularProgressIndicator()
+            is Result.Loading -> {}
             is Result.Success -> {
                 val currencies = (state as Result.Success).data.data.keys.toList()
 
@@ -59,7 +61,10 @@ fun CurrencyDropDown(currencyViewModel: CurrencyViewModel = hiltViewModel()) {
             }
 
             is Result.Failure -> {
-                Text(text = "Failed to load currencies")
+                Text(
+                    text = "You used all your monthly requests",
+                    style = MaterialTheme.typography.titleSmall
+                    )
             }
         }
     }

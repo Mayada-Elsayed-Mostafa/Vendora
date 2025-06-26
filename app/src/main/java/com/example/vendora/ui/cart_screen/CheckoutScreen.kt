@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -120,7 +121,7 @@ fun CheckoutScreen(
 
     val currency by currencyViewModel.selectedCurrency.collectAsState()
     val getChangeRate by currencyViewModel.getChangeRate.collectAsState()
-
+    var appliedPromoCode by remember { mutableStateOf("") }
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -144,7 +145,7 @@ fun CheckoutScreen(
                 navController.navigate(ScreenRoute.AddressScreen)
             }
         }else {
-            Text(text = "No default address found.")
+            //Text(text = "No default address found.")
             AddressButton("Add New Address"){
                 navController.navigate(ScreenRoute.AddressScreen)
             }
@@ -182,7 +183,7 @@ fun CheckoutScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(card){ item ->
-                        CheckoutItem(item,getChangeRate, currency)
+                        CheckoutItem(item)
                     }
 
                     item{
@@ -192,6 +193,9 @@ fun CheckoutScreen(
                             currency = currency,
                             navToDiscount = {
                                 navController.navigate(ScreenRoute.DiscountScreen)
+                            },
+                            onApplyPromo = {
+                                appliedPromoCode = it
                             }
                         )
 
@@ -203,12 +207,12 @@ fun CheckoutScreen(
                     token = token,
                     items = result.data.lines.edges,
                     currency = currency,
-
+                    promoCode = appliedPromoCode,
                     ){orderId  ->
                     /*nav to Payment Screen*/
                     println("Nav To")
                     println("$orderId")
-                    navController.navigate(ScreenRoute.PaymentScreenRoute(priceToUse,token,orderId))
+                    navController.navigate(ScreenRoute.PaymentScreenRoute(priceToUse,token,orderId, promoCode = appliedPromoCode))
                 }
 
             }
@@ -225,7 +229,7 @@ fun CheckoutScreen(
 
 
 @Composable
-fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: String ) {
+fun CheckoutItem (item: GetCartQuery.Edge  ) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -235,7 +239,7 @@ fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: Str
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                ,
             verticalAlignment = Alignment.CenterVertically
         )
         {
@@ -245,19 +249,21 @@ fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: Str
                     .build(),
                 contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
-                    .size(90.dp)
+                    .padding(vertical = 8.dp, horizontal = 12.dp)
+                    .fillMaxHeight()
+                    .width(100.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                    //.weight(1f)
+                    .background(Color(0xFF35383f)),
+                contentScale = ContentScale.Crop,
 
                 )
 
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(2f)
-            )
-            {
+            Column (
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp).fillMaxSize(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.SpaceBetween
+            ){
                 Text(
                     text = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold,fontSize = 14.sp),
@@ -265,21 +271,33 @@ fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: Str
                     maxLines = 3
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-                // color and size
-                Row( verticalAlignment = Alignment.CenterVertically)
-                {
+                Row (
+                    modifier = Modifier.padding(end = 8.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+
                     Text(
                         text ="${item.node.merchandise.onProductVariant?.title}",
                         style = MaterialTheme.typography.titleSmall,
                     )
 
-                    /* Text(
-                         text = " | Size = ${item.size}",
-                         style = MaterialTheme.typography.titleSmall,
-                     )*/
+                    Row (
+                        modifier =  Modifier
+                            .size(50.dp)
+                            .clip(RoundedCornerShape(25.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainer),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            text = "${item.node.quantity}",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                        )
+                    }
+
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     text = "${item.node.merchandise.onProductVariant?.price?.amount.toString().toDoubleOrNull()
                         ?.changeCurrency(context)} ",
@@ -287,21 +305,6 @@ fun CheckoutItem (item: GetCartQuery.Edge , getChangeRate: Double, currency: Str
                 )
 
             }
-            Row (
-                modifier =  Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainer),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Text(
-                    text = "${item.node.quantity}",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
-                )
-            }
-
-
         }
     }
 }
@@ -438,6 +441,7 @@ fun PaymentBottom(
     totalPrice: Int,
     token:String,
     currency: String="EGP",
+    promoCode: String = "",
     paymobviewModel: PaymobViewModel= hiltViewModel(),
     navTo:(orderId: Int)->Unit
 ) {
@@ -547,7 +551,8 @@ fun PromoCodeItem(
     discountViewModel: DiscountViewModel= hiltViewModel(),
     totalPrice: Double,
     currency: String,
-    navToDiscount:() -> Unit
+    navToDiscount:() -> Unit,
+    onApplyPromo: (String) -> Unit
 ) {
     var discountApplied by remember { mutableStateOf(false) }
     val finalPrice by discountViewModel.finalPrice.collectAsState()
@@ -612,6 +617,7 @@ fun PromoCodeItem(
                         discountViewModel.calculateFinalPriceWithCode(promo,totalPrice)
                         discountApplied = true
                         errorMessage = null
+                        onApplyPromo(promo)
                     } else {
                         errorMessage = "Invalid promo code"
                         discountApplied = false
@@ -658,7 +664,7 @@ fun PromoCodeItem(
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = "-${discountValue}",
+                            text = "-${String.format("%.2f", discountValue)}",
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
