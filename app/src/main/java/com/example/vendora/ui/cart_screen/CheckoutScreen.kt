@@ -250,8 +250,7 @@ fun CheckoutItem (item: GetCartQuery.Edge  ) {
                 contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
                     .padding(vertical = 8.dp, horizontal = 12.dp)
-                    .fillMaxHeight()
-                    .width(100.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
                     //.weight(1f)
                     .background(Color(0xFF35383f)),

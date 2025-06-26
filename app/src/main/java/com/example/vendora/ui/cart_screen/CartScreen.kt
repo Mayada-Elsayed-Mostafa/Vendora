@@ -1,5 +1,9 @@
 package com.example.vendora.ui.cart_screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -81,6 +86,7 @@ import com.example.vendora.ui.screens.currency.CurrencyDropDown
 import com.example.vendora.ui.screens.currency.CurrencyViewModel
 import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.utils.wrapper.Result
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 
 
@@ -134,27 +140,43 @@ fun CartScreen(
 
             is Result.Success -> {
                 if (result.data.lines.edges.isEmpty()) {
-                    CustomEmpty()
+                    //CustomEmpty()
+                    Empty()
+
                 } else
                 {
                     LazyColumn(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(result.data.lines.edges) { item ->
+                        itemsIndexed(result.data.lines.edges) { index, item ->
+                            var visible by remember { mutableStateOf(false) }
 
-                            CartItem(
-                                item = item,
-                                currency=currency,
-                                onCountChange = { newQuantity ->
-                                    cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
-                                },
-                                onDelete = {
-                                    itemIdToDelete.value = item.node.id
-                                },
-                                getChangeRate = getChangeRate
-                            )
+                            LaunchedEffect(Unit) {
+
+                                delay(index * 150L)
+                                visible = true
+                            }
+
+                            AnimatedVisibility(
+                                visible = visible,
+                                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                                exit = fadeOut()
+                            ) {
+                                CartItem(
+                                    item = item,
+                                    currency = currency,
+                                    onCountChange = { newQuantity ->
+                                        cartViewModel.updateCartLineQuantity(lineId = item.node.id, quantity = newQuantity)
+                                    },
+                                    onDelete = {
+                                        itemIdToDelete.value = item.node.id
+                                    },
+                                    getChangeRate = getChangeRate
+                                )
+                            }
                         }
+
                     }
                     when (getFirstToken) {
                         is Result.Success -> {
@@ -221,8 +243,7 @@ fun CartItem (item: GetCartQuery.Edge, currency:String = "EGP", onCountChange : 
                 contentDescription = item.node.merchandise.onProductVariant?.product?.title ?:"title",
                 modifier = Modifier
                     .padding(vertical = 8.dp, horizontal = 12.dp)
-                    .fillMaxHeight()
-                    .width(100.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
                     //.weight(1f)
                     .background(Color(0xFF35383f)),
@@ -442,4 +463,37 @@ fun CustomLoading() {
             progress = { progress },
         )
     }
+}
+
+@Composable
+fun Empty(title:String ="Your cart is empty!") {
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.cart))
+            val progress by animateLottieCompositionAsState(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+            )
+
+            LottieAnimation(
+                composition = composition,
+                modifier = Modifier.size(300.dp),
+                progress = { progress },
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+
+    }
+
 }
