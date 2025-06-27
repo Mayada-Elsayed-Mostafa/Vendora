@@ -206,8 +206,8 @@ fun PaymentMethodItem(title: String, icon: Int, navToPaymentMethod: () -> Unit) 
 
 
 @Composable
-fun CustomLottie() {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.visa))
+fun CustomLottie(size:Int = 350, title: Int = R.raw.visa) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(title))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever,
@@ -215,7 +215,7 @@ fun CustomLottie() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(350.dp),
+            .height(size.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

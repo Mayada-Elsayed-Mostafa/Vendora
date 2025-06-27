@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.address.viewModel
 
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.domain.model.address.Country
 import com.example.vendora.domain.model.address.CountryResponse
@@ -36,7 +37,7 @@ class AddressViewModelTest{
     private val deleteAddressUseCase = mockk<DeleteAddressUseCase>(relaxed = true)
     private val getCountryByIdUseCase = mockk<GetCountryByIdUseCase>(relaxed = true)
     private val getAllAddressesByEmailUseCase = mockk<GetAllAddressesByEmailUseCase>(relaxed = true)
-    private val firebaseAuth = mockk<FirebaseAuth>(relaxed = true)
+    private val userPreferences = mockk<UserPreferences>(relaxed = true)
 
     @Before
     fun setUp(){
@@ -56,7 +57,7 @@ class AddressViewModelTest{
            deleteAddressUseCase,
            getCountryByIdUseCase,
            getAllAddressesByEmailUseCase,
-           firebaseAuth
+           userPreferences
        )
     }
 

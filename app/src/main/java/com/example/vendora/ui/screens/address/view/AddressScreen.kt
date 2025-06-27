@@ -65,6 +65,7 @@ import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.ui.cart_screen.CustomAppBar
 import com.example.vendora.ui.cart_screen.CustomEmpty
+import com.example.vendora.ui.cart_screen.Empty
 import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.utils.wrapper.Result
 import com.google.firebase.auth.FirebaseAuth
@@ -109,11 +110,12 @@ fun AddressScreen(navController: NavHostController,viewModel: AddressViewModel =
                 .padding(horizontal = 16.dp) )
         {
             when (addressState) {
-                is Result.Loading -> CircularProgressIndicator()
+                is Result.Loading -> Empty("" , R.raw.location)
                 is Result.Success -> {
                     val addresses = (addressState as Result.Success<List<AddressEntity>>).data
                     if(addresses.isEmpty()){
-                        CustomEmpty("Add New Address")
+                        //CustomEmpty("Add New Address")
+                        Empty("Add New Address" , R.raw.location)
                     }else{
                         LazyColumn {
                             items(addresses) { address ->
