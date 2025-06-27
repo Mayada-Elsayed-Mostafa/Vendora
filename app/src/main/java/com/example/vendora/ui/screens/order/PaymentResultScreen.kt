@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.order
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -86,11 +87,13 @@ fun PaymentResultScreen(
             is Result.Failure -> OnError {}
             Result.Loading -> OnLoading()
             is Result.Success -> {
-
+                Log.d("Payment","PaymentStatus = ${(state.value.result as Result.Success).data.payment_status}")
+                Log.d("Payment","PaymentStatus = ${(state.value.result as Result.Success).data}")
                 val result = (state.value.result as Result.Success).data
                 LaunchedEffect(Unit) {
                     cartViewModel.checkOrCreateCart()
-                    viewModel.createOrder(result, discountCode = discountCode, context = context)
+                    if ((state.value.result as Result.Success).data.payment_status == "PAID")
+                        viewModel.createOrder(result, discountCode = discountCode, context = context)
                 }
 
                 OnSuccess(

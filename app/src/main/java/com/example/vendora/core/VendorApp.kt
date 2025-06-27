@@ -151,9 +151,9 @@ fun VendorApp() {
                     firstToken = firstToken,
                     orderId = orderId,
                     discountCode = discountCode
-                ) { order_Id, first_token, _ ,discountCode->
+                ) { order_Id, first_token, _ ,discountCo->
                     navController.navigate(
-                        PaymentResult(id = order_Id, token = first_token,discountCode = discountCode)
+                        PaymentResult(id = order_Id, token = first_token,discountCode = discountCo)
                     ) {
                         popUpTo(ScreenRoute.CartScreen) {
                             inclusive = true
