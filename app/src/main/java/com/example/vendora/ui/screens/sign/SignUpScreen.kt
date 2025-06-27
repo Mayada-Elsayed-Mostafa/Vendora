@@ -2,6 +2,7 @@ package com.example.vendora.ui.screens.sign
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +59,13 @@ fun SignUpScreen(
     onNavigateToSignIn: () -> Unit,
     onContinueAsGuest: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val backgroundColor = if (isDark) Color.Black else Color.White
+    val contentColor = if (isDark) Color.White else Color.Black
+    val secondaryColor = if (isDark) Color.LightGray else Color.Gray
+    val cardColor = if (isDark) Color.DarkGray else Color.White
+    val buttonColor = if (isDark) Color.LightGray else Color.Black
+
 
     val signUpState by viewModel.signUpState.collectAsState()
     val scrollState = rememberScrollState()
@@ -90,7 +98,7 @@ fun SignUpScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(Color.White)
+            .background(backgroundColor)
             .navigationBarsPadding()
             .statusBarsPadding()
     ) {
@@ -104,22 +112,23 @@ fun SignUpScreen(
                 onClick = onContinueAsGuest,
                 modifier = Modifier.align(TopEnd),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Gray),
+                border = androidx.compose.foundation.BorderStroke(1.dp, secondaryColor),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = 12.dp,
                     vertical = 6.dp
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.Transparent,
-                    contentColor = Color.Gray
+                    contentColor = secondaryColor
                 )
+
             ) {
                 Text("Continue as Guest", fontSize = 14.sp)
             }
         }
 
         Image(
-            painter = painterResource(id = R.drawable.vendora),
+            painter = painterResource(if (isSystemInDarkTheme()) R.drawable.vendora_dark else R.drawable.vendora),
             contentDescription = "App Logo",
             modifier = Modifier
                 .size(250.dp)
@@ -134,7 +143,7 @@ fun SignUpScreen(
                     .height(150.dp)
                     .padding(horizontal = 12.dp)
                     .offset(y = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Black),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(2.dp)
             ) {}
 
@@ -144,14 +153,14 @@ fun SignUpScreen(
                     .fillMaxHeight()
                     .padding(horizontal = 8.dp)
                     .offset(y = 12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Column {
                     Text(
                         text = stringResource(R.string.lets_create_account),
                         fontSize = 20.sp,
-                        color = Color.Black,
+                        color = contentColor,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp, vertical = 12.dp),
@@ -160,7 +169,12 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = firstName,
                         onValueChange = { firstName = it },
-                        label = { Text(stringResource(R.string.first_name), color = Color.Gray) },
+                        label = {
+                            Text(
+                                stringResource(R.string.first_name),
+                                color = secondaryColor
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
@@ -170,7 +184,12 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = lastName,
                         onValueChange = { lastName = it },
-                        label = { Text(stringResource(R.string.last_name), color = Color.Gray) },
+                        label = {
+                            Text(
+                                stringResource(R.string.last_name),
+                                color = secondaryColor
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
@@ -180,7 +199,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text(stringResource(R.string.email), color = Color.Gray) },
+                        label = { Text(stringResource(R.string.email), color = secondaryColor) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier
@@ -192,7 +211,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        label = { Text(stringResource(R.string.phone), color = Color.Gray) },
+                        label = { Text(stringResource(R.string.phone), color = secondaryColor) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
@@ -204,7 +223,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text(stringResource(R.string.password), color = Color.Gray) },
+                        label = { Text(stringResource(R.string.password), color = secondaryColor) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -218,7 +237,7 @@ fun SignUpScreen(
                         label = {
                             Text(
                                 stringResource(R.string.confirm_password),
-                                color = Color.Gray
+                                color = secondaryColor
                             )
                         },
                         visualTransformation = PasswordVisualTransformation(),
@@ -245,13 +264,13 @@ fun SignUpScreen(
                             .padding(horizontal = 24.dp),
                         enabled = !signUpState.isLoading,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
+                            containerColor = buttonColor,
                             contentColor = Color.White
                         )
                     ) {
                         if (signUpState.isLoading) {
                             CircularProgressIndicator(
-                                color = Color.White,
+                                color = contentColor,
                                 strokeWidth = 2.dp,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -268,9 +287,12 @@ fun SignUpScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(stringResource(R.string.already_have_an_account), color = Color.Gray)
+                        Text(
+                            stringResource(R.string.already_have_an_account),
+                            color = secondaryColor
+                        )
                         TextButton(onClick = onNavigateToSignIn) {
-                            Text(stringResource(R.string.sign_in), color = Color.Black)
+                            Text(stringResource(R.string.sign_in), color = contentColor)
                         }
                     }
                 }
@@ -294,12 +316,12 @@ fun SignUpScreen(
                         showDialog.value = false
                         viewModel.clearMessages()
                     }) {
-                        Text(stringResource(R.string.try_again), color = Color.Black)
+                        Text(stringResource(R.string.try_again), color = contentColor)
                     }
                 },
-                title = { Text(stringResource(R.string.oops), color = Color.Black) },
-                text = { Text(dialogMessage.value, color = Color.Black) },
-                containerColor = Color.White
+                title = { Text(stringResource(R.string.oops), color = contentColor) },
+                text = { Text(dialogMessage.value, color = contentColor) },
+                containerColor = cardColor
             )
         }
     }
