@@ -3,9 +3,7 @@ package com.example.vendora.ui.screens.sign
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.data.local.UserPreferences
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.example.vendora.domain.repo_interfaces.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,16 +19,15 @@ data class SignInState(
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
-
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val _signInState = MutableStateFlow(SignInState())
     val signInState: StateFlow<SignInState> = _signInState
 
     fun signInUser(email: String, password: String) {
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!isValidEmail(email)) {
             _signInState.value = SignInState(errorMessage = "Invalid email format")
             return
         }
@@ -42,36 +39,28 @@ class SignInViewModel @Inject constructor(
 
         _signInState.value = SignInState(isLoading = true)
 
-        viewModelScope.launch {
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val user = auth.currentUser
-
-                        if (user != null && user.isEmailVerified) {
-                            viewModelScope.launch {
-                                userPreferences.saveUser(user.uid, user.displayName ?: "",user.email ?: "")
-                                userPreferences.saveLoginState(true)
-                                _signInState.value = SignInState(
-                                    isSuccess = true,
-                                    successMessage = "Signed in successfully!"
-                                )
-                            }
-                        } else {
-                            auth.signOut()
-                            _signInState.value =
-                                SignInState(errorMessage = "Please verify your email first.")
-                        }
-                    } else {
-                        val errorMessage = when (val exception = task.exception) {
-                            is FirebaseAuthInvalidUserException -> "No account found with this email"
-                            is FirebaseAuthInvalidCredentialsException -> "Incorrect email or password"
-                            else -> exception?.message ?: "Unknown error"
-                        }
-                        _signInState.value = SignInState(errorMessage = errorMessage)
-                    }
+        authRepository.signInWithEmailAndPassword(
+            email,
+            password
+        ) { success, isVerified, userId, name, emailAddress, error ->
+            viewModelScope.launch {
+                if (success && isVerified) {
+                    userPreferences.saveUser(userId ?: "", name ?: "", emailAddress ?: "")
+                    userPreferences.saveLoginState(true)
+                    _signInState.value = SignInState(
+                        isSuccess = true,
+                        successMessage = "Signed in successfully!"
+                    )
+                } else {
+                    _signInState.value = SignInState(errorMessage = error)
                 }
+            }
         }
+
+    }
+
+    fun isValidEmail(email: String): Boolean {
+        return Regex("^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})").matches(email)
     }
 
     fun clearMessages() {

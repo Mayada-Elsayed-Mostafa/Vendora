@@ -129,10 +129,13 @@ fun VendorApp() {
                     navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().token
                 val orderId: Int =
                     navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().orderId
+
+                val promoCode = navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().promoCode
                 PaymentScreen(
                     token = token,
                     totalPrice = price,
                     orderId = orderId,
+                    discountCode = promoCode,
                     navController = navController
                 )
             }

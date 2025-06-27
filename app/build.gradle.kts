@@ -184,4 +184,6 @@ dependencies {
     testImplementation( "io.mockk:mockk-android:1.13.17")
     testImplementation ("io.mockk:mockk-agent:1.13.17")
     testImplementation("io.mockk:mockk:1.13.17")
+
+    testImplementation("app.cash.turbine:turbine:1.0.0")
 }

@@ -46,6 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.payment.AuthTokenResponse
@@ -61,7 +66,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 @Composable
-fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewModel: AddressViewModel = hiltViewModel(), viewModel: PaymobViewModel= hiltViewModel(), navController: NavHostController) {
+fun PaymentScreen(token:String, totalPrice : Double, orderId: Int,discountCode:String ,addressViewModel: AddressViewModel = hiltViewModel(), viewModel: PaymobViewModel= hiltViewModel(), navController: NavHostController) {
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
     var billing_data = BillingData()
@@ -95,10 +100,11 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(16.dp),
     ) {
-        CustomAppBar("Checkout Screen : $totalPrice EGP"){navController.popBackStack()}
+        CustomAppBar("Payment Methods"){navController.popBackStack()}
 
+        CustomLottie()
 
-        PaymentMethodItem ("Visa", R.drawable.visa,navToPaymentMethod = {
+        PaymentMethodItem ("Online Card", R.drawable.visa,navToPaymentMethod = {
             if (paymentKeyState is Result.Success){
                 val paymentToken = (paymentKeyState as Result.Success<PaymentKeyResponse>).data.token
                 println("final token : $paymentToken")
@@ -110,8 +116,8 @@ fun PaymentScreen(token:String, totalPrice : Double, orderId: Int, addressViewMo
                 ))
             }
         })
-        Divider()
-        PaymentMethodItem ("Wallet", R.drawable.wallet,navToPaymentMethod = {/**/})
+/*        Divider()
+        PaymentMethodItem ("Wallet", R.drawable.wallet,navToPaymentMethod = {*//**//*})*/
 
         Divider()
         PaymentMethodItem ("Cash on delivery", R.drawable.cash_on_delivery,navToPaymentMethod = {
@@ -190,4 +196,28 @@ fun PaymentMethodItem (title:String ,icon: Int,navToPaymentMethod:()->Unit ) {
 
         }
     }
+}
+
+
+@Composable
+fun CustomLottie() {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.visa))
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    Column (
+        modifier = Modifier.fillMaxWidth().height(350.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        LottieAnimation(
+            composition = composition,
+            modifier = Modifier
+                .fillMaxWidth().height(300.dp),
+            progress = { progress },
+        )
+
+    }
+
 }

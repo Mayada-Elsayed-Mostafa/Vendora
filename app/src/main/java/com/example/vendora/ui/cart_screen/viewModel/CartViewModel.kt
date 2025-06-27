@@ -83,16 +83,13 @@ class CartViewModel @Inject constructor(
                             _uiState.update {
                                 it.copy(
                                     createCartResult = result,
-                                    errorMessage = result.exception.message
-                                        ?: "Failed to create cart"
+                                    errorMessage = result.exception.message ?: "Failed to create cart"
                                 )
                             }
                         }
-
-                        is Result.Loading -> {
-                            _uiState.update { it.copy(createCartResult = result) }
-                        }
-
+                       is Result.Loading -> {
+                           _uiState.update { it.copy(createCartResult = result) }
+                       }
                         is Result.Success -> {
                             val cardId = result.data.id
                             repository.saveString(email, cardId)
@@ -232,8 +229,7 @@ class CartViewModel @Inject constructor(
                                 it.copy(
                                     createCartResult = result,
                                     isAddingToCart = false,
-                                    errorMessage = result.exception.message
-                                        ?: "Failed to create cart"
+                                    errorMessage = result.exception.message ?: "Failed to create cart"
                                 )
                             }
                         }
@@ -454,6 +450,9 @@ class CartViewModel @Inject constructor(
 
     fun getUserEmail(): String? = runBlocking {
         userPreferences.getUserEmail()
+    }
+    fun setCartIdForTest(cartId: String) {
+        _uiState.update { it.copy(cartId = cartId) }
     }
 
 }

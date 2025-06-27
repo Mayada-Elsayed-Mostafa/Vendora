@@ -1,6 +1,5 @@
 package com.example.vendora.ui.screens.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.domain.model.product.Product
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -50,7 +50,6 @@ class SearchViewModel @Inject constructor(
                     _searchResults.value = Result.Failure(e)
                 }
                 .collectLatest { result ->
-                    Log.d("searchProducts", "searchProducts: $result")
                     _searchResults.value = result
                 }
         }
@@ -59,4 +58,6 @@ class SearchViewModel @Inject constructor(
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
+
+
 }

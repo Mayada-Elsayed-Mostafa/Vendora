@@ -184,9 +184,9 @@ fun CustomOutlinedTextField(
         isError = isError,
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = Color.White,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedBorderColor = MaterialTheme.colorScheme.onSurface,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary,
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -217,9 +217,9 @@ fun CustomOutlinedTextFieldWithIcon(placeholder:String,value: String,onValueChan
         },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = Color.White,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedBorderColor = MaterialTheme.colorScheme.onSurface,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary,
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -264,8 +264,8 @@ fun  CustomDropdownField(
             }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             focusedBorderColor = Color.White,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary,
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -311,10 +311,11 @@ fun CustomReadOnlyField(
         placeholder = { Text(label) },
         shape = RoundedCornerShape(8.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
+
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedBorderColor = MaterialTheme.colorScheme.onSurface,
             disabledTextColor = Color.White,
-            focusedBorderColor = Color.White,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary,
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )

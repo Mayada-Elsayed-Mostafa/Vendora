@@ -5,19 +5,21 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 private val Context.dataStore by preferencesDataStore("user_prefs")
 
-class UserPreferences(private val context: Context) {
-
+class UserPreferences @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     companion object {
         private val USER_ID = stringPreferencesKey("user_id")
         private val USER_NAME = stringPreferencesKey("user_name")
         private val USER_EMAIL = stringPreferencesKey("user_email")
         private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-
     }
 
     suspend fun saveLoginState(isLoggedIn: Boolean) {

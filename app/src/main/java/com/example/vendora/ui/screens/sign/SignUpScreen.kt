@@ -2,6 +2,7 @@ package com.example.vendora.ui.screens.sign
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.TopEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -58,6 +58,12 @@ fun SignUpScreen(
     onNavigateToSignIn: () -> Unit,
     onContinueAsGuest: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val backgroundColor = if (isDark) Color.Black else Color.White
+    val contentColor = if (isDark) Color.White else Color.Black
+    val secondaryColor = if (isDark) Color.LightGray else Color.Gray
+    val cardColor = if (isDark) Color.DarkGray else Color.White
+    val buttonColor = if (isDark) Color.LightGray else Color.Black
 
     val signUpState by viewModel.signUpState.collectAsState()
     val scrollState = rememberScrollState()
@@ -86,191 +92,180 @@ fun SignUpScreen(
             showDialog.value = true
         }
     }
-    Column(
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .background(Color.White)
+            .background(backgroundColor)
             .navigationBarsPadding()
             .statusBarsPadding()
     ) {
-
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, end = 16.dp)
+                .verticalScroll(scrollState)
+                .fillMaxSize()
         ) {
-            OutlinedButton(
-                onClick = onContinueAsGuest,
-                modifier = Modifier.align(TopEnd),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Gray),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    horizontal = 12.dp,
-                    vertical = 6.dp
-                ),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.Gray
-                )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, end = 16.dp)
             ) {
-                Text("Continue as Guest", fontSize = 14.sp)
+                OutlinedButton(
+                    onClick = onContinueAsGuest,
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, secondaryColor),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 12.dp,
+                        vertical = 6.dp
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = secondaryColor
+                    )
+                ) {
+                    Text("Continue as Guest", fontSize = 14.sp)
+                }
             }
-        }
 
-        Image(
-            painter = painterResource(id = R.drawable.vendora),
-            contentDescription = "App Logo",
-            modifier = Modifier
-                .size(250.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-
-        Box(modifier = Modifier.fillMaxSize()) {
-
-            Card(
+            Image(
+                painter = painterResource(if (isSystemInDarkTheme()) R.drawable.vendora_dark else R.drawable.vendora),
+                contentDescription = "App Logo",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .padding(horizontal = 12.dp)
-                    .offset(y = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Black),
-                elevation = CardDefaults.cardElevation(2.dp)
-            ) {}
+                    .size(250.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(horizontal = 8.dp)
-                    .offset(y = 12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.lets_create_account),
-                        fontSize = 20.sp,
-                        color = Color.Black,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 12.dp),
-                        textAlign = TextAlign.Start
-                    )
-                    OutlinedTextField(
-                        value = firstName,
-                        onValueChange = { firstName = it },
-                        label = { Text(stringResource(R.string.first_name), color = Color.Gray) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
+            Box(modifier = Modifier.fillMaxSize()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .padding(horizontal = 12.dp)
+                        .offset(y = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
+                    elevation = CardDefaults.cardElevation(2.dp)
+                ) {}
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = lastName,
-                        onValueChange = { lastName = it },
-                        label = { Text(stringResource(R.string.last_name), color = Color.Gray) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text(stringResource(R.string.email), color = Color.Gray) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = { phone = it },
-                        label = { Text(stringResource(R.string.phone), color = Color.Gray) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text(stringResource(R.string.password), color = Color.Gray) },
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = { confirmPassword = it },
-                        label = {
-                            Text(
-                                stringResource(R.string.confirm_password),
-                                color = Color.Gray
-                            )
-                        },
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            viewModel.clearMessages()
-                            viewModel.registerUser(
-                                email.trim(), password, confirmPassword,
-                                firstName,
-                                lastName,
-                                token,
-                                phone
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        enabled = !signUpState.isLoading,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = Color.White
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(horizontal = 8.dp)
+                        .offset(y = 12.dp),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
+                    elevation = CardDefaults.cardElevation(8.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.lets_create_account),
+                            fontSize = 20.sp,
+                            color = contentColor,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 12.dp),
+                            textAlign = TextAlign.Start
                         )
-                    ) {
-                        if (signUpState.isLoading) {
-                            CircularProgressIndicator(
-                                color = Color.White,
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(20.dp)
+
+                        fun Modifier.inputPadding() = this
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+
+                        OutlinedTextField(
+                            value = firstName,
+                            onValueChange = { firstName = it },
+                            label = { Text(stringResource(R.string.first_name), color = secondaryColor) },
+                            modifier = Modifier.inputPadding()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = lastName,
+                            onValueChange = { lastName = it },
+                            label = { Text(stringResource(R.string.last_name), color = secondaryColor) },
+                            modifier = Modifier.inputPadding()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = { Text(stringResource(R.string.email), color = secondaryColor) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            modifier = Modifier.inputPadding()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = phone,
+                            onValueChange = { phone = it },
+                            label = { Text(stringResource(R.string.phone), color = secondaryColor) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.inputPadding()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text(stringResource(R.string.password), color = secondaryColor) },
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier.inputPadding()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = confirmPassword,
+                            onValueChange = { confirmPassword = it },
+                            label = { Text(stringResource(R.string.confirm_password), color = secondaryColor) },
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier.inputPadding()
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = {
+                                viewModel.clearMessages()
+                                viewModel.registerUser(
+                                    email.trim(), password, confirmPassword,
+                                    firstName, lastName, token, phone
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            enabled = !signUpState.isLoading,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = buttonColor,
+                                contentColor = Color.White
                             )
-                        } else {
-                            Text(stringResource(R.string.sign_up))
+                        ) {
+                            if (signUpState.isLoading) {
+                                CircularProgressIndicator(
+                                    color = contentColor,
+                                    strokeWidth = 2.dp,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            } else {
+                                Text(stringResource(R.string.sign_up))
+                            }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(stringResource(R.string.already_have_an_account), color = Color.Gray)
-                        TextButton(onClick = onNavigateToSignIn) {
-                            Text(stringResource(R.string.sign_in), color = Color.Black)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(stringResource(R.string.already_have_an_account), color = secondaryColor)
+                            TextButton(onClick = onNavigateToSignIn) {
+                                Text(stringResource(R.string.sign_in), color = contentColor)
+                            }
                         }
                     }
                 }
@@ -280,7 +275,8 @@ fun SignUpScreen(
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
-                .padding(16.dp)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
         )
 
         if (showDialog.value) {
@@ -294,13 +290,14 @@ fun SignUpScreen(
                         showDialog.value = false
                         viewModel.clearMessages()
                     }) {
-                        Text(stringResource(R.string.try_again), color = Color.Black)
+                        Text(stringResource(R.string.try_again), color = contentColor)
                     }
                 },
-                title = { Text(stringResource(R.string.oops), color = Color.Black) },
-                text = { Text(dialogMessage.value, color = Color.Black) },
-                containerColor = Color.White
+                title = { Text(stringResource(R.string.oops), color = contentColor) },
+                text = { Text(dialogMessage.value, color = contentColor) },
+                containerColor = cardColor
             )
         }
     }
 }
+
