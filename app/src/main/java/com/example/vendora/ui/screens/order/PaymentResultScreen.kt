@@ -50,6 +50,7 @@ fun PaymentResultScreen(
     onNavigateBack: () -> Unit,
     orderId: Int,
     token: String,
+    isSuccess: Boolean,
     discountCode: String
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle()
@@ -92,7 +93,7 @@ fun PaymentResultScreen(
                 val result = (state.value.result as Result.Success).data
                 LaunchedEffect(Unit) {
                     cartViewModel.checkOrCreateCart()
-                    if ((state.value.result as Result.Success).data.payment_status == "PAID")
+                    if (isSuccess)
                         viewModel.createOrder(result, discountCode = discountCode, context = context)
                 }
 
@@ -101,6 +102,7 @@ fun PaymentResultScreen(
                     result = (state.value.result as Result.Success).data,
                     creationResult = state.value.orderCreationResult,
                     onNavigateBack = onNavigateBack,
+                    isSuccess = isSuccess,
                     cartViewModel = cartViewModel
                 )
             }
@@ -140,6 +142,7 @@ fun OnLoading() {
 fun OnSuccess(
     paddingValues: PaddingValues,
     result: OrderPaymentResult,
+    isSuccess: Boolean,
     creationResult: Result<SingleOrderResponse>,
     onNavigateBack: () -> Unit,
     cartViewModel: CartViewModel
@@ -152,9 +155,9 @@ fun OnSuccess(
             .padding(paddingValues)
     ) {
         val animation =
-            if (result.payment_status == "PAID") R.raw.payment_success else R.raw.payment_failed
+            if (isSuccess) R.raw.payment_success else R.raw.payment_failed
         val message =
-            if (result.payment_status == "PAID") "payment successful" else "payment failed"
+            if (isSuccess) "payment successful" else "payment failed"
 
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animation))
         val progress by animateLottieCompositionAsState(

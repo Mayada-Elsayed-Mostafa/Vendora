@@ -60,6 +60,7 @@ data class OrderDetails(val id: Long)
 data class PaymentResult(
     val id: Int,
     val token: String,
+    val isSuccess: Boolean,
     val discountCode: String
 )
 

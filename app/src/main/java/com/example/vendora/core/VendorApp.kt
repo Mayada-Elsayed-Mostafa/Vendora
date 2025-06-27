@@ -145,15 +145,21 @@ fun VendorApp() {
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
                 val firstToken = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().firstToken
                 val orderId = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().orderId
-                val discountCode = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().discountCode
+                val discountCode =
+                    navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().discountCode
                 VisaScreen(
                     token = token,
                     firstToken = firstToken,
                     orderId = orderId,
                     discountCode = discountCode
-                ) { order_Id, first_token, _ ,discountCo->
+                ) { order_Id, first_token, isSuccess, discountCo ->
                     navController.navigate(
-                        PaymentResult(id = order_Id, token = first_token,discountCode = discountCo)
+                        PaymentResult(
+                            id = order_Id,
+                            token = first_token,
+                            isSuccess = isSuccess,
+                            discountCode = discountCo
+                        )
                     ) {
                         popUpTo(ScreenRoute.CartScreen) {
                             inclusive = true
@@ -234,6 +240,7 @@ fun VendorApp() {
                     orderId = paymentResult.id,
                     token = paymentResult.token,
                     onNavigateBack = { navController.popBackStack() },
+                    isSuccess = paymentResult.isSuccess,
                     discountCode = paymentResult.discountCode
                 )
             }
