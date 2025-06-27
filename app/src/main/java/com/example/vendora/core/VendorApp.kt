@@ -130,7 +130,8 @@ fun VendorApp() {
                 val orderId: Int =
                     navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().orderId
 
-                val promoCode = navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().promoCode
+                val promoCode =
+                    navBackStackEntry.toRoute<ScreenRoute.PaymentScreenRoute>().promoCode
                 PaymentScreen(
                     token = token,
                     totalPrice = price,
@@ -144,13 +145,15 @@ fun VendorApp() {
                 val token = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().token
                 val firstToken = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().firstToken
                 val orderId = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().orderId
+                val discountCode = navBackStackEntry.toRoute<ScreenRoute.VisaScreenRoute>().discountCode
                 VisaScreen(
                     token = token,
                     firstToken = firstToken,
-                    orderId = orderId
-                ) { order_Id, first_token, _ ->
+                    orderId = orderId,
+                    discountCode = discountCode
+                ) { order_Id, first_token, _ ,discountCode->
                     navController.navigate(
-                        PaymentResult(id = order_Id, token = first_token)
+                        PaymentResult(id = order_Id, token = first_token,discountCode = discountCode)
                     ) {
                         popUpTo(ScreenRoute.CartScreen) {
                             inclusive = true
@@ -230,7 +233,8 @@ fun VendorApp() {
                 PaymentResultScreen(
                     orderId = paymentResult.id,
                     token = paymentResult.token,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    discountCode = paymentResult.discountCode
                 )
             }
 
@@ -254,10 +258,13 @@ fun VendorApp() {
                 val type: String = navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().type
                 val orderId: Int =
                     navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().orderId
+                val discountCode: String =
+                    navBackStackEntry.toRoute<ScreenRoute.CashDeliveryScreen>().discountCode
                 CashOnDeliveryScreen(
                     token = token,
                     orderId = orderId,
                     type = type,
+                    discountCode = discountCode,
                     onNavigateBack = { navController.popBackStack(Home, false) }
                 )
             }

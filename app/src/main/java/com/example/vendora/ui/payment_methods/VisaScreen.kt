@@ -26,7 +26,8 @@ fun VisaScreen(
     token: String,
     orderId: Int,
     firstToken: String,
-    onPaymentResult: (Int,String,Boolean) -> Unit,
+    discountCode: String,
+    onPaymentResult: (Int,String,Boolean,String) -> Unit,
 ) {
     val iframeId = 929198
     val url = "https://accept.paymob.com/api/acceptance/iframes/$iframeId?payment_token=$token"
@@ -48,9 +49,9 @@ fun VisaScreen(
                         val txnResponse = uri.getQueryParameter("txn_response_code")
 
                         if (isSuccess && txnResponse == "APPROVED") {
-                            onPaymentResult(orderId,firstToken, true)
+                            onPaymentResult(orderId,firstToken, true,discountCode)
                         } else {
-                            onPaymentResult(orderId,firstToken, false)
+                            onPaymentResult(orderId,firstToken, false,discountCode)
                         }
 
                         return true

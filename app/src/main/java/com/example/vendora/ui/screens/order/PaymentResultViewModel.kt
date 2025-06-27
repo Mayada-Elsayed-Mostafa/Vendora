@@ -1,18 +1,21 @@
 package com.example.vendora.ui.screens.order
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendora.data.local.UserPreferences
+import com.example.vendora.domain.model.order.DiscountCodeBuild
 import com.example.vendora.domain.model.order.Item
 import com.example.vendora.domain.model.order.LineItemBuild
 import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.domain.usecase.order.CreateShopifyOrderUserCase
 import com.example.vendora.domain.usecase.order.GetOrderPaymentResultUseCase
+import com.example.vendora.ui.screens.currency.changeCurrency
+import com.example.vendora.ui.screens.currency.changeCurrencyDouble
 import com.example.vendora.utils.wrapper.Result
 import com.example.vendora.utils.wrapper.order_builder.CreateOrder
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +29,7 @@ import javax.inject.Inject
 class PaymentResultViewModel @Inject constructor(
     private val createShopifyOrderUserCase: CreateShopifyOrderUserCase,
     private val paymentResultUseCase: GetOrderPaymentResultUseCase,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
 ) : ViewModel() {
 
     private var _uiState = MutableStateFlow(PaymentResultUiState())
@@ -52,19 +55,35 @@ class PaymentResultViewModel @Inject constructor(
         }
     }
 
-    suspend fun createOrder(result: OrderPaymentResult, finStatus: String = "paid") {
+    suspend fun createOrder(
+        result: OrderPaymentResult,
+        finStatus: String = "paid",
+        discountCode: String,
+        context: Context
+    ) {
 
         val order = CreateOrder()
         val requestBody =
             order.email(userPreferences.getUserEmail() ?: "")
                 .financialStatus(if (finStatus == "Cash") "pending" else "paid")
                 .currency(result.currency)
-                .lineItems(createLineItems(result.items))
-                .build()
+                .lineItems(createLineItems(result.items,context))
 
-        Log.d("CashOnDelivery",requestBody.toString())
+        if (discountCode.isNotEmpty()) {
+            requestBody.discountCodes(
+                listOf(
+                    DiscountCodeBuild(
+                        code = discountCode,
+                        amount = result.amount_cents - (result.amount_cents * 0.1),
+                        type = ""
+                    )
+                )
+            )
+        }
 
-        createShopifyOrderUserCase.invoke(requestBody).collect { creationResult ->
+        val body = requestBody.build()
+
+        createShopifyOrderUserCase.invoke(body).collect { creationResult ->
             Log.d(TAG, creationResult.toString())
             if (creationResult is Result.Success) {
                 _uiState.update {
@@ -77,11 +96,11 @@ class PaymentResultViewModel @Inject constructor(
         }
     }
 
-    private fun createLineItems(items: List<Item>): List<LineItemBuild> {
+    private fun createLineItems(items: List<Item>,context: Context): List<LineItemBuild> {
         return items.map { item ->
             LineItemBuild(
                 title = item.name,
-                price = item.amount_cents.toDouble(),
+                price = item.amount_cents.toDouble().changeCurrencyDouble(context),
                 quantity = item.quantity
             )
         }.toList()

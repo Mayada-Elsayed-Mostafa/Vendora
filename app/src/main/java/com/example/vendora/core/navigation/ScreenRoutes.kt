@@ -22,7 +22,8 @@ sealed class ScreenRoute(
     data class VisaScreenRoute(
         val token:String,
         val orderId: Int,
-        val firstToken: String
+        val firstToken: String,
+        val discountCode: String
     ) : ScreenRoute("Visa")
 
     @Serializable
@@ -42,6 +43,7 @@ sealed class ScreenRoute(
         val orderId: Int,
         val firstToken: String,
         val type: String,
+        val discountCode:String
     ) : ScreenRoute("CashDeliveryScreen")
 
     @Serializable

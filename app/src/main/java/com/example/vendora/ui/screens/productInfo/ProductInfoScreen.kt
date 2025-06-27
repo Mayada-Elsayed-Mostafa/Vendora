@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.productInfo
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -410,6 +411,9 @@ fun ProductInfoFooterSection(
             onClick = {
                 if (!isGuestMode){
                     return@Button
+                } else {
+                    cartViewModel.addToCart(product.findVariantIdByColorAndSize(selectedColor,selectedSize)?: product.variants[0].admin_graphql_api_id,quantity)
+                    Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
                 }
             }, modifier = Modifier
                 .padding(start = 16.dp)

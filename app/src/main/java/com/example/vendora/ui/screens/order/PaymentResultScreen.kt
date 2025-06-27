@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,6 +49,7 @@ fun PaymentResultScreen(
     onNavigateBack: () -> Unit,
     orderId: Int,
     token: String,
+    discountCode: String
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -78,6 +80,8 @@ fun PaymentResultScreen(
         }
     ) { innerPadding ->
 
+        val context = LocalContext.current
+
         when (state.value.result) {
             is Result.Failure -> OnError {}
             Result.Loading -> OnLoading()
@@ -86,7 +90,7 @@ fun PaymentResultScreen(
                 val result = (state.value.result as Result.Success).data
                 LaunchedEffect(Unit) {
                     cartViewModel.checkOrCreateCart()
-                    viewModel.createOrder(result)
+                    viewModel.createOrder(result, discountCode = discountCode, context = context)
                 }
 
                 OnSuccess(

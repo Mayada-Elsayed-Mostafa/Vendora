@@ -112,5 +112,14 @@ fun Double.changeCurrency(context: Context):String {
     return String.format("%.2f", this * rate.toString().toDouble()) + " $currency"
 }
 
+fun Double.changeCurrencyDouble(context: Context):Double {
+    val prefs = context.getSharedPreferences("vendora", Context.MODE_PRIVATE)
+
+    val currency = prefs.getString("selected_currency","EGP")
+    val rate =  prefs.getString(currency,"1.0")
+
+    return String.format("%.2f", this * rate.toString().toDouble()).toDouble()
+}
+
 
 

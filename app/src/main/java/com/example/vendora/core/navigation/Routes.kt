@@ -1,6 +1,7 @@
 package com.example.vendora.core.navigation
 
 import com.example.vendora.R
+import com.example.vendora.domain.model.order.DiscountCode
 import kotlinx.serialization.Serializable
 
 // here we define class we will use in bottom navigation bar
@@ -58,7 +59,8 @@ data class OrderDetails(val id: Long)
 @Serializable
 data class PaymentResult(
     val id: Int,
-    val token: String
+    val token: String,
+    val discountCode: String
 )
 
 @Serializable

@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,16 +36,13 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.vendora.R
-import com.example.vendora.domain.model.order.LineItem
-import com.example.vendora.domain.model.order.Order
 import com.example.vendora.domain.model.order.OrderPaymentResult
 import com.example.vendora.domain.model.order.SingleOrderResponse
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.screens.brandDetails.OnError
-import com.example.vendora.ui.screens.order.OnLoading
-import com.example.vendora.ui.payment_methods.OnSuccess
 import com.example.vendora.ui.screens.order.DiscountSection
 import com.example.vendora.ui.screens.order.InfoSection
+import com.example.vendora.ui.screens.order.OnLoading
 import com.example.vendora.ui.screens.order.PaymentResultViewModel
 import com.example.vendora.ui.screens.order.ProductsList
 import com.example.vendora.utils.wrapper.Result
@@ -57,6 +54,7 @@ fun CashOnDeliveryScreen(
     token: String,
     orderId: Int,
     type: String,
+    discountCode: String,
     onNavigateBack: () -> Unit,
     viewModel: PaymentResultViewModel = hiltViewModel(),
     cartViewModel: CartViewModel = hiltViewModel()
@@ -65,7 +63,7 @@ fun CashOnDeliveryScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        Log.d("CashOnDelivery",type)
+        Log.d("CashOnDelivery", type)
         viewModel.getOrderResult(orderId, token)
     }
 
@@ -91,7 +89,7 @@ fun CashOnDeliveryScreen(
             )
         }
     ) { innerPadding ->
-
+        val context = LocalContext.current
         when (state.value.result) {
             is Result.Failure -> OnError {}
             Result.Loading -> OnLoading()
@@ -100,7 +98,7 @@ fun CashOnDeliveryScreen(
                 val result = (state.value.result as Result.Success).data
                 LaunchedEffect(Unit) {
                     cartViewModel.checkOrCreateCart()
-                    viewModel.createOrder(result, type)
+                    viewModel.createOrder(result, type, discountCode,context)
                 }
 
                 OnSuccess(
@@ -129,7 +127,7 @@ fun OnSuccess(
 
     val scrollState = rememberScrollState()
 
-    when(creationResult){
+    when (creationResult) {
         is Result.Failure -> {}
         Result.Loading -> OnLoading()
         is Result.Success -> {
@@ -137,7 +135,8 @@ fun OnSuccess(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(paddingValues)
                     .padding(8.dp)
                     .verticalScroll(scrollState)

@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vendora.R
+import kotlin.math.sign
 
 @Composable
 fun SignInScreen(
@@ -68,6 +70,8 @@ fun SignInScreen(
     val secondaryColor = if (isDark) Color.LightGray else Color.Gray
     val cardColor = if (isDark) Color.DarkGray else Color.White
     val buttonColor = if (isDark) Color.LightGray else Color.Black
+
+    val signInColor = if(isDark) Color(0xff1e2129) else MaterialTheme.colorScheme.surfaceContainer
 
     val signInState by viewModel.signInState.collectAsState()
 
@@ -145,7 +149,7 @@ fun SignInScreen(
                     .height(150.dp)
                     .padding(horizontal = 12.dp)
                     .offset(y = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = cardColor),
+                colors = CardDefaults.cardColors(containerColor = contentColor),
                 elevation = CardDefaults.cardElevation(2.dp)
             ) {}
 
@@ -155,7 +159,7 @@ fun SignInScreen(
                     .fillMaxHeight()
                     .padding(horizontal = 8.dp)
                     .offset(y = 12.dp),
-                colors = CardDefaults.cardColors(containerColor = cardColor),
+                colors = CardDefaults.cardColors(containerColor = signInColor),
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
