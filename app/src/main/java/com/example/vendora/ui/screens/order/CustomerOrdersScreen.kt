@@ -1,7 +1,12 @@
 package com.example.vendora.ui.screens.order
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -30,6 +35,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -86,6 +95,10 @@ fun OnSuccess(
     paddingValues: PaddingValues,
     navigateToOrderDetails: (Long) -> Unit
 ) {
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { visible = true}
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -95,14 +108,20 @@ fun OnSuccess(
         items(
             items = orders
         ) { order ->
-            OrderItem(
-                order = order,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .clickable {
-                        navigateToOrderDetails(order.id)
-                    }
-            )
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                exit = fadeOut()
+            ) {
+                OrderItem(
+                    order = order,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .clickable {
+                            navigateToOrderDetails(order.id)
+                        }
+                )
+            }
         }
     }
 }

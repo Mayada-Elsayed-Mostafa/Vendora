@@ -64,6 +64,7 @@ fun SignInScreen(
     val isDark = isSystemInDarkTheme()
     val backgroundColor = if (isDark) Color.Black else Color.White
     val contentColor = if (isDark) Color.White else Color.Black
+    val onButtonColor = if (isDark) Color.Black else Color.White
     val secondaryColor = if (isDark) Color.LightGray else Color.Gray
     val cardColor = if (isDark) Color.DarkGray else Color.White
     val buttonColor = if (isDark) Color.LightGray else Color.Black
@@ -198,7 +199,7 @@ fun SignInScreen(
                         enabled = !signInState.isLoading,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = buttonColor,
-                            contentColor = contentColor
+                            contentColor = onButtonColor
                         )
                     ) {
                         if (signInState.isLoading) {
@@ -208,7 +209,7 @@ fun SignInScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                         } else {
-                            Text(stringResource(R.string.sign_in))
+                            Text(stringResource(R.string.sign_in), color = onButtonColor)
                         }
                     }
 
@@ -222,7 +223,7 @@ fun SignInScreen(
                     ) {
                         Text(stringResource(R.string.don_t_have_an_account), color = secondaryColor)
                         TextButton(onClick = onNavigateToSignUp) {
-                            Text(stringResource(R.string.sign_up), color = contentColor)
+                            Text(stringResource(R.string.sign_up), color = buttonColor)
                         }
                     }
                 }
