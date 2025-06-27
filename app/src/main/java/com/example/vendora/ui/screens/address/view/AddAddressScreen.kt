@@ -45,10 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
 import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.domain.model.address.Province
 import com.example.vendora.ui.cart_screen.CustomAppBar
+import com.example.vendora.ui.cart_screen.CustomLottie
+import com.example.vendora.ui.cart_screen.Empty
 import com.example.vendora.ui.screens.address.viewModel.AddressViewModel
 import com.example.vendora.ui.screens.brandDetails.OnError
 import com.example.vendora.ui.screens.brandDetails.OnLoading
@@ -99,7 +102,7 @@ fun AddAddressScreen(navController: NavHostController,viewModel: AddressViewMode
             }
             is Result.Loading -> OnLoading()
             is Result.Success -> {
-
+                CustomLottie(size = 150, title = R.raw.address)
                 CustomOutlinedTextField("Title", value = type, onValueChange = {type=it})
 
                 CustomReadOnlyField(label = "country", value = "Egypt")

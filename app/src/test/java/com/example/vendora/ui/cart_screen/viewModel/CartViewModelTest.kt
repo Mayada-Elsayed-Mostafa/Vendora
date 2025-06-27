@@ -4,6 +4,7 @@ import com.example.vendora.CartCreateMutation
 import com.example.vendora.CartLinesAddMutation
 import com.example.vendora.CartLinesRemoveMutation
 import com.example.vendora.GetCartQuery
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.repo_interfaces.CartRepository
 import com.example.vendora.domain.usecase.cart.AddToCartUseCase
 import com.example.vendora.domain.usecase.cart.CreateCartUseCase
@@ -13,7 +14,6 @@ import com.example.vendora.domain.usecase.cart.RemoveFromCartUseCase
 import com.example.vendora.domain.usecase.cart.UpdateCartLineUseCase
 import com.example.vendora.type.CurrencyCode
 import com.example.vendora.utils.wrapper.Result
-import com.google.firebase.auth.FirebaseAuth
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -43,7 +43,7 @@ class CartViewModelTest {
     private lateinit var getCartUseCase: GetCartUseCase
     private lateinit var removeAllLinesFromCartUseCase: RemoveAllLinesFromCartUseCase
     private lateinit var cartRepository: CartRepository
-    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var userPreferences: UserPreferences
 
     @Before
     fun setUp(){
@@ -56,9 +56,9 @@ class CartViewModelTest {
         getCartUseCase = mockk(relaxed = true)
         removeAllLinesFromCartUseCase = mockk(relaxed = true)
         cartRepository = mockk(relaxed = true)
-        firebaseAuth = mockk(relaxed = true)
+        userPreferences = mockk(relaxed = true)
 
-        every { firebaseAuth.currentUser?.email } returns "mk@gmail.com"
+        coEvery { userPreferences.getUserEmail() } returns "mk@gmail.com"
         every { cartRepository.getCartId() } returns "cardId10"
 
         viewModel = CartViewModel(
@@ -69,7 +69,7 @@ class CartViewModelTest {
             getCartUseCase,
             cartRepository,
             removeAllLinesFromCartUseCase,
-            firebaseAuth
+            userPreferences
         )
     }
 
@@ -112,7 +112,7 @@ class CartViewModelTest {
             id = "1010"
         )
 
-        every { firebaseAuth.currentUser?.email } returns fakeEmail
+        coEvery  {userPreferences.getUserEmail()  } returns fakeEmail
         every { cartRepository.getString(fakeEmail, "") } returns fakeCartId
         coEvery { addToCartUseCase.invoke(fakeCartId, variantId, quantity) } returns flowOf(Result.Success(fakeCart))
 

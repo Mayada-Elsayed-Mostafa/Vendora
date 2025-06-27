@@ -45,7 +45,7 @@ class CartViewModel @Inject constructor(
     private var _cartItems = MutableStateFlow<Result<GetCartQuery.Cart>>(Result.Loading)
     val cartItems = _cartItems.asStateFlow()
 
-    private val auth = FirebaseAuth.getInstance()
+
 
     init {
         _uiState.update { it.copy(cartId = repository.getCartId()) }

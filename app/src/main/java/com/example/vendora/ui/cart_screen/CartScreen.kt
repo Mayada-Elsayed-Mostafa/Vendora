@@ -466,7 +466,7 @@ fun CustomLoading() {
 }
 
 @Composable
-fun Empty(title:String ="Your cart is empty!") {
+fun Empty(title:String ="Your cart is empty!",lottie : Int =R.raw.cart) {
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -475,7 +475,7 @@ fun Empty(title:String ="Your cart is empty!") {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.cart))
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottie))
             val progress by animateLottieCompositionAsState(
                 composition = composition,
                 iterations = LottieConstants.IterateForever,
