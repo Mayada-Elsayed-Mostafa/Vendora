@@ -1,3 +1,4 @@
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.order.UserOrdersResponse
 import com.example.vendora.domain.usecase.order.GetOrdersByEmailUseCase
 import com.example.vendora.ui.screens.order.OrderViewModel
@@ -26,8 +27,9 @@ import org.junit.Test
 class OrderViewModelTest {
 
     private val mockUseCase = mockk<GetOrdersByEmailUseCase>()
-    private val mockFirebaseAuth = mockk<FirebaseAuth>(relaxed = true)
-    private val mockFirebaseUser = mockk<FirebaseUser>()
+//    private val mockFirebaseAuth = mockk<FirebaseAuth>(relaxed = true)
+//    private val mockFirebaseUser = mockk<FirebaseUser>()
+    private val mockPreferences = mockk<UserPreferences>(relaxed = true)
     private lateinit var viewModel: OrderViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -35,10 +37,9 @@ class OrderViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        every { mockFirebaseAuth.currentUser } returns mockFirebaseUser
-        every { mockFirebaseUser.email } returns "test@example.com"
+        coEvery { mockPreferences.getUserEmail() } returns "test@example.com"
 
-        viewModel = OrderViewModel(mockUseCase, mockFirebaseAuth)
+        viewModel = OrderViewModel(mockUseCase, mockPreferences)
     }
 
     @After

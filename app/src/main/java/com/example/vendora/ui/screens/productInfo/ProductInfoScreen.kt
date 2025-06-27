@@ -411,12 +411,6 @@ fun ProductInfoFooterSection(
                 if (!isGuestMode){
                     return@Button
                 }
-                cartViewModel.addToCart(
-                    product.findVariantIdByColorAndSize(
-                        selectedColor,
-                        selectedSize
-                    ) ?: product.variants[0].admin_graphql_api_id, quantity
-                )
             }, modifier = Modifier
                 .padding(start = 16.dp)
                 .weight(1f)

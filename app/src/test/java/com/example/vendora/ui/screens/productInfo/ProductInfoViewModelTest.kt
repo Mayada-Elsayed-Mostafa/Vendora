@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.productInfo
 
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.usecase.products.GetProductByIdUseCase
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -10,10 +11,11 @@ class ProductInfoViewModelTest {
 
     private lateinit var viewModel: ProductInfoViewModel
     private val getProductByIdUseCase = mockk<GetProductByIdUseCase>()
+    private val mockUserPreferences = mockk<UserPreferences>()
 
     @Before
     fun setup() {
-        viewModel = ProductInfoViewModel(getProductByIdUseCase)
+        viewModel = ProductInfoViewModel(getProductByIdUseCase,mockUserPreferences)
     }
 
     @Test
