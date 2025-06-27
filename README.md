@@ -48,7 +48,7 @@ The application allows authenticated users to browse products from various vendo
 | Name              | Responsibilities                                                                 |
 |-------------------|-----------------------------------------------------------------------------------|
 | Mohamed Khaled    | 💳 Discount code <br> 🛒 Shopping Cart <br> 💳 Payment <br> 🧩 Ads <br> ⚙️ Settings screen  |
-| Zeyad Ma'moun     | 🏠 Home screen UI <br> 🏷 Brand listing & filtering <br> 📂 Categories screen|💳 Orders & Confirmation Email |
+| Zeyad Ma'moun     | 🏠 Home screen UI <br> 🏷 Brand listing & filtering <br> 📂 Categories screen <br>💳 Orders & Confirmation Email |
 | Mayada Elsayed    |🔐 Firebase Authentication (Sign in/Sign up) & Verification email <br> ⭐ Wishlist <br> 🔍 Search functionality  <br> 📦 Product details UI |
 
 
