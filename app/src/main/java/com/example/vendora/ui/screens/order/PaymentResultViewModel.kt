@@ -69,17 +69,17 @@ class PaymentResultViewModel @Inject constructor(
                 .currency(result.currency)
                 .lineItems(createLineItems(result.items,context))
 
-        if (discountCode.isNotEmpty()) {
-            requestBody.discountCodes(
-                listOf(
-                    DiscountCodeBuild(
-                        code = discountCode,
-                        amount = result.amount_cents - (result.amount_cents * 0.1),
-                        type = ""
-                    )
-                )
-            )
-        }
+//        if (discountCode.isNotEmpty()) {
+//            requestBody.discountCodes(
+//                listOf(
+//                    DiscountCodeBuild(
+//                        code = discountCode,
+//                        amount = result.amount_cents - (result.amount_cents * 0.1),
+//                        type = ""
+//                    )
+//                )
+//            )
+//        }
 
         val body = requestBody.build()
 

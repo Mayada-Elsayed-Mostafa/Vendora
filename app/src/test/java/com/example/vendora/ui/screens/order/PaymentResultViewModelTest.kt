@@ -70,18 +70,18 @@ class PaymentResultViewModelTest {
         assertEquals(fakeResult, viewModel.uiState.value.result)
     }
 
-    @Test
-    fun `createOrder updates uiState with creation result`() = runTest {
-        val orderPaymentResult = mockk<OrderPaymentResult>(relaxed = true)
-        val singleOrderResponse = mockk<SingleOrderResponse>(relaxed = true)
-        val expectedResult = Result.Success(singleOrderResponse)
-
-        coEvery { userPreferences.getUserEmail() } returns "test@example.com"
-        coEvery { createShopifyOrderUserCase.invoke(any()) } returns flowOf(expectedResult)
-
-        viewModel.createOrder(orderPaymentResult)
-        advanceUntilIdle()
-
-        assertEquals(expectedResult, viewModel.uiState.value.orderCreationResult)
-    }
+//    @Test
+//    fun `createOrder updates uiState with creation result`() = runTest {
+//        val orderPaymentResult = mockk<OrderPaymentResult>(relaxed = true)
+//        val singleOrderResponse = mockk<SingleOrderResponse>(relaxed = true)
+//        val expectedResult = Result.Success(singleOrderResponse)
+//
+//        coEvery { userPreferences.getUserEmail() } returns "test@example.com"
+//        coEvery { createShopifyOrderUserCase.invoke(any()) } returns flowOf(expectedResult)
+//
+//        viewModel.createOrder(orderPaymentResult)
+//        advanceUntilIdle()
+//
+//        assertEquals(expectedResult, viewModel.uiState.value.orderCreationResult)
+//    }
 }

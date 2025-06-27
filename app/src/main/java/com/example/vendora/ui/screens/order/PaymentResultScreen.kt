@@ -87,8 +87,8 @@ fun PaymentResultScreen(
             is Result.Failure -> OnError {}
             Result.Loading -> OnLoading()
             is Result.Success -> {
-                Log.d("Payment","PaymentStatus = ${(state.value.result as Result.Success).data.payment_status}")
-                Log.d("Payment","PaymentStatus = ${(state.value.result as Result.Success).data}")
+//                Log.d("Payment","PaymentStatus = ${(state.value.result as Result.Success).data.payment_status}")
+//                Log.d("Payment","PaymentStatus = ${(state.value.result as Result.Success).data}")
                 val result = (state.value.result as Result.Success).data
                 LaunchedEffect(Unit) {
                     cartViewModel.checkOrCreateCart()

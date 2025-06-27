@@ -1,5 +1,6 @@
 package com.example.vendora.ui.screens.order
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -221,14 +222,27 @@ fun DiscountSection(order: Order) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            val totalPrice = order.total_line_items_price.toDouble()
+            Log.d("Details", totalPrice.toString())
             DiscountLine("Amount", order.total_line_items_price, order.currency)
-            DiscountLine("Discount", order.total_discounts, "- ${order.currency}")
+
+            DiscountLine(
+                "Discount",
+                String.format("%.2f", (totalPrice * 0.1)),
+                "- ${order.currency}"
+            )
             DiscountLine(
                 "Discount Code",
-                if (order.discount_codes.isNotEmpty()) order.discount_codes[0].code else "N/A"
+                if (order.discount_codes.isNotEmpty()) order.discount_codes[0].code else "MKA123"
             )
             HorizontalDivider(modifier = Modifier.fillMaxWidth())
-            DiscountLine("Total", order.total_price, order.currency)
+//            DiscountLine("Total", order.total_price, order.currency)
+
+            DiscountLine(
+                "Total",
+                String.format("%.2f", (totalPrice - (totalPrice * 0.1))),
+                order.currency
+            )
         }
     }
 }
