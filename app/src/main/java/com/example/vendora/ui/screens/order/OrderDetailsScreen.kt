@@ -221,11 +221,14 @@ fun DiscountSection(order: Order) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            DiscountLine("Amount", order.total_line_items_price,order.currency)
-            DiscountLine("Discount", order.total_discounts, "- ${ order.currency }")
-            DiscountLine("Discount Code", "SUMMER25")
+            DiscountLine("Amount", order.total_line_items_price, order.currency)
+            DiscountLine("Discount", order.total_discounts, "- ${order.currency}")
+            DiscountLine(
+                "Discount Code",
+                if (order.discount_codes.isNotEmpty()) order.discount_codes[0].code else "N/A"
+            )
             HorizontalDivider(modifier = Modifier.fillMaxWidth())
-            DiscountLine("Total", order.total_price,order.currency)
+            DiscountLine("Total", order.total_price, order.currency)
         }
     }
 }
@@ -267,8 +270,11 @@ fun InfoSection(order: Order) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            DiscountLine("Payment Method", if (order.financial_status == "paid") "Visa" else "Cash on Delivery" )
-            DiscountLine("Data", order.created_at.formatTimestamp() )
+            DiscountLine(
+                "Payment Method",
+                if (order.financial_status == "paid") "Visa" else "Cash on Delivery"
+            )
+            DiscountLine("Data", order.created_at.formatTimestamp())
             DiscountLine("Confirmation number", order.confirmation_number)
         }
     }

@@ -49,7 +49,6 @@ import com.example.vendora.R
 import com.example.vendora.ui.cart_screen.viewModel.CartViewModel
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
-import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun ProfileScreen(
@@ -80,15 +79,13 @@ fun ProfileScreen(
 
     LaunchedEffect(Unit) {
         viewModel.collectUserState()
-        Log.d("Profile", userInfo.value.email)
-        Log.d("Profile", userInfo.value.isGuest.toString())
     }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
                 navigateToCart = {
-                    if (viewModel.isGuestMode()){
+                    if (!userInfo.value.isGuest) {
                         showDialog = true
                     } else {
                         navigateToCart()
@@ -154,7 +151,7 @@ fun OnSuccess(
             icon = R.drawable.order,
             title = "Orders"
         ) {
-            if (userInfo.isGuest) {
+            if (!userInfo.isGuest) {
                 dialogAttributes.value = DialogAttributes(
                     onDismiss = { showDialog = false },
                     onAccept = { navigateToLogin() }
@@ -169,7 +166,7 @@ fun OnSuccess(
             icon = R.drawable.wishlist,
             title = "Wishlist"
         ) {
-            if (userInfo.isGuest) {
+            if (!userInfo.isGuest) {
                 dialogAttributes.value = DialogAttributes(
                     onDismiss = { showDialog = false },
                     onAccept = { navigateToLogin() }
@@ -180,7 +177,7 @@ fun OnSuccess(
             }
         }
         // logout item
-        if (!userInfo.isGuest) {
+        if (userInfo.isGuest) {
             OptionItem(
                 icon = R.drawable.logout,
                 color = Color.Red,
@@ -216,7 +213,7 @@ fun ProfileAppBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.outline_category),
+                    painter = painterResource(R.drawable.outline_me),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

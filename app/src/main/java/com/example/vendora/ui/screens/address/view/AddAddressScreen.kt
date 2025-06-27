@@ -68,7 +68,7 @@ fun AddAddressScreen(navController: NavHostController,viewModel: AddressViewMode
 
     val context = LocalContext.current
     val message by viewModel.message.collectAsState()
-    val email = FirebaseAuth.getInstance().currentUser?.email
+    val email = viewModel.getUserEmail()
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()

@@ -30,7 +30,7 @@ class UserPreferences(private val context: Context) {
         val isLoggedIn = context.dataStore.data.map { prefs ->
             prefs[IS_LOGGED_IN]
         }.first()
-        return isLoggedIn == true
+        return isLoggedIn ?: false
     }
 
     suspend fun saveUser(id: String, name: String, email: String) {

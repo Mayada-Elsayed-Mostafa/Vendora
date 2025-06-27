@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,8 +28,12 @@ class HomeViewModel @Inject constructor(
     private var _username = MutableStateFlow("")
     val username = _username.asStateFlow()
 
+    private var _isGuestMode = MutableStateFlow(true)
+    val isGuestMode = _isGuestMode.asStateFlow()
+
     init {
         viewModelScope.launch {
+            _isGuestMode.value = !userPreferences.isUserLoggedIn()
             val name = userPreferences.getUserName()
             _username.value = name ?: ""
         }

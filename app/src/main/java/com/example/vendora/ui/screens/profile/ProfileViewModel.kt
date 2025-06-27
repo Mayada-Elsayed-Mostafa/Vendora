@@ -13,19 +13,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
 ) : ViewModel() {
-
-    private val auth = FirebaseAuth.getInstance()
 
     private var _userInfo = MutableStateFlow(UserInfo())
     val userInfo = _userInfo.asStateFlow()
+
+//    private var _isGuestMode = MutableStateFlow(true)
+//    val isGuestMode = _isGuestMode.asStateFlow()
 
     fun collectUserState() {
         viewModelScope.launch {
             val userId = userPreferences.getUserId()
             val userName = userPreferences.getUserName()
             val email = userPreferences.getUserEmail()
+            val isGuest = userPreferences.isUserLoggedIn()
 
             if (!userId.isNullOrEmpty() && !email.isNullOrEmpty()) {
                 _userInfo.update {
@@ -33,7 +36,7 @@ class ProfileViewModel @Inject constructor(
                         fullName = userName ?: "User",
                         phoneNumber = "",
                         email = email,
-                        isGuest = false
+                        isGuest = isGuest
                     )
                 }
             } else {
@@ -42,7 +45,7 @@ class ProfileViewModel @Inject constructor(
                         fullName = "Guest",
                         phoneNumber = "",
                         email = "",
-                        isGuest = true
+                        isGuest = isGuest
                     )
                 }
             }

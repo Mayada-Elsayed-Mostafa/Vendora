@@ -7,6 +7,7 @@ import com.example.vendora.CartLinesAddMutation
 import com.example.vendora.CartLinesRemoveMutation
 import com.example.vendora.CartLinesUpdateMutation
 import com.example.vendora.GetCartQuery
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.repo_interfaces.CartRepository
 import com.example.vendora.domain.usecase.cart.AddToCartUseCase
 import com.example.vendora.domain.usecase.cart.CreateCartUseCase
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,7 +36,8 @@ class CartViewModel @Inject constructor(
     private val getCartUseCase: GetCartUseCase,
     private val repository: CartRepository,
     private val removeAllLinesFromCartUseCase: RemoveAllLinesFromCartUseCase,
-):ViewModel(){
+    private val userPreferences: UserPreferences
+) : ViewModel() {
 
     private var _uiState = MutableStateFlow(CartUiState())
     val uiState = _uiState.asStateFlow()
@@ -52,45 +55,47 @@ class CartViewModel @Inject constructor(
     }
 
 
-
-    fun checkOrCreateCart(){
-        val email = auth.currentUser?.email
-        if (email != null){
-            val existingCardId = repository.getString(email,"")
+    fun checkOrCreateCart() {
+        val email = getUserEmail()
+        if (email != null) {
+            val existingCardId = repository.getString(email, "")
             println("existingCardId : $existingCardId")
-            if (existingCardId.isNotEmpty()){
+            if (existingCardId.isNotEmpty()) {
                 _uiState.update { it.copy(cartId = existingCardId) }
                 loadCart(existingCardId)
-            }else{
+            } else {
                 println("email : $email")
                 createCartAndSave(email)
             }
-        }else{
+        } else {
             _uiState.update { it.copy(errorMessage = "User not logged in") }
             println(_uiState.value.errorMessage)
         }
     }
 
-    private fun createCartAndSave(email: String){
+    private fun createCartAndSave(email: String) {
         viewModelScope.launch {
             createCartUseCase.invoke()
                 .flowOn(Dispatchers.IO)
-                .collect{ result ->
-                    when(result){
+                .collect { result ->
+                    when (result) {
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
                                     createCartResult = result,
-                                    errorMessage = result.exception.message ?: "Failed to create cart"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to create cart"
                                 )
                             }
                         }
-                       is Result.Loading -> {
-                           _uiState.update { it.copy(createCartResult = result) }
-                       }
+
+                        is Result.Loading -> {
+                            _uiState.update { it.copy(createCartResult = result) }
+                        }
+
                         is Result.Success -> {
                             val cardId = result.data.id
-                            repository.saveString(email,cardId)
+                            repository.saveString(email, cardId)
 
                             _uiState.update {
                                 it.copy(
@@ -108,34 +113,37 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun createCart(){
+    fun createCart() {
         viewModelScope.launch {
             createCartUseCase.invoke()
                 .flowOn(Dispatchers.IO)
-                .collect{ result ->
-                    when(result){
+                .collect { result ->
+                    when (result) {
                         is Result.Success -> {
                             _uiState.update {
                                 it.copy(
                                     createCartResult = result,
                                     cartId = result.data.id,
-                                    totalQuantity = result.data.totalQuantity ,
-                                    totalAmount = result.data.cost.totalAmount.amount.toString() ,
-                                    currencyCode =  "EGP",
+                                    totalQuantity = result.data.totalQuantity,
+                                    totalAmount = result.data.cost.totalAmount.amount.toString(),
+                                    currencyCode = "EGP",
                                     isLoading = false,
                                     errorMessage = null
                                 )
                             }
                         }
+
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
                                     createCartResult = result,
                                     isLoading = false,
-                                    errorMessage = result.exception.message ?: "Failed to create cart"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to create cart"
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update { it.copy(isLoading = true) }
                         }
@@ -146,10 +154,10 @@ class CartViewModel @Inject constructor(
     }
 
 
-    fun addToCart(variantId:String,quantity: Int = 1){
+    fun addToCart(variantId: String, quantity: Int = 1) {
 
 
-        val cartId = repository.getString(auth.currentUser?.email?:"","")
+        val cartId = repository.getString(getUserEmail() ?: "", "")
 
 
         println("addToCart Id :$cartId")
@@ -162,22 +170,22 @@ class CartViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            addToCartUseCase.invoke(cartId,variantId,quantity)
+            addToCartUseCase.invoke(cartId, variantId, quantity)
                 .flowOn(Dispatchers.IO)
-                .collect{ result ->
-                    when(result){
-                        is Result.Success ->{
+                .collect { result ->
+                    when (result) {
+                        is Result.Success -> {
                             _uiState.update {
                                 it.copy(
                                     addToCartResult = result,
                                     isAddingToCart = false,
-                                    totalQuantity = result.data.totalQuantity ,
-                                    totalAmount = result.data.cost.totalAmount.amount.toString() ,
+                                    totalQuantity = result.data.totalQuantity,
+                                    totalAmount = result.data.cost.totalAmount.amount.toString(),
                                     currencyCode = result.data.cost.totalAmount.currencyCode.toString(),
                                     errorMessage = null
                                 )
                             }
-                            println("$$$$$$$$$$$$"+_uiState.value.addToCartResult)
+                            println("$$$$$$$$$$$$" + _uiState.value.addToCartResult)
 
                         }
 
@@ -186,10 +194,12 @@ class CartViewModel @Inject constructor(
                                 it.copy(
                                     addToCartResult = result,
                                     isAddingToCart = false,
-                                    errorMessage = result.exception.message ?: "Failed to add item to cart"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to add item to cart"
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update { it.copy(addToCartResult = result) }
                         }
@@ -216,15 +226,18 @@ class CartViewModel @Inject constructor(
                             }
                             addToCart(variantId, quantity)
                         }
+
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
                                     createCartResult = result,
                                     isAddingToCart = false,
-                                    errorMessage = result.exception.message ?: "Failed to create cart"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to create cart"
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update { it.copy(createCartResult = result) }
                         }
@@ -254,23 +267,27 @@ class CartViewModel @Inject constructor(
                                 it.copy(
                                     updateCartResult = result,
                                     isUpdatingCart = false,
-                                    totalQuantity = result.data.totalQuantity ,
-                                    totalAmount = result.data.cost.totalAmount.amount.toString() ,
-                                    currencyCode = result.data.cost.totalAmount.currencyCode.toString() ?: "EGP",
+                                    totalQuantity = result.data.totalQuantity,
+                                    totalAmount = result.data.cost.totalAmount.amount.toString(),
+                                    currencyCode = result.data.cost.totalAmount.currencyCode.toString()
+                                        ?: "EGP",
                                     errorMessage = null
                                 )
                             }
                             //loadCart(cartId)
                         }
+
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
                                     updateCartResult = result,
                                     isUpdatingCart = false,
-                                    errorMessage = result.exception.message ?: "Failed to update cart"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to update cart"
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update { it.copy(updateCartResult = result) }
                         }
@@ -300,23 +317,26 @@ class CartViewModel @Inject constructor(
                                 it.copy(
                                     removeFromCartResult = result,
                                     isUpdatingCart = false,
-                                    totalQuantity = result.data.totalQuantity ,
-                                    totalAmount = result.data.cost.totalAmount.amount.toString() ,
+                                    totalQuantity = result.data.totalQuantity,
+                                    totalAmount = result.data.cost.totalAmount.amount.toString(),
                                     currencyCode = result.data.cost.totalAmount.currencyCode.toString(),
                                     errorMessage = null
                                 )
                             }
                             loadCart(cartId)
                         }
+
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
                                     removeFromCartResult = result,
                                     isUpdatingCart = false,
-                                    errorMessage = result.exception.message ?: "Failed to remove item"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to remove item"
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update { it.copy(removeFromCartResult = result) }
                         }
@@ -346,9 +366,9 @@ class CartViewModel @Inject constructor(
                             _uiState.update {
                                 it.copy(
                                     loadCartResult = result,
-                                    totalQuantity = result.data.totalQuantity ,
+                                    totalQuantity = result.data.totalQuantity,
                                     totalAmount = result.data.cost.totalAmount.amount.toString(),
-                                    currencyCode = result.data.cost.totalAmount.currencyCode.toString() ,
+                                    currencyCode = result.data.cost.totalAmount.currencyCode.toString(),
                                     isLoading = false,
                                     errorMessage = null
                                 )
@@ -356,6 +376,7 @@ class CartViewModel @Inject constructor(
                             _cartItems.value = Result.Success(result.data)
 
                         }
+
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
@@ -365,6 +386,7 @@ class CartViewModel @Inject constructor(
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update {
                                 it.copy(
@@ -408,15 +430,18 @@ class CartViewModel @Inject constructor(
                             }
                             loadCart(cartId)
                         }
+
                         is Result.Failure -> {
                             _uiState.update {
                                 it.copy(
                                     removeFromCartResult = result,
                                     isUpdatingCart = false,
-                                    errorMessage = result.exception.message ?: "Failed to clear cart"
+                                    errorMessage = result.exception.message
+                                        ?: "Failed to clear cart"
                                 )
                             }
                         }
+
                         is Result.Loading -> {
                             _uiState.update {
                                 it.copy(removeFromCartResult = result)
@@ -427,17 +452,19 @@ class CartViewModel @Inject constructor(
         }
     }
 
-
+    fun getUserEmail(): String? = runBlocking {
+        userPreferences.getUserEmail()
+    }
 
 }
 
 
 data class CartUiState(
-    val loadCartResult:  Result<GetCartQuery.Cart> = Result.Loading,
-    val addToCartResult:  Result<CartLinesAddMutation.Cart>? = null,
-    val createCartResult:  Result<CartCreateMutation.Cart>? = null,
-    val updateCartResult:  Result<CartLinesUpdateMutation.Cart>? = null,
-    val removeFromCartResult:  Result<CartLinesRemoveMutation.Cart>? = null,
+    val loadCartResult: Result<GetCartQuery.Cart> = Result.Loading,
+    val addToCartResult: Result<CartLinesAddMutation.Cart>? = null,
+    val createCartResult: Result<CartCreateMutation.Cart>? = null,
+    val updateCartResult: Result<CartLinesUpdateMutation.Cart>? = null,
+    val removeFromCartResult: Result<CartLinesRemoveMutation.Cart>? = null,
     val cartId: String? = null,
     val isAddingToCart: Boolean = false,
     val isUpdatingCart: Boolean = false,

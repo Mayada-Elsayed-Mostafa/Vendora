@@ -3,6 +3,7 @@ package com.example.vendora.ui.screens.category
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.data.repo_implementation.CategoryRepositoryImpl
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.domain.repo_interfaces.CategoryRepository
@@ -22,17 +23,21 @@ import javax.inject.Inject
 data class CategoryUiState(
     val categoryResult: Result<ProductCategoryBlock> = Result.Loading,
     var filteredProducts: List<Product> = emptyList(),
-    val subCategory: String = "women"
+    val subCategory: String = "women",
 )
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
-    private val repository: CategoryRepository
+    private val repository: CategoryRepository,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private var _uiState = MutableStateFlow(CategoryUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var _isGuestMode = MutableStateFlow(true)
+    val isGuestMode = _isGuestMode.asStateFlow()
 
     init {
         startCollection()
@@ -40,6 +45,7 @@ class CategoryViewModel @Inject constructor(
 
     fun startCollection() {
         viewModelScope.launch(Dispatchers.IO) {
+            _isGuestMode.value = !userPreferences.isUserLoggedIn()
             getCategoriesUseCase.invoke()
         }
     }

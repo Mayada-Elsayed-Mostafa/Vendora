@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.domain.usecase.products.GetProductByIdUseCase
 import com.example.vendora.utils.wrapper.Result
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductInfoViewModel @Inject constructor(
-    private val getProductUseCase: GetProductByIdUseCase
+    private val getProductUseCase: GetProductByIdUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
     private var _product = MutableStateFlow<Result<Product>>(Result.Loading)
     val product = _product.asStateFlow()
@@ -32,6 +34,15 @@ class ProductInfoViewModel @Inject constructor(
 
     private val _isFavorite = mutableStateOf(false)
     val isFavorite: State<Boolean> = _isFavorite
+
+    private var _isGuestMode = MutableStateFlow(true)
+    val isGuestMode = _isGuestMode.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _isGuestMode.value = userPreferences.isUserLoggedIn()
+        }
+    }
 
     fun initializeOptions(colors: List<String>, sizes: List<String>) {
         if (_selectedColor.value.isEmpty() && colors.isNotEmpty()) {

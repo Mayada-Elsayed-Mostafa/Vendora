@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -63,7 +64,6 @@ import com.example.vendora.ui.screens.search.LottieLoader
 import com.example.vendora.ui.ui_model.DialogAttributes
 import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.utils.wrapper.Result
-import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun ProductInfoScreen(
@@ -199,7 +199,7 @@ fun ProductInfoSection(
     product: Product,
     navigateToLogin: () -> Unit
 ) {
-
+    val isGuestMode by viewModel.isGuestMode.collectAsStateWithLifecycle()
     val showGuestModeDialog = remember { mutableStateOf(false) }
 
     if (showGuestModeDialog.value) {
@@ -214,7 +214,7 @@ fun ProductInfoSection(
     Column(modifier = Modifier.padding(16.dp)) {
         ProductInfoHeaderSection(
             product, favoritesViewModel,
-            viewModel.isGuestMode(),
+            isGuestMode,
             showGuestModeDialog,
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -246,7 +246,7 @@ fun ProductInfoHeaderSection(
                 fontSize = 20.sp
             )
             IconButton(onClick = {
-                if (isGuestMode) {
+                if (!isGuestMode) {
                     showDialog.value = true
                 } else {
                     if (isFavorite) {
@@ -389,6 +389,7 @@ fun ProductInfoFooterSection(
     val selectedSize by viewModel.selectedSize
     val selectedColor by viewModel.selectedColor
     val context = LocalContext.current
+    val isGuestMode by viewModel.isGuestMode.collectAsStateWithLifecycle()
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -407,6 +408,9 @@ fun ProductInfoFooterSection(
         Button(
             enabled = !uiState.isAddingToCart,
             onClick = {
+                if (!isGuestMode){
+                    return@Button
+                }
                 cartViewModel.addToCart(
                     product.findVariantIdByColorAndSize(
                         selectedColor,

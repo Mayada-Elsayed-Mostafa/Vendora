@@ -83,6 +83,7 @@ import com.example.vendora.ui.screens.currency.convertToCurrency
 import com.example.vendora.ui.screens.discount.viewModel.DiscountViewModel
 import com.example.vendora.utils.wrapper.Result
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.runBlocking
 
 
 @Composable
@@ -98,7 +99,7 @@ fun CheckoutScreen(
 
     val uiState by cartViewModel.uiState.collectAsState()
     val cartItem by cartViewModel.cartItems.collectAsState()
-    val email = FirebaseAuth.getInstance().currentUser?.email
+    val email = cartViewModel.getUserEmail()
     LaunchedEffect(Unit) {
         if(email != null){
             addressViewModel.getAllAddressesByEmail(email)

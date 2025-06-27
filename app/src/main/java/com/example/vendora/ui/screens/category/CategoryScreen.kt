@@ -57,7 +57,6 @@ import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.ui.ui_model.subCategories
 import com.example.vendora.ui.ui_model.tabs
 import com.example.vendora.utils.wrapper.Result
-import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun CategoryScreen(
@@ -69,6 +68,7 @@ fun CategoryScreen(
 ) {
 
     val state = viewModel.uiState.collectAsStateWithLifecycle()
+    val isGuestMode = viewModel.isGuestMode.collectAsStateWithLifecycle()
     val showGuestModeDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -93,14 +93,14 @@ fun CategoryScreen(
                 result = emptyList(),
                 onSearchQueryChange = { query -> println(query) },
                 navigateToCart = {
-                    if (viewModel.isGuestMode()) {
+                    if (isGuestMode.value) {
                         showGuestModeDialog.value = true
                     } else {
                         navigateToCart()
                     }
                 },
                 navigateToFavorite = {
-                    if (viewModel.isGuestMode()) {
+                    if (isGuestMode.value) {
                         showGuestModeDialog.value = true
                     } else {
                         navigateToFavorite()

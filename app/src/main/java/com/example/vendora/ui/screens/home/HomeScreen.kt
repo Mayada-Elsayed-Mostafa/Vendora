@@ -73,7 +73,6 @@ import com.example.vendora.ui.ui_model.GiftCardAd
 import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.example.vendora.ui.ui_model.couponList
 import com.example.vendora.utils.wrapper.Result
-import com.example.vendora.utils.wrapper.isGuestMode
 
 @Composable
 fun HomeScreen(
@@ -88,6 +87,7 @@ fun HomeScreen(
 ) {
     val brands = viewModel.brands.collectAsStateWithLifecycle()
     val username = viewModel.username.collectAsStateWithLifecycle()
+    val isGuestMode = viewModel.isGuestMode.collectAsStateWithLifecycle()
     val showGuestModeDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -124,7 +124,7 @@ fun HomeScreen(
                     HomeHeader(
                         username = username.value,
                         navigateToCart = navigateToCart,
-                        isGuestMode = viewModel.isGuestMode(),
+                        isGuestMode = isGuestMode.value,
                         showDialog = showGuestModeDialog,
                         navigateToFavorite = navigateToFavorites
                     )

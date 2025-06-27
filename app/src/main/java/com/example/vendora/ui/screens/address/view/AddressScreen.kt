@@ -74,7 +74,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun AddressScreen(navController: NavHostController,viewModel: AddressViewModel = hiltViewModel()) {
     val addressState by viewModel.address.collectAsState()
     val message by viewModel.message.collectAsState()
-    val email = FirebaseAuth.getInstance().currentUser?.email
+    val email = viewModel.getUserEmail()
     LaunchedEffect(Unit) {
         if(email !=null){
             viewModel.getAllAddressesByEmail(email)

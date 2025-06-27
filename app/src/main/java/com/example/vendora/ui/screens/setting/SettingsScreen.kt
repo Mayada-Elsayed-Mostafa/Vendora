@@ -22,7 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -32,7 +31,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,43 +40,75 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.vendora.R
 import com.example.vendora.core.navigation.ScreenRoute
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.ui.screens.currency.CurrencyDropDown
 import com.example.vendora.ui.screens.currency.CurrencyViewModel
-import com.example.vendora.ui.screens.profile.OnSuccess
+import com.example.vendora.ui.screens.home.HomeViewModel
 import com.example.vendora.ui.screens.profile.OptionItem
-import com.example.vendora.ui.screens.profile.ProfileAppBar
+import com.example.vendora.ui.ui_model.DialogAttributes
+import com.example.vendora.ui.ui_model.GuestModeDialog
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.runBlocking
 
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun SettingsScreen(
+    navController: NavHostController,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val isGuestMode by viewModel.isGuestMode.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        GuestModeDialog(
+            attributes = DialogAttributes(
+                onDismiss = { showDialog = false },
+                onAccept = { showDialog = false }
+            )
+        )
+    }
+
     Scaffold(
         topBar = {
             SettingsAppBar(
-                navigateToCart = {navController.navigate(ScreenRoute.CartScreen)},
+                navigateToCart = {
+                    if (!isGuestMode){
+                        showDialog = true
+                    } else {
+                        navController.navigate(ScreenRoute.CartScreen)
+                    }
+                },
             )
         },
     ) { innerPadding ->
 
         HorizontalDivider()
-        SettingBody(modifier = Modifier.padding(innerPadding).padding(16.dp), navController = navController)
+        SettingBody(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp),
+            navController = navController,
+            isGuestMode = isGuestMode
+        )
 
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingBody(modifier: Modifier, navController: NavHostController) {
+fun SettingBody(
+    modifier: Modifier,
+    navController: NavHostController,
+    isGuestMode: Boolean
+) {
     val sheetState = rememberModalBottomSheetState()
     var isSheetOpen by remember { mutableStateOf(false) }
-    val user = FirebaseAuth.getInstance().currentUser
 
     Column(modifier = modifier) {
-        if (user != null){
+        if (!isGuestMode) {
             OptionItem(
                 icon = R.drawable.pin,
                 title = "Address"
@@ -101,8 +131,6 @@ fun SettingBody(modifier: Modifier, navController: NavHostController) {
         ) {
             isSheetOpen = true
         }
-
-
 
 
     }
@@ -166,14 +194,14 @@ fun SettingBody(modifier: Modifier, navController: NavHostController) {
 fun SettingsAppBar(
     navigateToCart: () -> Unit,
 
-) {
+    ) {
     TopAppBar(
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.outline_category),
+                    painter = painterResource(R.drawable.settings),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

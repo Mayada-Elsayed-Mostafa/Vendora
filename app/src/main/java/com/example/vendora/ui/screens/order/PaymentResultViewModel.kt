@@ -3,6 +3,7 @@ package com.example.vendora.ui.screens.order
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.order.Item
 import com.example.vendora.domain.model.order.LineItemBuild
 import com.example.vendora.domain.model.order.OrderPaymentResult
@@ -25,12 +26,11 @@ import javax.inject.Inject
 class PaymentResultViewModel @Inject constructor(
     private val createShopifyOrderUserCase: CreateShopifyOrderUserCase,
     private val paymentResultUseCase: GetOrderPaymentResultUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private var _uiState = MutableStateFlow(PaymentResultUiState())
     val uiState = _uiState.asStateFlow()
-
-    private val auth = FirebaseAuth.getInstance()
 
     val TAG = "PaymentResultViewModel"
 
@@ -53,10 +53,10 @@ class PaymentResultViewModel @Inject constructor(
     }
 
     suspend fun createOrder(result: OrderPaymentResult, finStatus: String = "paid") {
-        Log.d(TAG, auth.currentUser?.email.toString())
+
         val order = CreateOrder()
         val requestBody =
-            order.email(auth.currentUser?.email ?: "zeyadmamoun952@gmail.com")
+            order.email(userPreferences.getUserEmail() ?: "")
                 .financialStatus(if (finStatus == "Cash") "pending" else "paid")
                 .currency(result.currency)
                 .lineItems(createLineItems(result.items))

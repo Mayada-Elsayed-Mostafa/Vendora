@@ -32,7 +32,7 @@ object AppModule {
     @Provides
     fun provideFavoritesRepository(
         firestore: FirebaseFirestore,
-        auth: FirebaseAuth
-    ): FavoritesRepository = FavoritesRepositoryImpl(firestore, auth)
+        userPreferences: UserPreferences
+    ): FavoritesRepository = FavoritesRepositoryImpl(firestore, userPreferences)
 
 }

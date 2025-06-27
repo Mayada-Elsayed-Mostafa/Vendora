@@ -2,6 +2,7 @@ package com.example.vendora.ui.screens.address.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vendora.data.local.UserPreferences
 import com.example.vendora.domain.model.address.AddressEntity
 import com.example.vendora.domain.model.address.CountryResponse
 import com.example.vendora.domain.model.address.Province
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,7 +30,8 @@ class AddressViewModel @Inject constructor(
     private val insertAddressUseCase: InsertAddressUseCase,
     private val deleteAddressUseCase: DeleteAddressUseCase,
     private val getCountryByIdUseCase: GetCountryByIdUseCase,
-    private val getAllAddressesByEmailUseCase: GetAllAddressesByEmailUseCase
+    private val getAllAddressesByEmailUseCase: GetAllAddressesByEmailUseCase,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private val _address = MutableStateFlow<Result<List<AddressEntity>>>(Result.Loading)
@@ -46,10 +49,11 @@ class AddressViewModel @Inject constructor(
     private val _selectedProvince = MutableStateFlow<String?>(null)
     val selectedProvince = _selectedProvince.asStateFlow()
 
-    val email = FirebaseAuth.getInstance().currentUser?.email
+    var email: String? = null
 
 
     init {
+        email = runBlocking { userPreferences.getUserEmail() }
         getCountry()
     }
     fun getAllAddresses() {
@@ -71,7 +75,7 @@ class AddressViewModel @Inject constructor(
         viewModelScope.launch {
             insertAddressUseCase(addressEntity)
             if (email !=null){
-                 getAllAddressesByEmail(email)
+                 getAllAddressesByEmail(email!!)
             }
 
             _message.value = "Address added successfully"
@@ -83,7 +87,7 @@ class AddressViewModel @Inject constructor(
         viewModelScope.launch {
             deleteAddressUseCase(addressId)
             if (email !=null){
-                getAllAddressesByEmail(email)
+                getAllAddressesByEmail(email!!)
             }
             _message.value = "Address deleted"
         }
@@ -107,6 +111,10 @@ class AddressViewModel @Inject constructor(
                     _provinces.value = it
                 }
         }
+    }
+
+    fun getUserEmail(): String? = runBlocking {
+        userPreferences.getUserEmail()
     }
 
     fun changeSelectedProvince(provinceName: String) {
