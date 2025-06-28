@@ -24,6 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +40,7 @@ import coil3.compose.AsyncImage
 import com.example.vendora.R
 import com.example.vendora.domain.model.product.Product
 import com.example.vendora.ui.cart_screen.CustomAppBar
+import com.example.vendora.ui.screens.address.view.ConfirmDeleteDialog
 import com.example.vendora.ui.screens.currency.changeCurrency
 import com.example.vendora.ui.screens.search.LottieLoader
 
@@ -105,6 +108,7 @@ fun FavoriteProductCard(
     onProductClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val showDeleteDialog = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .padding(start = 16.dp, end = 8.dp, bottom = 8.dp)
@@ -123,7 +127,7 @@ fun FavoriteProductCard(
                     contentScale = ContentScale.Crop
                 )
                 IconButton(
-                    onClick = onFavoriteClick,
+                    onClick = {showDeleteDialog.value = true},
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
                     Icon(
@@ -146,5 +150,18 @@ fun FavoriteProductCard(
                 modifier = Modifier.padding(8.dp)
             )
         }
+    }
+
+    if (showDeleteDialog.value) {
+        ConfirmDeleteDialog(
+            message = "Are you sure you want to delete this product?",
+            onConfirm = {
+                onFavoriteClick()
+                showDeleteDialog.value = false
+            },
+            onDismiss = {
+                showDeleteDialog.value = false
+            }
+        )
     }
 }

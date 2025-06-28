@@ -46,7 +46,7 @@ class CurrencyViewModel @Inject constructor(
     val getChangeRate = _getChangeRate.asStateFlow()
 
     init {
-        //getRates()
+        getRates()
         getSelectedCurrency()
         getRateValue()
     }

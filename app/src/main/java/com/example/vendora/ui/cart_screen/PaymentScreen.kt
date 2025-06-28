@@ -78,7 +78,7 @@ fun PaymentScreen(
         viewModel.getPaymentKey(
             paymentKeyRequest = PaymentKeyRequest(
                 auth_token = token,
-                amount_cents = totalPrice.toInt(),
+                amount_cents = totalPrice.toInt() * 100,
                 order_id = orderId,
                 billing_data = billing_data,
                 integration_id = 5134520,

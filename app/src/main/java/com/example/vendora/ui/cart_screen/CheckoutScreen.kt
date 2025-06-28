@@ -461,7 +461,7 @@ fun PaymentBottom(
         paymobviewModel.createOrder(
             orderRequest = OrderRequest(
                 auth_token = token,
-                amount_cents = totalPrice,
+                amount_cents = totalPrice * 100 ,
                 items = orderList ,
                 currency = currency
             )
@@ -680,7 +680,7 @@ fun PromoCodeItem(
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = "${finalPrice} $currency",
+                            text = "${String.format("%.2f", finalPrice)} $currency",
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
