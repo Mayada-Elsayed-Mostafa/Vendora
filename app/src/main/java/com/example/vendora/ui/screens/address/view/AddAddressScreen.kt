@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.LocationOn
@@ -86,11 +88,14 @@ fun AddAddressScreen(navController: NavHostController,viewModel: AddressViewMode
     val selectedProvince by viewModel.selectedProvince.collectAsState()
     var expandedProvince by remember { mutableStateOf(false) }
     var phoneError by remember { mutableStateOf<String?>(null) }
+    val scrollState = rememberScrollState()
 
     Column (modifier = Modifier
         .fillMaxSize()
         .windowInsetsPadding(WindowInsets.statusBars)
-        .padding(16.dp)) {
+        .padding(16.dp)
+        .verticalScroll(scrollState)
+    ) {
 
         CustomAppBar("Add New Address") {navController.popBackStack() }
         Spacer(modifier = Modifier.height(16.dp))
